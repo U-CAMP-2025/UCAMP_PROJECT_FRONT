@@ -2,18 +2,17 @@ import { createGlobalStyle } from 'styled-components';
 
 const GlobalStyle = createGlobalStyle`
   *, *::before, *::after { box-sizing: border-box; }
-  html, body, #root { height: 100%; }
-  body {
+  html, body {
     margin: 0;
-    background: ${({ theme }) => theme.color.bg};
-    color: ${({ theme }) => theme.color.text};
-    font-family: ${({ theme }) => theme.font.family};
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    padding: 0;
+    font-family: var(--font-primary); 
+    font-weight: ${({ theme }) => theme.font.weight.regular};
+    background-color: ${({ theme }) => theme.color?.bg || '#fff'};
+    color: ${({ theme }) => theme.color?.text || '#000'};
   }
-  a { color: inherit; text-decoration: none; }
-  img { display: block; max-width: 100%; }
-  button { font: inherit; }
+  button, input, textarea {
+    font-family: inherit;
+  }
   :root { 
     color-scheme: dark;
     font-synthesis: none;

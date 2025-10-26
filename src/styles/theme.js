@@ -12,12 +12,19 @@ const theme = {
     lg: '0 10px 30px rgba(0,0,0,0.35)',
   },
   font: {
-    family:
-      "-apple-system, Pretendard, system-ui, Segoe UI, Roboto, Apple SD Gothic Neo, Noto Sans KR, Helvetica Neue, Arial, 'Apple Color Emoji','Segoe UI Emoji', 'Segoe UI Symbol'",
+    family: {
+      primary: 'Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif',
+    },
     weight: {
+      thin: 100,
+      extraLight: 200,
+      light: 300,
       regular: 400,
       medium: 500,
+      semiBold: 600,
       bold: 700,
+      extraBold: 800,
+      black: 900,
     },
   },
 };

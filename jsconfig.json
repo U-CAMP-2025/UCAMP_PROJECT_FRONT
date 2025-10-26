@@ -12,6 +12,7 @@
       "@api/*": ["src/api/*"],
       "@assets/*": ["src/assets/*"]
     },
+    "typeRoots": ["./node_modules/@types", "./src/types"],
     "moduleResolution": "bundler",
     "jsx": "react-jsx"
   },
