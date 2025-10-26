@@ -1,5 +1,19 @@
 const theme = {
-  color: {},
+  colors: {
+    gray: {
+      50: '#F9FAFB',
+      100: '#F3F4F6',
+      200: '#E5E7EB',
+      300: '#D1D4DB',
+      400: '#9CA3AF',
+      500: '#6B7280',
+      600: '#4B5563',
+      700: '#374151',
+      800: '#1F2937',
+      900: '#111827',
+      950: '#030712',
+    },
+  },
   radius: {
     sm: '6px',
     md: '10px',
@@ -16,15 +30,11 @@ const theme = {
       primary: 'Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif',
     },
     weight: {
-      thin: 100,
-      extraLight: 200,
       light: 300,
       regular: 400,
       medium: 500,
       semiBold: 600,
       bold: 700,
-      extraBold: 800,
-      black: 900,
     },
   },
 };
