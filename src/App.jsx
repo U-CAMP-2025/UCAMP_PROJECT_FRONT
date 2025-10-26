@@ -1,11 +1,7 @@
-import Layout from '@components/layout/Layout';
+import AppRoutes from './routes';
 
 function App() {
-  return (
-    <Layout>
-      <h1>Hello World</h1>
-    </Layout>
-  );
+  return <AppRoutes />;
 }
 
 export default App;
