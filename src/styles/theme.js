@@ -1,5 +1,16 @@
 const theme = {
   colors: {
+    primary: '#2563eb',
+    primaryHover: '#1d4ed8',
+    secondary: '#64748b',
+    danger: '#ef4444',
+    success: '#22c55e',
+    warning: '#f59e0b',
+    bg: '#0b1020',
+    card: '#12182b',
+    text: '#111827',
+    textMuted: '#94a3b8',
+    border: '#233145',
     gray: {
       50: '#F9FAFB',
       100: '#F3F4F6',
@@ -13,6 +24,18 @@ const theme = {
       900: '#111827',
       950: '#030712',
     },
+  },
+  space: {
+    0: '0px',
+    1: '4px',
+    2: '8px',
+    3: '12px',
+    4: '16px',
+    5: '20px',
+    6: '24px',
+    8: '32px',
+    10: '40px',
+    12: '48px',
   },
   radius: {
     sm: '6px',
@@ -28,6 +51,14 @@ const theme = {
   font: {
     family: {
       primary: 'Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif',
+    },
+    size: {
+      xs: '12px',
+      sm: '14px',
+      md: '16px',
+      lg: '18px',
+      xl: '22px',
+      title: '28px',
     },
     weight: {
       light: 300,
