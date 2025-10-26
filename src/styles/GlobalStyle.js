@@ -14,7 +14,6 @@ const GlobalStyle = createGlobalStyle`
     font-family: inherit;
   }
   :root { 
-    color-scheme: dark;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
