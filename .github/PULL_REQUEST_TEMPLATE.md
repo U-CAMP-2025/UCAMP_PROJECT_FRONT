@@ -1,4 +1,4 @@
-## Issue
+## Issue Number
 
 - Resolves #
 
