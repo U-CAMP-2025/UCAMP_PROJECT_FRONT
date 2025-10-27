@@ -7,6 +7,7 @@ import styled from 'styled-components';
 import Text from './common/Text';
 
 export const LoginExample = () => {
+  // 예시 추가
   const [userState, setUserState] = useState({
     name: '',
     email: '',
