@@ -6,4 +6,5 @@ export const Header = () => {
 
 const HeaderContainer = styled.div`
   font-weight: ${({ theme }) => theme.font.weight.bold};
+  color: ${({ theme }) => theme.colors.gray[900]};
 `;

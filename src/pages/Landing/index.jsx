@@ -1,5 +1,5 @@
-import { PageContainer } from '@components/layout/PageContainer';
 import { LoginExample } from '@components/LoginExample';
+import { PageContainer } from '@components/layout/PageContainer';
 
 export default function LandingPage() {
   return (
