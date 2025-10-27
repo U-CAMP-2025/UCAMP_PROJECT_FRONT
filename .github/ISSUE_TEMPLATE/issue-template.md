@@ -1,7 +1,7 @@
 ---
 name: issue template
 about: issue template
-title: "[Feat]: "
+title: 'Feat: '
 labels: ''
 assignees: ''
 
