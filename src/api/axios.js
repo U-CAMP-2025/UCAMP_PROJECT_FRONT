@@ -19,6 +19,7 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      // TODO: 공통 401 에러 처리(로그아웃/토큰 리프레쉬)
       console.warn('Unauthorized');
     }
     return Promise.reject(error);
