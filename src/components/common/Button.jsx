@@ -2,15 +2,18 @@ import styled, { css } from 'styled-components';
 
 const variants = {
   primary: css`
-    background: ${({ theme }) => theme.colors.primary};
-    color: white;
+    background: ${({ theme }) => theme.colors.primary[10]};
+    color: ${({ theme }) => theme.colors.primary[2]};
     &:hover {
-      background: ${({ theme }) => theme.colors.primaryHover};
+      background: ${({ theme }) => theme.colors.primary[9]};
     }
   `,
   secondary: css`
-    background: ${({ theme }) => theme.colors.secondary};
-    color: ${({ theme }) => theme.colors.text};
+    background: ${({ theme }) => theme.colors.primary[6]};
+    color: ${({ theme }) => theme.colors.primary[10]};
+    &:hover {
+      background-color: ${({ theme }) => theme.colors.primary[5]};
+    }
   `,
 };
 
@@ -33,9 +36,6 @@ const Base = styled.button`
   border: none;
   border-radius: ${({ theme }) => theme.radius.md};
   cursor: pointer;
-  transition:
-    transform 0.05s ease,
-    filter 0.2s ease;
   ${({ $variant }) => variants[$variant] || variants.primary}
   ${({ $size }) => sizes[$size] || sizes.md}
   &:disabled {
@@ -43,6 +43,10 @@ const Base = styled.button`
     cursor: not-allowed;
   }
   font-weight: ${({ theme }) => theme.font.weight.semiBold};
+  transition: all 0.3s ease;
+  &:hover {
+    transition: all 0.3s ease;
+  }
 `;
 
 const Button = ({ children, variant = 'primary', size = 'md', ...rest }) => {
