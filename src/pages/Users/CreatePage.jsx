@@ -1,3 +1,6 @@
+import { useRef } from 'react';
+import { useForm } from 'react-hook-form';
+
 const styles = {
   // 1. 화면 전체 중앙 정렬 (body 역할을 가정)
   pageLayout: {
@@ -87,18 +90,33 @@ const styles = {
 
 const CreatePage = () => {
   // 폼 제출 핸들러 (선택 사항)
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('회원 가입 버튼 클릭!');
-    // 여기에 폼 데이터를 처리하는 로직을 추가합니다.
-  };
 
+  const {
+    handleSubmit, // form onSubmit에 들어가는 함수
+    register, // onChange 등의 이벤트 객체 생성
+    watch, // register를 통해 받은 모든 값 확인
+    formState: { errors }, // register의 에러 메시지 자동 출력
+  } = useForm();
+
+  // useRef, watch로 nickname 필드값 가져오고,
+  // nickname.current에 값 저장
+  const nickname = useRef();
+  nickname.current = watch('nickname');
+  // 상동.
+  const email = useRef();
+  email.current = watch('email');
+  const job = useRef();
+  job.current = watch('job');
+
+  const onChangeFormLib = (data) => {
+    console.log('제출 정보', data);
+  };
   return (
     // 전체 화면 중앙 정렬을 위한 레이아웃
     <div style={styles.pageLayout}>
       <div style={styles.signupContainer}>
         <h1 style={styles.title}>회원 가입</h1>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onChangeFormLib)}>
           {/* 닉네임 입력 */}
           <div style={styles.inputGroup}>
             <label htmlFor='nickname' style={styles.inputLabel}>
@@ -109,9 +127,18 @@ const CreatePage = () => {
               id='nickname'
               style={styles.formInput}
               placeholder='닉네임을 입력하세요'
+              // 닉네임 입력 유효성 검사. 입력하지 않으면 '닉네임을 입력해야 합니다', 최소 길이 2글자
+              {...register('nickname', {
+                required: { value: true, message: '닉네임을 입력해야합니다.' },
+                minLength: {
+                  value: 2,
+                  message: '닉네임은 두 글자 이상 입력해주세요',
+                },
+              })}
             />
           </div>
-
+          {/* 닉네임 에러 메시지 출력 */}
+          {errors?.nickname && <span>{errors?.nickname?.message}</span>}
           {/* 이메일 입력 (읽기 전용 및 정보 텍스트 포함) */}
           <div style={styles.inputGroup}>
             <label htmlFor='email' style={styles.inputLabel}>
@@ -123,7 +150,7 @@ const CreatePage = () => {
                 id='email'
                 style={{ ...styles.formInput, borderRadius: '8px 0 0 8px' }} // wrapper에서 전체 border를 관리하므로 내부 input은 왼쪽만 둥글게
                 value='user@kakao.com'
-                readOnly
+                {...register('email')}
               />
               <span style={styles.emailInfo}>(카카오에서 바로 받아옴)</span>
             </div>
@@ -134,7 +161,13 @@ const CreatePage = () => {
             <label htmlFor='job' style={styles.inputLabel}>
               관심직무
             </label>
-            <select id='job' style={styles.formSelect}>
+            <select
+              id='job'
+              style={styles.formSelect}
+              {...register('job', {
+                required: { value: true, message: '직무를 선택해주세요.' },
+              })}
+            >
               <option value='' disabled>
                 직무를 선택하세요
               </option>
