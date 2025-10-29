@@ -3,12 +3,13 @@ import styled from 'styled-components';
 
 export const FieldCard = styled.div`
   border: 1px solid ${({ theme }) => theme.colors.gray[6]};
-  border-radius: ${({ theme }) => theme.radius.lg};
+  border-radius: ${({ theme }) => theme.radius.md};
   background: #fff;
   padding: ${({ theme }) => theme.space[4]};
   display: grid;
   align-items: center;
   gap: ${({ theme }) => theme.space[4]};
+  height: 80px;
 `;
 
 export const FieldLeft = styled.div`
@@ -26,9 +27,7 @@ export const FieldRight = styled.div`
   gap: ${({ theme }) => theme.space[3]};
 `;
 
-export const FieldLabel = (props) => (
-  <Typography as='label' size={3} weight='semiBold' {...props} />
-);
+export const FieldLabel = (props) => <Typography size={3} weight='semiBold' {...props} />;
 
 export const FieldValue = (props) => <Typography as='div' size={3} {...props} />;
 

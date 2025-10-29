@@ -62,14 +62,18 @@ const MyInfo = () => {
         <FieldCard>
           <FieldLeft>
             <FieldLabel htmlFor='nick'>닉네임</FieldLabel>
-            <ReadonlyInput id='nick'>{user?.nickName}</ReadonlyInput>
+            <ReadonlyInput id='nick' style={{ width: '85%' }}>
+              {user?.nickName}
+            </ReadonlyInput>
           </FieldLeft>
         </FieldCard>
         {/* 이메일 (수정 불가) */}
         <FieldCard>
           <FieldLeft>
             <FieldLabel htmlFor='email'>이메일</FieldLabel>
-            <ReadonlyInput id='email'>{user?.email}</ReadonlyInput>
+            <ReadonlyInput id='email' style={{ width: '85%' }}>
+              {user?.email}
+            </ReadonlyInput>
           </FieldLeft>
         </FieldCard>
         {/* 관심 직무 */}
@@ -77,7 +81,7 @@ const MyInfo = () => {
           <FieldLeft>
             <FieldLabel>관심직무</FieldLabel>
             {editingJob ? (
-              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: 12, alignItems: 'left' }}>
                 <SearchableSelect
                   value={selectedJobId}
                   onChange={(id) => setSelectedJobId(id)}
@@ -90,7 +94,9 @@ const MyInfo = () => {
               </div>
             ) : (
               <>
-                <FieldValue>{jobs.find((j) => j.jobId === selectedJobId)?.name}</FieldValue>
+                <FieldValue style={{ flex: '1', textAlign: 'right' }}>
+                  {jobs.find((j) => j.jobId === selectedJobId)?.name}
+                </FieldValue>
                 <FieldActions>
                   <button style={pillStyle} onClick={() => setEditingJob(true)}>
                     <Typography as='span' size={2} weight='semiBold'>
