@@ -52,7 +52,7 @@ const Text = styled.p.withConfig({
   shouldForwardProp: (prop) => !['size', 'weight', 'muted'].includes(prop),
 })`
   margin: 0;
-  color: ${({ muted, theme }) => (muted ? theme.colors.textMuted : theme.colors.gray[12])};
+  color: ${({ muted, theme }) => (muted ? theme.colors.gray[3] : theme.colors.gray[12])};
   ${({ size }) => scale[size || 'md']}
   font-weight: ${({ weight, theme }) =>
     weight ? theme.font.weight[weight] : theme.font.weight.regular};
