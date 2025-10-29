@@ -39,6 +39,5 @@ export default function AdminPage() {
 }
 
 const ContentWrapper = styled.div`
-  min-width: 800px;
-  max-width: 1024px;
+  width: 1024px;
 `;
