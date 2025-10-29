@@ -1,12 +1,11 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { CaretDownIcon, CheckIcon } from '@radix-ui/react-icons';
 import React from 'react';
-// useEffect, useState 제거
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 import Typography from './Typography';
 
-// --- 스타일 정의 생략 (이전과 동일하게 유지) ---
+// --- 스타일 정의 ---
 const SortTrigger = styled(DropdownMenu.Trigger)`
   all: unset;
   display: flex;
@@ -36,7 +35,8 @@ const DropdownContent = styled(DropdownMenu.Content)`
   z-index: 100;
 `;
 
-const DropdownItem = styled(DropdownMenu.Item)`
+// 💡💡💡 [핵심 수정] RadioItem으로 변경
+const DropdownItem = styled(DropdownMenu.RadioItem)`
   font-family: ${({ theme }) => theme.font.family.primary};
   font-size: ${({ theme }) => theme.font.size[3]};
   color: ${({ theme }) => theme.colors.gray[12]};
@@ -72,29 +72,24 @@ const ItemIndicator = styled(DropdownMenu.ItemIndicator)`
 const CaretIconStyled = styled(CaretDownIcon)`
   color: ${({ theme }) => theme.colors.gray[10]};
 `;
-// --- 스타일 정의 끝 ---
 
 const sortOptions = [
-  { value: 'created_asc', label: '가져오기 순' },
+  { value: 'bookcount_asc', label: '가져오기 순' },
   { value: 'review_desc', label: '리뷰 많은 순' },
   { value: 'latest_desc', label: '최신순' },
 ];
 
-// 💡 내부 상태(internalSort, useEffect, useState)를 모두 제거하고 prop만 사용합니다.
-export const SortSelector = ({ currentSort = 'latest_desc', onSortChange }) => {
+export const SortSelector = ({ currentSort = 'bookcount_asc', onSortChange }) => {
   const handleSortChange = (newSort) => {
-    // 1. 상위 컴포넌트로 값 전달 (이것이 QAListPage의 state를 변경합니다.)
     if (onSortChange) {
       onSortChange(newSort);
     }
-
-    console.log('SortSelector [onValueChange]: Value passed UP:', newSort);
+    console.log('SortSelector [onValueChange]:', newSort);
   };
 
-  // 💡 prop인 currentSort를 사용하여 UI 표시
   const currentLabel = sortOptions.find((opt) => opt.value === currentSort)?.label || '정렬';
 
-  console.log('SortSelector [Render]: Displaying value (PROP):', currentSort);
+  console.log('SortSelector [Render]:', currentSort);
 
   return (
     <DropdownMenu.Root>
@@ -107,7 +102,6 @@ export const SortSelector = ({ currentSort = 'latest_desc', onSortChange }) => {
 
       <DropdownMenu.Portal>
         <DropdownContent sideOffset={5} align='end'>
-          {/* 💡 DropdownMenu.RadioGroup의 value에 currentSort prop을 직접 연결 */}
           <DropdownMenu.RadioGroup value={currentSort} onValueChange={handleSortChange}>
             {sortOptions.map((option) => (
               <DropdownItem key={option.value} value={option.value}>

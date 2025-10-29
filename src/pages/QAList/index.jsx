@@ -9,8 +9,6 @@ import styled from 'styled-components';
 
 // --- 페이지 스타일 정의 ---
 
-// 💡 FilterAndSortBar는 이제 MainContentWrapper 내부에서 사용되므로,
-// 좌우 패딩을 제거하고 너비 100%를 사용하도록 합니다.
 const FilterAndSortBar = styled.div`
   /* 직무 선택과 정렬 드롭다운을 포함하는 상단 바 */
   display: flex;
@@ -92,7 +90,7 @@ const qaList = [
 ];
 
 export default function QAListPage() {
-  const [currentSort, setCurrentSort] = useState('latest_desc');
+  const [currentSort, setCurrentSort] = useState('bookcount_asc');
 
   const handleSortChange = (newSort) => {
     setCurrentSort(newSort);
@@ -103,8 +101,8 @@ export default function QAListPage() {
     const sorted = [...qaList];
 
     switch (currentSort) {
-      case 'created_asc':
-        return sorted.sort((a, b) => a.postId - b.postId);
+      case 'bookcount_asc':
+        return sorted.sort((a, b) => a.bookCount - b.bookCount);
 
       case 'review_desc':
         return sorted.sort((a, b) => b.review - a.review);
