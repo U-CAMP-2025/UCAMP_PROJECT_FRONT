@@ -1,3 +1,4 @@
+import Typography from '@components/common/Typography';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import theme from '@styles/theme';
@@ -15,7 +16,6 @@ import {
   DropdownItem,
   DropdownSeparator,
 } from '../common/HeaderStyles';
-import Text from '../common/Text';
 
 export const Header = () => {
   const activeMenu = '질문답변 생성'; // 현재 활성 메뉴
@@ -23,9 +23,9 @@ export const Header = () => {
   return (
     <HeaderContainer>
       <LeftSection>
-        <Text size={5} weight='bold' style={{ color: theme.colors.primary[9] }}>
+        <Typography size={5} weight='bold' style={{ color: theme.colors.primary[9] }}>
           면접톡
-        </Text>
+        </Typography>
 
         <Nav>
           <NavItem href='#' $isActive={activeMenu === '질문답변 둘러보기'}>
@@ -49,9 +49,9 @@ export const Header = () => {
         <DropdownMenu.Root>
           <ProfileToggle>
             <ProfileAvatar role='img' aria-label='사용자 아바타' />
-            <Text size={3} weight='semiBold'>
+            <Typography size={3} weight='semiBold'>
               유저 닉네임
-            </Text>
+            </Typography>
             <ChevronDownIcon width={16} height={16} color={theme.colors.gray[11]} />
           </ProfileToggle>
 

@@ -1,3 +1,4 @@
+import Typography from '@components/common/Typography';
 import React from 'react';
 
 import {
@@ -12,7 +13,6 @@ import {
   CopyrightText,
   ContactText,
 } from '../common/FooterStyles';
-import Text from '../common/Text';
 
 // 푸터 링크 데이터 (실제 서비스 링크로 교체 필요)
 const footerLinks = [
@@ -49,9 +49,9 @@ export const Footer = () => {
         {/* 1. 상단 링크 섹션 */}
         <FooterLinkSection>
           {/* 로고 영역 */}
-          <Text size={5} weight='bold' style={{ color: 'black' }}>
+          <Typography size={5} weight='bold' style={{ color: 'black' }}>
             면접톡
-          </Text>
+          </Typography>
 
           {/* 링크 그룹 */}
           {footerLinks.map((group) => (
