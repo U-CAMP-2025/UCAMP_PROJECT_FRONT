@@ -18,18 +18,15 @@ import {
 import Text from '../common/Text';
 
 export const Header = () => {
-  // 실제 서비스에서는 현재 페이지 경로에 따라 '활성 메뉴' 상태를 관리합니다.
-  const activeMenu = '질문답변 생성'; // 예시: 현재 활성 메뉴
+  const activeMenu = '질문답변 생성'; // 현재 활성 메뉴
 
   return (
     <HeaderContainer>
       <LeftSection>
-        {/* 로고 영역 */}
         <Text size={5} weight='bold' style={{ color: theme.colors.primary[9] }}>
           면접톡
         </Text>
 
-        {/* 메인 네비게이션 */}
         <Nav>
           <NavItem href='#' $isActive={activeMenu === '질문답변 둘러보기'}>
             질문답변 둘러보기
@@ -47,10 +44,8 @@ export const Header = () => {
       </LeftSection>
 
       <RightSection>
-        {/* 알림 아이콘 */}
         <NotificationIcon role='button' aria-label='알림'></NotificationIcon>
 
-        {/* 프로필 드롭다운 메뉴 */}
         <DropdownMenu.Root>
           <ProfileToggle>
             <ProfileAvatar role='img' aria-label='사용자 아바타' />
