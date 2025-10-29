@@ -19,8 +19,8 @@ const footerLinks = [
   {
     title: '서비스',
     links: [
-      { name: '질문답변 둘러보기', href: '/explore' },
-      { name: '질문답변 생성', href: '/create' },
+      { name: '질문답변 둘러보기', href: '/qalist' },
+      { name: '질문답변 생성', href: '/myqa' },
       { name: '면접 시뮬레이션', href: '/simulation' },
     ],
   },
