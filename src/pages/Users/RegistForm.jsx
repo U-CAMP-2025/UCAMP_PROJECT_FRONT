@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 const styles = {
@@ -88,9 +88,25 @@ const styles = {
   },
 };
 
-const CreatePage = () => {
+const RegistForm = () => {
   // 폼 제출 핸들러 (선택 사항)
-
+  // TODO: jobList 요청 있어야 함
+  const [jobList, setJobList] = useState([
+    '직무01',
+    '직무02',
+    '직무03',
+    '직무04',
+    '직무05',
+    '직무06',
+    '직무07',
+    '직무08',
+    '직무09',
+    '직무10',
+    '직무11',
+    '직무12',
+    '직무13',
+    '직무14',
+  ]);
   const {
     handleSubmit, // form onSubmit에 들어가는 함수
     register, // onChange 등의 이벤트 객체 생성
@@ -171,9 +187,11 @@ const CreatePage = () => {
               <option value='' disabled>
                 직무를 선택하세요
               </option>
-              <option value='developer'>개발자</option>
-              <option value='designer'>디자이너</option>
-              <option value='planner'>기획자</option>
+              {jobList.map((el, idx) => (
+                <option key={idx} value={el}>
+                  {el}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -186,4 +204,4 @@ const CreatePage = () => {
     </div>
   );
 };
-export default CreatePage;
+export default RegistForm;

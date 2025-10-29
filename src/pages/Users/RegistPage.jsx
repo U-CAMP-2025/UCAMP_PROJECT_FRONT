@@ -1,12 +1,12 @@
 import { PageContainer } from '@components/layout/PageContainer';
 import React from 'react';
 
-import CreatePage from './CreatePage';
+import RegistForm from './RegistForm';
 
 const RegistPage = () => {
   return (
     <PageContainer header footer>
-      <CreatePage />
+      <RegistForm />
     </PageContainer>
   );
 };
