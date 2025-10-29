@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import RecordRTC, { RecordRTCPromisesHandler } from 'recordrtc';
 
+import TextToSpeech from './TextToSpeech';
+
 const QUESTIONS = [
   '자기소개를 해주세요.',
   '우리 회사에 지원한 동기는 무엇인가요?',
@@ -9,6 +11,8 @@ const QUESTIONS = [
   '협업에서 가장 중요하게 생각하는 점은?',
   '입사 후 3년 목표는 무엇인가요?',
 ];
+
+const voiceId = 'Xb7hH8MSUJpSbSDYk0k2';
 
 const MAX_SECONDS = 60; // 질문당 제한 시간(초)
 
@@ -19,6 +23,7 @@ export default function SimulationGO() {
   const [loading, setLoading] = useState(true);
   // 상태
   const [currentIdx, setCurrentIdx] = useState(0);
+  const [currentQuestion, setcurrentQuestion] = useState('');
   const [timeLeft, setTimeLeft] = useState(MAX_SECONDS);
   const [isSessionStarted, setIsSessionStarted] = useState(false);
   const [isQuestionRecording, setIsQuestionRecording] = useState(false);
@@ -146,7 +151,8 @@ export default function SimulationGO() {
     setTimeLeft(MAX_SECONDS);
 
     // 첫 질문 자동 읽기
-    speakQuestion(QUESTIONS[0]);
+    // speakQuestion(QUESTIONS[0]);
+    setcurrentQuestion(QUESTIONS[0]);
   };
 
   const stopSession = async () => {
@@ -272,7 +278,8 @@ export default function SimulationGO() {
     // if (isQuestionRecording) return;
 
     const q = QUESTIONS[currentIdx] || '';
-    speakQuestion(q);
+    // speakQuestion(q);
+    setcurrentQuestion(QUESTIONS[currentIdx]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIdx, isSessionStarted]);
 
@@ -317,6 +324,7 @@ export default function SimulationGO() {
   // UI
   return (
     <div style={{ padding: 24, fontFamily: 'Inter, system-ui, sans-serif' }}>
+      <TextToSpeech voice={voiceId} currentQuestion={currentQuestion} />
       {/* 컨트롤 */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 12, alignItems: 'center' }}>
         <button style={btnStyle} onClick={isSessionStarted ? stopSession : startSession}>
