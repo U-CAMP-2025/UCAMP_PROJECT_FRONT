@@ -35,7 +35,7 @@ export const LoginExample = () => {
 
   return (
     <StyledStack direction='column' justify='center' align='center' wrap>
-      <Text size='lg' weight='bold'>
+      <Text size='6' weight='bold'>
         로그인 여부: {isLogin ? '로그인됨' : '로그인 안됨'}
       </Text>
       <div>
@@ -63,5 +63,5 @@ export const LoginExample = () => {
 
 // 기존 styled components에서 css를 추가하고 싶을 때
 const StyledStack = styled(Stack)`
-  border: 1px solid ${({ theme }) => theme.colors.primary};
+  border: 1px solid ${({ theme }) => theme.colors.primary[10]};
 `;

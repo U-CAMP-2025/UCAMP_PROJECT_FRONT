@@ -1,24 +1,50 @@
 import styled, { css } from 'styled-components';
 
 const scale = {
-  xs: css`
-    font-size: ${({ theme }) => theme.font.size.xs};
+  1: css`
+    font-size: ${({ theme }) => theme.font.size[1]};
+    letter-spacing: ${({ theme }) => theme.font.letterSpacing[1]};
+    line-height: ${({ theme }) => theme.font.lineHeight[1]};
   `,
-  sm: css`
-    font-size: ${({ theme }) => theme.font.size.sm};
+  2: css`
+    font-size: ${({ theme }) => theme.font.size[2]};
+    letter-spacing: ${({ theme }) => theme.font.letterSpacing[2]};
+    line-height: ${({ theme }) => theme.font.lineHeight[2]};
   `,
-  md: css`
-    font-size: ${({ theme }) => theme.font.size.md};
+  3: css`
+    font-size: ${({ theme }) => theme.font.size[3]};
+    letter-spacing: ${({ theme }) => theme.font.letterSpacing[3]};
+    line-height: ${({ theme }) => theme.font.lineHeight[3]};
   `,
-  lg: css`
-    font-size: ${({ theme }) => theme.font.size.lg};
+  4: css`
+    font-size: ${({ theme }) => theme.font.size[4]};
+    letter-spacing: ${({ theme }) => theme.font.letterSpacing[4]};
+    line-height: ${({ theme }) => theme.font.lineHeight[4]};
   `,
-  xl: css`
-    font-size: ${({ theme }) => theme.font.size.xl};
+  5: css`
+    font-size: ${({ theme }) => theme.font.size[5]};
+    letter-spacing: ${({ theme }) => theme.font.letterSpacing[5]};
+    line-height: ${({ theme }) => theme.font.lineHeight[5]};
   `,
-  title: css`
-    font-size: ${({ theme }) => theme.font.size.title};
-    font-weight: ${({ theme }) => theme.font.weight.bold};
+  6: css`
+    font-size: ${({ theme }) => theme.font.size[6]};
+    letter-spacing: ${({ theme }) => theme.font.letterSpacing[6]};
+    line-height: ${({ theme }) => theme.font.lineHeight[6]};
+  `,
+  7: css`
+    font-size: ${({ theme }) => theme.font.size[7]};
+    letter-spacing: ${({ theme }) => theme.font.letterSpacing[7]};
+    line-height: ${({ theme }) => theme.font.lineHeight[7]};
+  `,
+  8: css`
+    font-size: ${({ theme }) => theme.font.size[8]};
+    letter-spacing: ${({ theme }) => theme.font.letterSpacing[8]};
+    line-height: ${({ theme }) => theme.font.lineHeight[8]};
+  `,
+  9: css`
+    font-size: ${({ theme }) => theme.font.size[9]};
+    letter-spacing: ${({ theme }) => theme.font.letterSpacing[9]};
+    line-height: ${({ theme }) => theme.font.lineHeight[9]};
   `,
 };
 
@@ -26,7 +52,7 @@ const Text = styled.p.withConfig({
   shouldForwardProp: (prop) => !['size', 'weight', 'muted'].includes(prop),
 })`
   margin: 0;
-  color: ${({ muted, theme }) => (muted ? theme.colors.textMuted : theme.colors.text)};
+  color: ${({ muted, theme }) => (muted ? theme.colors.textMuted : theme.colors.gray[12])};
   ${({ size }) => scale[size || 'md']}
   font-weight: ${({ weight, theme }) =>
     weight ? theme.font.weight[weight] : theme.font.weight.regular};
