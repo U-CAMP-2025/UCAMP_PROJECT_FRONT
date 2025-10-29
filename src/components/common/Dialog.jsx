@@ -1,7 +1,7 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import styled from 'styled-components';
 
-import Text from './Text';
+import Typography from './Typography';
 
 export const Overlay = styled(Dialog.Overlay)`
   position: fixed;
@@ -23,11 +23,11 @@ export const Content = styled(Dialog.Content)`
   box-shadow: ${({ theme }) => theme.shadow.lg};
 `;
 
-export const Title = styled(Text).attrs({ as: 'h3', size: 5, weight: 'semiBold' })`
+export const Title = styled(Typography).attrs({ as: 'h3', size: 5, weight: 'semiBold' })`
   margin-bottom: ${({ theme }) => theme.space[3]};
 `;
 
-export const Description = styled(Text).attrs({ size: 3, muted: true })`
+export const Description = styled(Typography).attrs({ size: 3, muted: true })`
   margin-bottom: ${({ theme }) => theme.space[5]};
 `;
 

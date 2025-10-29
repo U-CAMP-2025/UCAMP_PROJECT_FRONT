@@ -48,7 +48,7 @@ const scale = {
   `,
 };
 
-const Text = styled.p.withConfig({
+const Typography = styled.p.withConfig({
   shouldForwardProp: (prop) => !['size', 'weight', 'muted'].includes(prop),
 })`
   margin: 0;
@@ -58,4 +58,4 @@ const Text = styled.p.withConfig({
     weight ? theme.font.weight[weight] : theme.font.weight.regular};
 `;
 
-export default Text;
+export default Typography;

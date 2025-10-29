@@ -1,7 +1,7 @@
 import * as Label from '@radix-ui/react-label';
 import styled from 'styled-components';
 
-import Text from './Text';
+import Typography from './Typography';
 
 export const FieldRoot = styled.div`
   display: grid;
@@ -33,7 +33,7 @@ export const Input = styled.input.withConfig({
   }
 `;
 
-export const FieldHint = styled(Text).attrs({ size: 2, muted: true })``;
+export const FieldHint = styled(Typography).attrs({ size: 2, muted: true })``;
 
 //
 /*
