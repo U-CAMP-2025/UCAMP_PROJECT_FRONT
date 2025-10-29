@@ -3,6 +3,7 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import theme from '@styles/theme';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import {
   HeaderContainer,
@@ -19,6 +20,7 @@ import {
 } from '../common/HeaderStyles';
 
 export const Header = () => {
+  const { pathname } = useLocation();
   const navigate = useNavigate();
   const activeMenu = '질문답변 생성'; // 현재 활성 메뉴
 
@@ -30,16 +32,16 @@ export const Header = () => {
         </Typography>
 
         <Nav>
-          <NavItem href='/qalist' $isActive={activeMenu === '질문답변 둘러보기'}>
+          <NavItem href='/qalist' $isActive={pathname === '/qalist'}>
             질문답변 둘러보기
           </NavItem>
-          <NavItem href='/myqa' $isActive={activeMenu === '질문답변 생성'}>
+          <NavItem href='/myqa' $isActive={pathname === '/myqa'}>
             질문답변 생성
           </NavItem>
-          <NavItem href='/simulation' $isActive={activeMenu === '면접 시뮬레이션'}>
+          <NavItem href='/simulation' $isActive={pathname === '/simulation'}>
             면접 시뮬레이션
           </NavItem>
-          <NavItem href='/simulation/record' $isActive={activeMenu === '시뮬레이션 결과'}>
+          <NavItem href='/simulation/record' $isActive={pathname === '/simulation/record'}>
             시뮬레이션 결과
           </NavItem>
         </Nav>
