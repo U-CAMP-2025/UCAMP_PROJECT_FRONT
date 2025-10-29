@@ -4,10 +4,8 @@ import { SortSelector } from '@components/common/SortSelector';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import QASetList from '@components/qaset/QASetList';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
-
-// Typography 컴포넌트 임포트 (추가됨)
 
 // --- 페이지 스타일 정의 ---
 
@@ -60,9 +58,7 @@ const MainContentWrapper = styled.div`
   min-height: 80vh;
 `;
 
-// --- Mock 데이터 (이전에 제공된 데이터 사용) ---
 const qaList = [
-  // ... (데이터는 동일)
   {
     postId: 1,
     nickname: '댄싱다람쥐',
@@ -96,7 +92,6 @@ const qaList = [
 ];
 
 export default function QAListPage() {
-  // 상태 관리 (필터링 및 정렬)
   const [currentSort, setCurrentSort] = useState('latest_desc');
 
   const handleSortChange = (newSort) => {
@@ -104,12 +99,31 @@ export default function QAListPage() {
     console.log('정렬 방식 변경:', newSort);
   };
 
+  const sortedQAList = useMemo(() => {
+    const sorted = [...qaList];
+
+    switch (currentSort) {
+      case 'created_asc':
+        return sorted.sort((a, b) => a.postId - b.postId);
+
+      case 'review_desc':
+        return sorted.sort((a, b) => b.review - a.review);
+
+      case 'latest_desc':
+        return sorted.sort((a, b) => {
+          const dateA = new Date(a.createAt.replace(/\./g, '-'));
+          const dateB = new Date(b.createAt.replace(/\./g, '-'));
+          return dateB - dateA;
+        });
+
+      default:
+        return sorted;
+    }
+  }, [currentSort]); // currentSort가 바뀔 때만 재계산
+
   return (
-    // PageContainer는 Header와 Footer를 포함한다고 가정합니다.
     <PageContainer header footer>
-      {/* 💡 필터 바를 MainContentWrapper 안으로 이동하여 중앙 정렬되도록 합니다. */}
       <MainContentWrapper>
-        {/* 1. 필터 및 정렬 바 */}
         <FilterAndSortBar>
           <FilterSection>
             <JobSelector />
@@ -123,15 +137,10 @@ export default function QAListPage() {
           </SortSection>
         </FilterAndSortBar>
 
-        {/* 2. 질문 답변 카드 목록 */}
-        {/* QASetList는 내부에서 좌우 패딩을 가지므로, 여기서는 추가 패딩이 필요 없습니다. */}
-        <QASetList qaList={qaList} />
+        <QASetList qaList={sortedQAList} />
       </MainContentWrapper>
 
-      {/* 3. 무한 스크롤 로딩 표시 영역 (구현 시 필요) */}
-      <div style={{ textAlign: 'center', padding: '20px' }}>
-        {/* <Text muted>로딩 중...</Text> */}
-      </div>
+      <div style={{ textAlign: 'center', padding: '20px' }}></div>
     </PageContainer>
   );
 }

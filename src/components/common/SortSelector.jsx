@@ -1,23 +1,23 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { CaretDownIcon, CheckIcon } from '@radix-ui/react-icons';
-import React, { useState } from 'react';
+import React from 'react';
+// useEffect, useState 제거
 import styled, { css } from 'styled-components';
 
 import Typography from './Typography';
 
-// --- 스타일 정의 ---
-
+// --- 스타일 정의 생략 (이전과 동일하게 유지) ---
 const SortTrigger = styled(DropdownMenu.Trigger)`
-  /* 정렬 방식을 표시하는 버튼 */
   all: unset;
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[1]};
-  padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]}; /* 8px 12px */
+  padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]};
   border: 1px solid ${({ theme }) => theme.colors.gray[6]};
   border-radius: ${({ theme }) => theme.radius.sm};
   background-color: white;
   cursor: pointer;
+  transition: all 0.2s;
 
   &:hover {
     border-color: ${({ theme }) => theme.colors.gray[8]};
@@ -41,7 +41,7 @@ const DropdownItem = styled(DropdownMenu.Item)`
   font-size: ${({ theme }) => theme.font.size[3]};
   color: ${({ theme }) => theme.colors.gray[12]};
   padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[4]};
-  padding-left: ${({ theme }) => theme.space[6]}; /* 체크 아이콘 공간 확보 */
+  padding-left: ${({ theme }) => theme.space[6]};
   position: relative;
   user-select: none;
   cursor: pointer;
@@ -50,6 +50,12 @@ const DropdownItem = styled(DropdownMenu.Item)`
   &[data-highlighted] {
     background-color: ${({ theme }) => theme.colors.primary[3]};
     color: ${({ theme }) => theme.colors.primary[12]};
+  }
+
+  &[data-state='checked'] {
+    background-color: ${({ theme }) => theme.colors.primary[2]};
+    color: ${({ theme }) => theme.colors.primary[12]};
+    font-weight: ${({ theme }) => theme.font.weight.semiBold};
   }
 `;
 
@@ -60,14 +66,13 @@ const ItemIndicator = styled(DropdownMenu.ItemIndicator)`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: ${({ theme }) => theme.colors.primary[9]}; /* Primary 색상 체크 아이콘 */
+  color: ${({ theme }) => theme.colors.primary[9]};
 `;
 
 const CaretIconStyled = styled(CaretDownIcon)`
   color: ${({ theme }) => theme.colors.gray[10]};
 `;
-
-// --- 컴포넌트 로직 ---
+// --- 스타일 정의 끝 ---
 
 const sortOptions = [
   { value: 'created_asc', label: '가져오기 순' },
@@ -75,17 +80,21 @@ const sortOptions = [
   { value: 'latest_desc', label: '최신순' },
 ];
 
+// 💡 내부 상태(internalSort, useEffect, useState)를 모두 제거하고 prop만 사용합니다.
 export const SortSelector = ({ currentSort = 'latest_desc', onSortChange }) => {
-  const [sort, setSort] = useState(currentSort);
-
   const handleSortChange = (newSort) => {
-    setSort(newSort);
+    // 1. 상위 컴포넌트로 값 전달 (이것이 QAListPage의 state를 변경합니다.)
     if (onSortChange) {
       onSortChange(newSort);
     }
+
+    console.log('SortSelector [onValueChange]: Value passed UP:', newSort);
   };
 
-  const currentLabel = sortOptions.find((opt) => opt.value === sort)?.label || '정렬';
+  // 💡 prop인 currentSort를 사용하여 UI 표시
+  const currentLabel = sortOptions.find((opt) => opt.value === currentSort)?.label || '정렬';
+
+  console.log('SortSelector [Render]: Displaying value (PROP):', currentSort);
 
   return (
     <DropdownMenu.Root>
@@ -98,7 +107,8 @@ export const SortSelector = ({ currentSort = 'latest_desc', onSortChange }) => {
 
       <DropdownMenu.Portal>
         <DropdownContent sideOffset={5} align='end'>
-          <DropdownMenu.RadioGroup value={sort} onValueChange={handleSortChange}>
+          {/* 💡 DropdownMenu.RadioGroup의 value에 currentSort prop을 직접 연결 */}
+          <DropdownMenu.RadioGroup value={currentSort} onValueChange={handleSortChange}>
             {sortOptions.map((option) => (
               <DropdownItem key={option.value} value={option.value}>
                 <ItemIndicator>
