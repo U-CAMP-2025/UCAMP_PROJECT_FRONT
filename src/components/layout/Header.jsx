@@ -2,6 +2,7 @@ import Typography from '@components/common/Typography';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import theme from '@styles/theme';
+import { useNavigate } from 'react-router-dom';
 
 import {
   HeaderContainer,
@@ -18,6 +19,7 @@ import {
 } from '../common/HeaderStyles';
 
 export const Header = () => {
+  const navigate = useNavigate();
   const activeMenu = '질문답변 생성'; // 현재 활성 메뉴
 
   return (
@@ -28,16 +30,16 @@ export const Header = () => {
         </Typography>
 
         <Nav>
-          <NavItem href='#' $isActive={activeMenu === '질문답변 둘러보기'}>
+          <NavItem href='/qalist' $isActive={activeMenu === '질문답변 둘러보기'}>
             질문답변 둘러보기
           </NavItem>
-          <NavItem href='#' $isActive={activeMenu === '질문답변 생성'}>
+          <NavItem href='/myqa' $isActive={activeMenu === '질문답변 생성'}>
             질문답변 생성
           </NavItem>
-          <NavItem href='#' $isActive={activeMenu === '면접 시뮬레이션'}>
+          <NavItem href='/simulation' $isActive={activeMenu === '면접 시뮬레이션'}>
             면접 시뮬레이션
           </NavItem>
-          <NavItem href='#' $isActive={activeMenu === '시뮬레이션 결과'}>
+          <NavItem href='/simulation/record' $isActive={activeMenu === '시뮬레이션 결과'}>
             시뮬레이션 결과
           </NavItem>
         </Nav>
@@ -57,9 +59,7 @@ export const Header = () => {
 
           <DropdownMenu.Portal>
             <DropdownContent sideOffset={5} align='end'>
-              <DropdownItem onSelect={() => console.log('마이페이지 이동')}>
-                마이페이지
-              </DropdownItem>
+              <DropdownItem onSelect={() => navigate('/mypage')}>마이페이지</DropdownItem>
               <DropdownSeparator />
               <DropdownItem onSelect={() => console.log('로그아웃')}>로그아웃</DropdownItem>
             </DropdownContent>
