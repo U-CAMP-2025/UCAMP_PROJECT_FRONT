@@ -38,6 +38,7 @@ const Th = styled.th`
 `;
 
 const Td = styled.td`
+  font-size: ${({ theme }) => theme.font.size[2]};
   padding: ${({ theme }) => `${theme.space[4]} ${theme.space[5]}`};
   border-bottom: 1px solid ${({ theme }) => theme.colors.gray[5]};
   color: ${({ theme }) => theme.colors.gray[12]};
@@ -47,6 +48,7 @@ const Td = styled.td`
     css`
       text-align: ${align};
     `}
+  white-space: nowrap;
 `;
 
 const Tr = styled.tr`
