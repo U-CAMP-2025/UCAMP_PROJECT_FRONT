@@ -1,3 +1,5 @@
+import AdminTranscriptionPage from '@pages/Admin/Transcription';
+import AdminUserPage from '@pages/Admin/User';
 import LandingPage from '@pages/Landing';
 import MyPage from '@pages/MyPage';
 import MyQAPage from '@pages/MyQA';
@@ -18,6 +20,8 @@ const AppRoutes = () => {
         <Route path='/mypage' element={<MyPage />} />
         <Route path='/qalist' element={<QAListPage />} />
         <Route path='/myqa' element={<MyQAPage />} />
+        <Route path='/admin/user' element={<AdminUserPage />} />
+        <Route path='/admin/transcription' element={<AdminTranscriptionPage />} />
       </Routes>
     </BrowserRouter>
   );
