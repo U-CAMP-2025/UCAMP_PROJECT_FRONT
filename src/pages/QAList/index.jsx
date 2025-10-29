@@ -102,7 +102,7 @@ export default function QAListPage() {
 
     switch (currentSort) {
       case 'bookcount_asc':
-        return sorted.sort((a, b) => a.bookCount - b.bookCount);
+        return sorted.sort((a, b) => b.bookCount - a.bookCount);
 
       case 'review_desc':
         return sorted.sort((a, b) => b.review - a.review);
