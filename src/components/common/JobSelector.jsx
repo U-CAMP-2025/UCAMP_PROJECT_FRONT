@@ -21,7 +21,7 @@ const SelectorWrapper = styled.div`
 `;
 
 // 💡 추가됨: 칩과 드롭다운을 묶는 컨테이너
-const ChipsAndTriggerWrapper = styled.div`
+const ChipGroupAndTrigger = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[2]}; /* 칩과 버튼 사이 간격 8px */
@@ -171,24 +171,36 @@ const SelectSeparator = styled(Select.Separator)`
 // 2. COMPONENT LOGIC
 // ===========================================
 
+// 💡💡💡 [핵심 수정 1] 💡💡💡
+// qaList의 'job' 배열 문자열과 name이 일치하도록 수정
 const ALL_JOBS = [
-  { id: 'fe', name: '프론트엔드' },
-  { id: 'be', name: '백엔드' },
+  { id: 'web', name: '웹개발' },
+  { id: 'fe', name: '프론트엔드 개발' },
+  { id: 'be', name: '백엔드 개발' },
   { id: 'data', name: '데이터 분석' },
   { id: 'ml', name: '머신러닝' },
   { id: 'qa', name: 'QA 엔지니어' },
   { id: 'devops', name: 'DevOps' },
 ];
 
+// 💡 직무 ID로 이름을 찾는 헬퍼 함수
+const getJobNameById = (jobId) => {
+  const job = ALL_JOBS.find((j) => j.id === jobId);
+  return job ? job.name : '알 수 없음';
+};
+
 /**
- * 직무를 선택하고 칩 형태로 표시하는 컴포넌트 (최대 3개 선택 가능)
+ * 직무를 선택하고 칩 형태로 표시하는 컴포넌트
+ * @param {object} props
+ * @param {string[]} props.value - 선택된 직무 ID 배열 (예: ['fe', 'be'])
+ * @param {function} props.onChange - 직무 ID 배열이 변경될 때 호출되는 함수
  */
-export const JobSelector = () => {
-  // theme 객체를 직접 사용해야 하는 경우 useTheme 훅을 사용합니다.
+export const JobSelector = ({ value = [], onChange = () => {} }) => {
+  // 💡 theme 객체는 useTheme()으로 가져옵니다.
   const theme = useTheme();
 
-  // 임시로 'fe', 'be'가 선택된 상태로 시작합니다.
-  const [selectedJobs, setSelectedJobs] = useState(['fe', 'be']);
+  // 💡 useState() 제거. value prop을 selectedJobs로 사용합니다.
+  const selectedJobs = value;
   const MAX_SELECTIONS = 3;
   const isMaxSelected = selectedJobs.length >= MAX_SELECTIONS;
 
@@ -197,26 +209,22 @@ export const JobSelector = () => {
   const handleSelectChange = (jobId) => {
     if (!selectedJobs.includes(jobId)) {
       if (selectedJobs.length < MAX_SELECTIONS) {
-        setSelectedJobs([...selectedJobs, jobId]);
+        // 💡 2. setSelectedJobs 대신 onChange 호출
+        onChange([...selectedJobs, jobId]);
       }
     }
-    return undefined;
   };
 
   const handleRemoveJob = (jobId) => {
-    setSelectedJobs(selectedJobs.filter((id) => id !== jobId));
+    // 💡 3. setSelectedJobs 대신 onChange 호출
+    onChange(selectedJobs.filter((id) => id !== jobId));
   };
 
-  const getJobName = (jobId) => {
-    const job = ALL_JOBS.find((j) => j.id === jobId);
-    return job ? job.name : '알 수 없음';
-  };
-
+  // 현재 선택되지 않은 직무 목록 (드롭다운에 표시될 항목)
   const availableJobs = ALL_JOBS.filter((job) => !selectedJobs.includes(job.id));
 
   return (
     <SelectorWrapper>
-      {/* 레이블 */}
       <Typography
         size={3}
         weight='semiBold'
@@ -225,16 +233,15 @@ export const JobSelector = () => {
         직무
       </Typography>
 
-      {/* 💡 칩 목록과 드롭다운 토글을 하나의 래퍼로 묶어 밀착시킵니다. */}
-      <ChipsAndTriggerWrapper>
-        {/* 1. 선택된 칩 목록 */}
+      {/* 1. 선택된 칩 목록 (value prop 사용) */}
+      <ChipGroupAndTrigger>
         <ChipGroup>
           {selectedJobs.map((jobId) => (
             <JobChip key={jobId}>
-              {getJobName(jobId)}
+              {getJobNameById(jobId)}
               <RemoveButton
                 onClick={() => handleRemoveJob(jobId)}
-                title={`Remove ${getJobName(jobId)}`}
+                title={`Remove ${getJobNameById(jobId)}`}
               >
                 <Cross1Icon width={12} height={12} />
               </RemoveButton>
@@ -251,36 +258,27 @@ export const JobSelector = () => {
           <Select.Portal>
             <SelectContent position='popper' sideOffset={8}>
               <SelectViewport>
-                <Select.Group>
-                  {isMaxSelected ? (
-                    <SelectItem value='max-reached' disabled>
-                      <SelectItemText>최대 {MAX_SELECTIONS}개까지 선택 가능합니다.</SelectItemText>
-                    </SelectItem>
-                  ) : (
-                    availableJobs.map((job) => (
+                {isMaxSelected ? (
+                  <SelectItem value='max-reached' disabled>
+                    <SelectItemText>최대 {MAX_SELECTIONS}개까지 선택 가능합니다.</SelectItemText>
+                  </SelectItem>
+                ) : (
+                  <Select.Group>
+                    {availableJobs.map((job) => (
                       <SelectItem key={job.id} value={job.id}>
+                        <SelectItemText>{job.name}</SelectItemText>
                         <SelectItemIndicator>
                           <CheckIcon />
                         </SelectItemIndicator>
-                        <SelectItemText>{job.name}</SelectItemText>
                       </SelectItem>
-                    ))
-                  )}
-                </Select.Group>
-
-                {ALL_JOBS.length === selectedJobs.length && !isMaxSelected && (
-                  <>
-                    <SelectSeparator />
-                    <SelectItem value='all-selected' disabled>
-                      <SelectItemText>모든 직무가 선택되었습니다.</SelectItemText>
-                    </SelectItem>
-                  </>
+                    ))}
+                  </Select.Group>
                 )}
               </SelectViewport>
             </SelectContent>
           </Select.Portal>
         </Select.Root>
-      </ChipsAndTriggerWrapper>
+      </ChipGroupAndTrigger>
     </SelectorWrapper>
   );
 };

@@ -89,56 +89,80 @@ const qaList = [
   },
 ];
 
+const ALL_JOBS_MAP = new Map([
+  ['web', '웹개발'],
+  ['fe', '프론트엔드 개발'],
+  ['be', '백엔드 개발'],
+  ['data', '데이터 분석'],
+  ['ml', '머신러닝'],
+  ['qa', 'QA 엔지니어'],
+  ['devops', 'DevOps'],
+]);
+
 export default function QAListPage() {
   const [currentSort, setCurrentSort] = useState('bookcount_asc');
+
+  const [selectedJobIds, setSelectedJobIds] = useState([]);
 
   const handleSortChange = (newSort) => {
     setCurrentSort(newSort);
     console.log('정렬 방식 변경:', newSort);
   };
 
-  const sortedQAList = useMemo(() => {
-    const sorted = [...qaList];
+  // 💡 2. 필터링과 정렬을 모두 처리하는 useMemo
+  const filteredAndSortedList = useMemo(() => {
+    // --- 1. 필터링 ---
+    let filteredList = [...qaList];
+    if (selectedJobIds.length > 0) {
+      // 선택된 ID를 직무 이름(string)으로 변환
+      const selectedJobNames = selectedJobIds.map((id) => ALL_JOBS_MAP.get(id));
 
+      filteredList = qaList.filter((item) => {
+        // item.job 배열에 선택된 직무 이름이 하나라도 포함되어 있는지 확인
+        return selectedJobNames.every((jobName) => item.job.includes(jobName));
+      });
+    }
+
+    // --- 2. 정렬 (필터링된 리스트 기준) ---
+    const sorted = [...filteredList];
     switch (currentSort) {
       case 'bookcount_asc':
         return sorted.sort((a, b) => b.bookCount - a.bookCount);
-
       case 'review_desc':
         return sorted.sort((a, b) => b.review - a.review);
-
       case 'latest_desc':
         return sorted.sort((a, b) => {
           const dateA = new Date(a.createAt.replace(/\./g, '-'));
           const dateB = new Date(b.createAt.replace(/\./g, '-'));
           return dateB - dateA;
         });
-
       default:
         return sorted;
     }
-  }, [currentSort]); // currentSort가 바뀔 때만 재계산
+    // 💡 3. currentSort 또는 selectedJobIds가 변경될 때마다 재계산
+  }, [currentSort, selectedJobIds]);
 
   return (
     <PageContainer header footer>
+      {' '}
       <MainContentWrapper>
+        {' '}
         <FilterAndSortBar>
+          {' '}
           <FilterSection>
-            <JobSelector />
-          </FilterSection>
-
+            <JobSelector value={selectedJobIds} onChange={setSelectedJobIds} />{' '}
+          </FilterSection>{' '}
           <SortSection>
+            {' '}
             <Typography size={3} style={{ fontWeight: 500, color: 'inherit' }}>
-              정렬 방법
+              정렬 방법{' '}
             </Typography>
-            <SortSelector currentSort={currentSort} onSortChange={handleSortChange} />
-          </SortSection>
+            <SortSelector currentSort={currentSort} onSortChange={handleSortChange} />{' '}
+          </SortSection>{' '}
         </FilterAndSortBar>
-
-        <QASetList qaList={sortedQAList} />
+        <QASetList qaList={filteredAndSortedList} />{' '}
       </MainContentWrapper>
-
-      <div style={{ textAlign: 'center', padding: '20px' }}></div>
+      <div style={{ textAlign: 'center', padding: '20px' }}></div>{' '}
     </PageContainer>
   );
 }
