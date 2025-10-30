@@ -30,16 +30,14 @@ export const SignupForm = ({
     mode: 'onBlur',
   });
 
-  const onSubmit = async (data) => {
+  const handleSubmitForm = (data) => {
     const { nickname, jobId } = data;
-    if (onSubmitForm) {
-      return await onSubmitForm(data);
-    }
-    return await postSignUp(nickname, jobId);
+    const response = postSignUp(nickname, jobId);
+    console.log(response);
   };
 
   return (
-    <Form onSubmit={handleSubmit(onSubmit)}>
+    <Form onSubmit={handleSubmit(handleSubmitForm)}>
       <Header>
         <Typography size={7} weight='bold' style={{ color: theme.colors.primary[10] }}>
           면접톡
