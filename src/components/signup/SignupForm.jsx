@@ -147,7 +147,7 @@ const Input = styled.input`
 `;
 
 const ErrorText = styled(Typography).attrs({ as: 'div', size: 2 })`
-  color: #ef4444;
+  color: ${({ theme }) => theme.colors.error};
 `;
 
 const Submit = styled.button`
