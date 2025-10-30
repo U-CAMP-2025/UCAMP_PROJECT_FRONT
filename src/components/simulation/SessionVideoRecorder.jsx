@@ -10,6 +10,15 @@ const SessionVideoRecorder = forwardRef(function SessionVideoRecorder(
   const recRef = useRef(null);
   const [videoUrl, setVideoUrl] = useState(null);
 
+  const config = {
+    audioBitsPerSecond: 32000, // 오디오 비트레이트 32kbps
+    videoBitsPerSecond: 500000, // 비디오 비트레이트 500kbps
+    bitsPerSecond: 530000, // 전체 비트레이트
+    frameRate: 12, // 프레임 레이트 12fps
+    width: 854, // 해상도 480p (854x480)
+    height: 480, // 해상도 480p
+  };
+
   useImperativeHandle(ref, () => ({
     start: async () => {
       if (recRef.current) return;
@@ -25,7 +34,11 @@ const SessionVideoRecorder = forwardRef(function SessionVideoRecorder(
         await videoElRef.current.play().catch(() => {});
       }
 
-      const rec = new RecordRTCPromisesHandler(stream, { type: 'video', mimeType: 'video/mp4' });
+      const rec = new RecordRTCPromisesHandler(stream, {
+        type: 'video',
+        mimeType: 'video/mp4',
+        ...config,
+      });
       recRef.current = rec;
       await rec.startRecording();
     },
