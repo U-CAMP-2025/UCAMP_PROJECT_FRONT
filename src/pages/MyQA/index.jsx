@@ -113,7 +113,7 @@ export default function MyQAListPage() {
 
   const handleAddClick = () => {
     // 질문답변 생성 페이지로 이동 (경로 수정 필요)
-    navigate('/create-qa');
+    navigate('/qa/create');
   };
 
   return (

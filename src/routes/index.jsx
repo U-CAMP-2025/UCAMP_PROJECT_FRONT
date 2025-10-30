@@ -2,6 +2,7 @@ import AdminPage from '@pages/Admin';
 import LandingPage from '@pages/Landing';
 import MyPage from '@pages/MyPage';
 import MyQAPage from '@pages/MyQA';
+import QACreatePage from '@pages/MyQA/QaCreatePage';
 import NotFoundPage from '@pages/NotFound';
 import QADetailPage from '@pages/QADetail';
 import QAListPage from '@pages/QAList';
@@ -21,6 +22,7 @@ const AppRoutes = () => {
         <Route path='/qalist' element={<QAListPage />} />
         <Route path='/qa/:qaId' element={<QADetailPage />} />
         <Route path='/myqa' element={<MyQAPage />} />
+        <Route path='/qa/create' element={<QACreatePage />} />
         <Route path='/admin/user' element={<AdminPage />} />
         <Route path='/admin/transcription' element={<AdminPage />} />
       </Routes>
