@@ -63,7 +63,7 @@ export const SignupForm = ({
       </Field>
 
       {/* 이메일 */}
-      <Field>
+      {/* <Field>
         <Label htmlFor='email'>이메일</Label>
         <Input
           id='email'
@@ -74,7 +74,7 @@ export const SignupForm = ({
           {...register('email')}
         />
         {errors.email && <ErrorText>{errors.email.message}</ErrorText>}
-      </Field>
+      </Field> */}
 
       {/* 관심 직무 */}
       <Field>

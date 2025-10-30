@@ -4,11 +4,10 @@ import NotificationDrawer from '@components/notification/NotificationDrawer';
 import { KakaoLoginDialog } from '@components/signup/KakaoLoginDialog';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { ChevronDownIcon, PersonIcon, BellIcon } from '@radix-ui/react-icons';
+import { useAuthStore } from '@store/auth/authStore';
 import theme from '@styles/theme';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
-import { useAuthStore } from 'src/store/auth/useAuthStore';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import {
   HeaderContainer,
@@ -27,7 +26,7 @@ import {
 } from '../common/HeaderStyles';
 
 export const Header = () => {
-  const { isLogin, user, login, logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
@@ -105,7 +104,7 @@ export const Header = () => {
       </LeftSection>
 
       <RightSection>
-        {isLogin ? (
+        {user ? (
           <>
             <NotifWrap type='button' aria-label='알림' onClick={() => setNotifOpen(true)}>
               <BellIcon width={20} height={20} color={theme.colors.gray[11]} />
