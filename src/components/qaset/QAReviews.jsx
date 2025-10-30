@@ -116,30 +116,6 @@ const Header = styled.div`
   align-items: flex-end;
 `;
 
-const FormBox = styled.form`
-  border: 1px solid ${({ theme }) => theme.colors.gray[6]};
-  border-radius: ${({ theme }) => theme.radius.xl};
-  background: #fff;
-  padding: ${({ theme }) => theme.space[5]};
-  display: grid;
-  gap: ${({ theme }) => theme.space[4]};
-`;
-
-const TextArea = styled.textarea`
-  width: 100%;
-  min-height: 140px;
-  resize: vertical;
-  border: 1px solid ${({ theme }) => theme.colors.gray[6]};
-  border-radius: ${({ theme }) => theme.radius.lg};
-  background: ${({ theme }) => theme.colors.gray[2]};
-  padding: ${({ theme }) => theme.space[4]};
-  outline: none;
-  &:focus {
-    border-color: ${({ theme }) => theme.colors.primary[8]};
-    box-shadow: 0 0 0 3px rgba(110, 86, 207, 0.15);
-  }
-`;
-
 const List = styled.ul`
   list-style: none;
   margin: 0;

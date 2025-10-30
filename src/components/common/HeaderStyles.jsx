@@ -6,16 +6,28 @@ export const HeaderContainer = styled.header`
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  height: 60px;
+  height: 80px;
   padding: 0 ${({ theme }) => theme.space[4]};
   background-color: ${({ theme }) => theme.colors.gray[1]};
   border-bottom: 1px solid ${({ theme }) => theme.colors.gray[4]};
+  white-space: nowrap;
+`;
+
+export const Logo = styled.button`
+  margin: 0 25px;
+  background: none;
+  border: none;
+  padding: 0;
+  &:hover {
+    cursor: pointer;
+  }
 `;
 
 export const LeftSection = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[8]};
+  margin-right: 40px;
 `;
 
 export const RightSection = styled.div`
@@ -32,17 +44,17 @@ export const Nav = styled.nav`
 
 export const NavItem = styled.a`
   font-family: ${({ theme }) => theme.font.family.primary};
-  font-weight: ${({ theme }) => theme.font.weight.medium};
+  font-weight: ${({ theme }) => theme.font.weight.semiBold};
   font-size: ${({ theme }) => theme.font.size[3]};
   line-height: ${({ theme }) => theme.font.lineHeight[3]};
-  color: ${({ theme }) => theme.colors.gray[11]};
+  color: ${({ theme }) => theme.colors.gray[10]};
   text-decoration: none;
   padding: ${({ theme }) => theme.space[1]} 0;
   cursor: pointer;
   position: relative;
 
   &:hover {
-    color: ${({ theme }) => theme.colors.primary[9]};
+    color: ${({ theme }) => theme.colors.primary[10]};
   }
 
   ${(props) =>
@@ -80,6 +92,44 @@ export const NotificationIcon = styled.div`
   }
 `;
 
+export const NotifWrap = styled.button`
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  border-radius: ${({ theme }) => theme.radius.lg};
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  &:hover {
+    background: ${({ theme }) => theme.colors.gray[3]};
+  }
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(110, 86, 207, 0.25);
+  }
+`;
+
+export const Badge = styled.span`
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: ${({ theme }) => theme.colors.primary[9]};
+  color: #fff;
+  font-size: 11px;
+  font-weight: ${({ theme }) => theme.font.weight.bold};
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+`;
+
 // --- 프로필 드롭다운 토글 및 아바타 ---
 export const ProfileToggle = styled(DropdownMenu.Trigger)`
   display: flex;
@@ -92,8 +142,6 @@ export const ProfileToggle = styled(DropdownMenu.Trigger)`
 
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary[6]};
-    border-radius: ${({ theme }) => theme.radius.sm};
   }
 `;
 
@@ -112,6 +160,23 @@ export const ProfileAvatar = styled.div`
     font-size: ${({ theme }) => theme.font.size[3]};
     font-weight: ${({ theme }) => theme.font.weight.semiBold};
     color: white;
+  }
+`;
+
+export const Avatar = styled.div`
+  width: 36px;
+  height: 36px;
+  margin-right: 6px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: ${({ theme }) => theme.colors.primary[3]};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 `;
 
@@ -155,7 +220,8 @@ export const DropdownContent = styled(DropdownMenu.Content)`
 
 export const DropdownItem = styled(DropdownMenu.Item)`
   font-family: ${({ theme }) => theme.font.family.primary};
-  font-size: ${({ theme }) => theme.font.size[3]};
+  font-size: ${({ theme }) => theme.font.size[2]};
+  font-weight: ${({ theme }) => theme.font.weight.medium};
   color: ${({ theme }) => theme.colors.gray[12]};
   padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[4]};
   cursor: pointer;

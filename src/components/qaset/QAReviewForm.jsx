@@ -1,8 +1,7 @@
 import Button from '@components/common/Button';
 import Typography from '@components/common/Typography';
-import { PersonIcon } from '@radix-ui/react-icons';
 import { useForm } from 'react-hook-form';
-import styled, { useTheme } from 'styled-components';
+import styled from 'styled-components';
 
 /**
  * QAReviewForm — 로그인 사용자의 리뷰 작성 폼
