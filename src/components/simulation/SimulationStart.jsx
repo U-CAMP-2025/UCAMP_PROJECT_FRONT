@@ -32,6 +32,7 @@ const SimulationStart = () => {
       .get('/interviewers')
       .then((resp) => {
         setInterviewers(resp.data.data);
+        console.log(resp.data.data);
       })
       .catch();
     axiosInstance

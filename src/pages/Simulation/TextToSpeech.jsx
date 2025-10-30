@@ -14,7 +14,7 @@ const TextToSpeech = ({ voice, currentQuestion }) => {
         {
           method: 'POST',
           headers: {
-            // 'xi-api-key': import.meta.env.VITE_ELEVENLABS_API_KEY,
+            'xi-api-key': import.meta.env.VITE_ELEVENLABS_API_KEY,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
