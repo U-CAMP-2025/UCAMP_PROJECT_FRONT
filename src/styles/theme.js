@@ -1,6 +1,7 @@
 const theme = {
   colors: {
     text: '#202020',
+    error: '#ef4444',
     gray: {
       1: '#FCFCFC',
       2: '#F9F9F9',
