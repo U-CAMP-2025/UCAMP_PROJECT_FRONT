@@ -13,6 +13,8 @@ import styled, { css } from 'styled-components';
 
 // QAListPage의 MainContentWrapper 재사용
 const MainContentWrapper = styled.div`
+  width: 100%;
+  min-width: 700px;
   max-width: 1200px; /* 최대 너비 설정 */
   margin: 0 auto; /* 중앙 정렬 */
   padding: ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[6]}; /* 상하 32px, 좌우 24px */
@@ -118,7 +120,6 @@ export default function MyQAListPage() {
 
   return (
     <PageContainer header footer>
-      {' '}
       <MainContentWrapper>
         {/* 1. 페이지 헤더 (제목 + 추가하기 버튼) */}
         <MyPageHeader>

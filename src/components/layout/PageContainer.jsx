@@ -20,4 +20,7 @@ const ChildrenWrapper = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 50px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
