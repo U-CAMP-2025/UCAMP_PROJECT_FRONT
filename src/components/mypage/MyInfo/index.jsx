@@ -4,6 +4,7 @@ import Button from '@components/common/Button';
 import ReadonlyInput from '@components/common/ReadOnlyInput';
 import SearchableSelect from '@components/common/SearchableSelect';
 import Typography from '@components/common/Typography';
+import { defaultAnimateLayoutChanges } from '@dnd-kit/sortable';
 import theme from '@styles/theme';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -12,24 +13,16 @@ import { FieldCard, FieldLeft, FieldLabel, FieldValue, FieldActions } from './Fi
 import PhotoSubmitDialog from './PhotoSubmitDialog';
 
 const initialUserState = {
-  nickName: '유저 닉네임',
+  nickname: '유저 닉네임',
   email: 'user@email.com',
-  job: '',
+  jobName: '',
   passStatus: false,
+  status: '',
   userProfileImageUrl: '',
 };
 const MyInfo = () => {
   const [user, setUser] = useState(initialUserState);
-  const [jobs, setJobs] = useState([
-    {
-      jobId: 1,
-      name: '프론트엔드 개발자',
-    },
-    {
-      jobId: 2,
-      name: '백엔드 개발자',
-    },
-  ]);
+  const [jobs, setJobs] = useState([]);
   const [selectedJobId, setSelectedJobId] = useState(1);
 
   const [openPhotoModal, setOpenPhotoModal] = useState(false);
@@ -41,12 +34,45 @@ const MyInfo = () => {
   };
 
   useEffect(() => {
+    const loadInfo = async () => {
+      try {
+        const data = await fetchUserMypage(); // 백엔드 요청
+        // 백엔드 → 프론트 구조로 변환
+
+        setUser({
+          nickname: data.nickname,
+          email: data.email,
+          job: data.job,
+          passStatus: data.passStatus,
+          status: data.status,
+          userProfileImageUrl: '',
+        });
+      } catch (err) {
+        console.error('데이터 로드 실패:', err);
+      }
+    };
+
     // fetchUserMypage()
     //   .then((response) => setUser(response?.data || initialUserState))
     //   .catch(() => setUser(initialUserState));
     // fetchJobList()
     //   .then((response) => setJobs(response?.data || []))
     //   .catch(() => setJobs([]));
+    const loadData = async () => {
+      try {
+        const data = await fetchJobList(); // 백엔드 요청
+        // 백엔드 → 프론트 구조로 변환
+        const mapped = data.map((item, index) => ({
+          jobId: item.jobId,
+          name: item.jobName,
+        }));
+        setJobs(mapped);
+      } catch (err) {
+        console.error('데이터 로드 실패:', err);
+      }
+    };
+    loadData();
+    loadInfo();
   }, []);
 
   const handleFilePick = (file) => {
@@ -64,7 +90,7 @@ const MyInfo = () => {
           <FieldLeft>
             <FieldLabel htmlFor='nick'>닉네임</FieldLabel>
             <ReadonlyInput id='nick' style={{ width: '85%' }}>
-              {user?.nickName}
+              {user?.nickname}
             </ReadonlyInput>
           </FieldLeft>
         </FieldCard>
