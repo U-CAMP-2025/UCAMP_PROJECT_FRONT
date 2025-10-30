@@ -1,6 +1,7 @@
+import { languages } from 'eslint-plugin-prettier';
 import React, { useEffect, useRef, useState } from 'react';
 
-const TextToSpeech = ({ voice, currentQuestion }) => {
+const TextToSpeech = ({ voiceModel, currentQuestion }) => {
   const [audioUrl, setAudioUrl] = useState(null);
   const stopRef = useRef(false);
 
@@ -10,7 +11,7 @@ const TextToSpeech = ({ voice, currentQuestion }) => {
       console.log('test');
       stopRef.current = true; // 첫 렌더링 이후 API 호출을 허용
       fetch(
-        `https://api.elevenlabs.io/v1/text-to-speech/${voice}/stream?output_format=mp3_44100_128`,
+        `https://api.elevenlabs.io/v1/text-to-speech/${voiceModel.voiceId}/stream?output_format=mp3_44100_128`,
         {
           method: 'POST',
           headers: {
@@ -20,6 +21,8 @@ const TextToSpeech = ({ voice, currentQuestion }) => {
           body: JSON.stringify({
             text: currentQuestion,
             model_id: 'eleven_multilingual_v2',
+            languages: 'ko',
+            voice_settings: voiceModel.voice_settings,
           }),
         },
       )

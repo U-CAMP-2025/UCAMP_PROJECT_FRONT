@@ -1,6 +1,7 @@
 import axiosInstance from '@api/axios';
 import QuestionAudioRecorder from '@components/simulation/QuestionAudioRecorder';
 import SessionVideoRecorder from '@components/simulation/SessionVideoRecorder';
+import VoiceModel from '@components/simulation/VoiceModel';
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
@@ -14,9 +15,6 @@ const QUESTIONS = [
   '입사 후 3년 목표는 무엇인가요?',
 ];
 
-const VOICE_A = 'WzMnDIgiICcj1oXbUBO0'; // 남
-const VOICE_B = 'ksaI0TCD9BstzEzlxj4q'; // 여
-const interviewer_A = new Set([1, 3, 5, 7, 9]);
 const MAX_SECONDS = 60;
 
 export default function SimulationGO() {
@@ -41,15 +39,10 @@ export default function SimulationGO() {
       .then((resp) => {
         const id = resp.data?.data?.interviewer?.interviewerId;
         setInterviewerId(id);
+        console.log(id);
       })
       .catch((err) => console.error('에러:', err));
   }, [simulationId]);
-
-  // 면접관 → 보이스 선택(두 개만)
-  const resolvedVoice = (() => {
-    if (interviewerId == null) return undefined;
-    return interviewer_A.has(Number(interviewerId)) ? VOICE_A : VOICE_B;
-  })();
 
   // 세션 시작/종료
   const startSession = async () => {
@@ -104,7 +97,12 @@ export default function SimulationGO() {
   return (
     <div style={{ padding: 24, fontFamily: 'Inter, system-ui, sans-serif' }}>
       {/* ElevenLabs TTS */}
-      <TextToSpeech voice={resolvedVoice} currentQuestion={currentQuestion} />
+      {!!interviewerId && (
+        <TextToSpeech
+          voiceModel={VoiceModel[interviewerId - 1]}
+          currentQuestion={currentQuestion}
+        />
+      )}
 
       {/* 비디오 레코더 (세션 전체) */}
       <SessionVideoRecorder ref={videoRef} />
