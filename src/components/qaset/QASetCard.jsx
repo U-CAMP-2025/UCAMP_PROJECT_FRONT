@@ -1,8 +1,9 @@
 import Tag, { TagGroup } from '@components/common/Tag';
 import Typography from '@components/common/Typography';
 import { BookmarkIcon, CommentIcon } from '@components/common/icons';
+import { BookmarkFilledIcon } from '@radix-ui/react-icons';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 
 const Card = styled.article`
   border: 1px solid ${({ theme }) => theme.colors.gray[7]};
@@ -15,6 +16,7 @@ const Card = styled.article`
     transform 0.02s ease,
     border-color 0.2s ease;
   cursor: pointer;
+  position: relative; /* 💡 북마크 아이콘의 기준점이 되도록 추가 */
   &:hover {
     box-shadow: ${({ theme }) => theme.shadow.md};
     border-color: ${({ theme }) => theme.colors.gray[8]};
@@ -41,6 +43,21 @@ const Badge = styled.span`
   font-weight: ${({ theme }) => theme.font.weight.semiBold};
   background: ${({ theme }) => theme.colors.gray[3]};
   color: ${({ theme }) => theme.colors.gray[11]};
+`;
+
+// 💡 [신규] 북마크 리본 아이콘 스타일
+const BookmarkRibbon = styled.div`
+  position: absolute;
+  top: -10px;
+  right: 20px;
+
+  color: ${({ theme }) => theme.colors.primary[9]};
+  z-index: 2; /* 태그(TopRow)보다 위에 보이도록 설정 */
+
+  svg {
+    width: 50px;
+    height: 50px;
+  }
 `;
 
 const Divider = styled.hr`
@@ -75,7 +92,22 @@ const ArrowWrap = styled.div`
 
 export default function QASetCard({ item }) {
   const navigate = useNavigate();
-  const { postId, job = [], title, description, bookCount = 0, review = 0, createAt } = item || {};
+  const theme = useTheme(); // 💡 테마 객체 가져오기
+
+  // 💡 OTHER_WRITER prop 추가
+  const {
+    postId,
+    job = [],
+    title,
+    description,
+    bookCount = 0,
+    review = 0,
+    createAt,
+    OTHER_WRITER,
+  } = item || {};
+
+  // 💡 OTHER_WRITER 값이 있으면 true (북마크된 게시글)
+  const isBookmarked = !!OTHER_WRITER;
 
   return (
     <Card
@@ -83,61 +115,75 @@ export default function QASetCard({ item }) {
       role='button'
       aria-label={`${title} 상세로 이동`}
     >
-      {/* 태그 + 상태 배지 */}
+      {/* 💡 북마크 아이콘 추가 */}
+      {isBookmarked && (
+        <BookmarkRibbon>
+          <BookmarkFilledIcon />
+        </BookmarkRibbon>
+      )}
+      {/* 태그 + 상태 배지 */}{' '}
       <TopRow>
+        {' '}
         {job.length > 0 && (
           <TagGroup>
+            {' '}
             {job.map((jobName) => (
               <Tag key={jobName}>{jobName}</Tag>
-            ))}
+            ))}{' '}
           </TagGroup>
-        )}
-        {/* {isMe && <Badge>내 질문</Badge>}
-        {isPass && <Badge>합격자</Badge>} */}
+        )}{' '}
+        {/* {isMe && <Badge>내 질문</Badge>}{isPass && <Badge>합격자</Badge>} */}
       </TopRow>
-
       <Divider />
-
-      {/* 제목 + 설명 */}
+      {/* 제목 + 설명 */}{' '}
       <Typography as='h3' size={3} weight='semiBold'>
-        제목
-      </Typography>
+        제목{' '}
+      </Typography>{' '}
       <Typography as='p' size={3} weight='bold' style={{ marginTop: 8 }}>
-        {title}
-      </Typography>
-
+        {title}{' '}
+      </Typography>{' '}
       {description && (
         <>
+          {' '}
           <Typography as='h4' size={3} weight='bold' style={{ marginTop: 16 }}>
-            설명
-          </Typography>
+            설명{' '}
+          </Typography>{' '}
           <Typography as='p' size={3} weight='regular' style={{ marginTop: 6 }}>
-            {description}
-          </Typography>
+            {description}{' '}
+          </Typography>{' '}
         </>
       )}
-
-      {/* 생성일 + 작성자 */}
+      {/* 생성일 + 작성자 */}{' '}
       <div style={{ marginTop: 16 }}>
+        {' '}
         <Typography as='h4' size={3} weight='bold'>
-          생성일
-        </Typography>
+          생성일{' '}
+        </Typography>{' '}
         <Typography as='p' size={2} weight='regular' style={{ marginTop: 6 }}>
-          {createAt}
+          {createAt}{' '}
         </Typography>
-      </div>
-
-      <Divider />
-
-      {/* 푸터(정적 아이콘/숫자 표시) */}
-      <Footer>
-        <IconStat aria-label='북마크 수'>
-          <BookmarkIcon />
-          <Typography as='span' size={3}>
-            {bookCount}
+        {/* 💡 북마크된 글일 경우 원작자 표시 (선택 사항) */}
+        {isBookmarked && (
+          <Typography
+            as='p'
+            size={1}
+            weight='regular'
+            style={{ marginTop: 4, color: theme.colors.gray[9] }}
+          >
+            가져온 글 (From: {OTHER_WRITER})
           </Typography>
+        )}{' '}
+      </div>
+      <Divider />
+      {/* 푸터(정적 아이콘/숫자 표시) */}{' '}
+      <Footer>
+        {' '}
+        <IconStat aria-label='북마크 수'>
+          <BookmarkIcon />{' '}
+          <Typography as='span' size={3}>
+            {bookCount}{' '}
+          </Typography>{' '}
         </IconStat>
-
         <IconStat aria-label='리뷰 수'>
           <CommentIcon />
           <Typography as='span' size={3}>
