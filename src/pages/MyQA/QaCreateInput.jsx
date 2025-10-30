@@ -1,33 +1,39 @@
-// keyframes 임포트 추가
 import Typography from '@components/common/Typography';
+// 💡 dnd-kit 임포트
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import * as Accordion from '@radix-ui/react-accordion';
 import { Pencil1Icon, TrashIcon, CaretDownIcon, DragHandleDots2Icon } from '@radix-ui/react-icons';
-// DragHandleDots2Icon 추가
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import styled, { keyframes } from 'styled-components';
 
-// Typography로 alias (경로 수정 필요)
-
 // --- 스타일 정의 ---
 
+// 💡 FormItemContainer에 transform, transition 추가 (dnd-kit용)
 export const FormItemContainer = styled(Accordion.Item)`
   background-color: white;
   border: 1px solid ${({ theme }) => theme.colors.gray[5]};
   border-radius: ${({ theme }) => theme.radius.md};
   overflow: hidden;
   box-shadow: ${({ theme }) => theme.shadow.sm};
-  /* 드래그 상태 스타일 (라이브러리 사용 시 추가) */
-  /* &[data-dragging='true'] { ... } */
+
+  /* 💡 dnd-kit이 아이템을 움직일 때 사용할 스타일 */
+  transform: ${({ style }) =>
+    style?.transform ? CSS.Transform.toString(style.transform) : 'none'};
+  transition: ${({ style }) => style?.transition || 'none'};
+
+  /* 💡 드래그 중일 때의 스타일 (그림자 강조) */
+  &[data-dragging='true'] {
+    box-shadow: ${({ theme }) => theme.shadow.lg};
+    z-index: 10;
+  }
 `;
 
-// 💡 FormHeader에 드래그 핸들 영역 추가
 export const FormHeader = styled(Accordion.Header)`
-  /* Header는 Trigger를 포함하는 non-button 요소여야 하므로 div로 변경 */
   display: flex;
   align-items: center;
   width: 100%;
-  /* Trigger에서 border 관리 */
 `;
 
 export const DragHandle = styled.button`
@@ -35,7 +41,7 @@ export const DragHandle = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[2]}; /* 좌우 여백 줄임 */
+  padding: ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[2]};
   cursor: grab;
   color: ${({ theme }) => theme.colors.gray[8]};
 
@@ -50,7 +56,7 @@ export const DragHandle = styled.button`
 
 export const AccordionTriggerStyled = styled(Accordion.Trigger)`
   all: unset;
-  flex-grow: 1; /* 남은 공간 차지 */
+  flex-grow: 1;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -61,7 +67,6 @@ export const AccordionTriggerStyled = styled(Accordion.Trigger)`
   &[data-state='open'] {
     border-bottom-color: ${({ theme }) => theme.colors.gray[4]};
   }
-
   &:focus {
     outline: none;
     box-shadow: inset 0 0 0 2px ${({ theme }) => theme.colors.primary[6]};
@@ -89,11 +94,10 @@ export const QuestionNumberBadge = styled.div`
 
 export const QuestionTitleText = styled(Typography).attrs({ size: 3, weight: 'semiBold' })`
   color: ${({ theme }) => theme.colors.gray[12]};
-  /* 내용이 길 경우 잘림 처리 (옵션) */
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  max-width: 300px; /* 최대 너비 제한 */
+  max-width: 300px;
 `;
 
 export const ControlIconGroup = styled.div`
@@ -121,7 +125,6 @@ export const CaretIcon = styled(CaretDownIcon)`
   color: ${({ theme }) => theme.colors.gray[8]};
   transition: transform 300ms cubic-bezier(0.87, 0, 0.13, 1);
 
-  /* AccordionTrigger의 data-state를 참조 */
   ${AccordionTriggerStyled}[data-state='open'] & {
     transform: rotate(-180deg);
   }
@@ -181,40 +184,52 @@ export const FormTextArea = styled.textarea`
 // --- 스타일 정의 끝 ---
 
 /**
- * 질문답변 생성 페이지에서 사용하는 개별 세트 입력 컴포넌트
  * @param {object} props
+ * @param {string} props.id - dnd-kit을 위한 고유 ID (useFieldArray의 item.id)
  * @param {number} props.index - 배열 내 인덱스
  * @param {function} props.onDelete - 삭제 핸들러
- * @param {object} props.dragHandleProps - 드래그 라이브러리 핸들 props (옵션)
  */
-export const QACreateInput = ({ index, onDelete, dragHandleProps }) => {
-  // useFormContext로 register와 watch(제목 표시용) 가져오기
+export const QACreateInput = ({ id, index, onDelete }) => {
   const { register, watch } = useFormContext();
 
   const questionName = `qaSets[${index}].question`;
   const answerName = `qaSets[${index}].answer`;
-
-  // 현재 질문 입력 값을 watch하여 제목으로 사용
   const currentQuestion = watch(questionName);
 
+  // 💡 dnd-kit 훅 사용
+  const {
+    attributes,
+    listeners,
+    setNodeRef, // DOM 노드 참조
+    transform,
+    transition,
+    isDragging, // 드래그 상태
+  } = useSortable({ id: id }); // useFieldArray의 item.id를 고유 ID로 사용
+
+  // 💡 dnd-kit 스타일
+  const style = {
+    transform,
+    transition,
+  };
+
   return (
-    // 아코디언 Root를 각 Item마다 두지 않고, 상위(QACreatePage)에서 관리합니다.
-    // Item value를 고유하게 설정 (예: `item-${index}`)
-    <FormItemContainer value={`item-${index}`}>
+    // 💡 setNodeRef, style, data-dragging 속성 추가
+    <FormItemContainer
+      value={`item-${index}`}
+      ref={setNodeRef}
+      style={style}
+      data-dragging={isDragging}
+    >
       <FormHeader>
-        {/* 드래그 핸들 */}
-        <DragHandle type='button' {...dragHandleProps} title='순서 변경'>
+        {/* 💡 드래그 핸들에 listeners와 attributes 적용 */}
+        <DragHandle type='button' {...attributes} {...listeners} title='순서 변경'>
           <DragHandleDots2Icon width={20} height={20} />
         </DragHandle>
 
-        {/* 아코디언 열기/닫기 트리거 */}
         <AccordionTriggerStyled>
           <HeaderLeft>
             <QuestionNumberBadge>{index + 1}</QuestionNumberBadge>
-            <QuestionTitleText>
-              {/* 질문 입력 내용 또는 기본 텍스트 표시 */}
-              {currentQuestion || `질문 ${index + 1}`}
-            </QuestionTitleText>
+            <QuestionTitleText>{currentQuestion || `질문 ${index + 1}`}</QuestionTitleText>
           </HeaderLeft>
 
           <ControlIconGroup>

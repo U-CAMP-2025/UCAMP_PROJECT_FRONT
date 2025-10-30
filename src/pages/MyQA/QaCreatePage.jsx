@@ -1,14 +1,23 @@
 import { JobSelector } from '@components/common/JobSelector';
-// JobSelector 임포트
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
-// QASetInputItem 임포트
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import * as Accordion from '@radix-ui/react-accordion';
-// Accordion Root 사용
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
-// Radix Checkbox 사용
 import { CheckIcon, PlusIcon } from '@radix-ui/react-icons';
-import React, { useState } from 'react';
+import React from 'react';
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -16,19 +25,15 @@ import styled from 'styled-components';
 import { QACreateInput } from './QaCreateInput';
 
 // --- 페이지 스타일 정의 ---
-
 const FormWrapper = styled.div`
   padding: ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[6]};
 `;
-
 const Section = styled.section`
-  margin-bottom: ${({ theme }) => theme.space[10]}; /* 섹션 간 간격 40px */
+  margin-bottom: ${({ theme }) => theme.space[10]};
 `;
-
 const SectionTitle = styled(Typography).attrs({ as: 'h2', size: 5, weight: 'bold' })`
-  margin-bottom: ${({ theme }) => theme.space[5]}; /* 제목 아래 여백 20px */
+  margin-bottom: ${({ theme }) => theme.space[5]};
 `;
-
 const FormInput = styled.input`
   width: 100%;
   padding: ${({ theme }) => theme.space[4]};
@@ -45,13 +50,11 @@ const FormTextAreaSummary = styled(FormInput).attrs({ as: 'textarea' })`
   min-height: 100px;
   resize: vertical;
 `;
-
 const QASetListContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.space[4]}; /* 아이템 간 간격 16px */
+  gap: ${({ theme }) => theme.space[4]};
 `;
-
 const AddSetButton = styled.button`
   all: unset;
   display: flex;
@@ -106,7 +109,6 @@ const CheckboxLabel = styled.label`
   cursor: pointer;
   user-select: none;
 `;
-
 const FormFooter = styled.div`
   display: flex;
   justify-content: flex-end;
@@ -114,7 +116,6 @@ const FormFooter = styled.div`
   gap: ${({ theme }) => theme.space[4]};
   margin-top: ${({ theme }) => theme.space[8]}; /* 하단 여백 32px */
 `;
-
 const SubmitButton = styled.button`
   padding: ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[5]};
   background-color: ${({ theme }) => theme.colors.primary[9]};
@@ -136,14 +137,13 @@ const SubmitButton = styled.button`
 
 export default function QACreatePage() {
   const navigate = useNavigate();
-  // react-hook-form 설정 (FormProvider 사용)
   const methods = useForm({
     defaultValues: {
       jobIds: [],
       title: '',
       summary: '',
-      qaSets: [{ question: '', answer: '' }], // 기본 1개 세트
-      status: 'N', // 기본 비공개
+      qaSets: [{ question: '', answer: '' }],
+      status: 'Y',
     },
   });
   const {
@@ -155,120 +155,119 @@ export default function QACreatePage() {
     formState: { errors, isSubmitting },
   } = methods;
 
-  // useFieldArray 설정
   const { fields, append, remove, move } = useFieldArray({
     control,
     name: 'qaSets',
   });
 
-  // JobSelector 상태 관리
-  const selectedJobIds = watch('jobIds'); // jobIds 필드 watch
-
+  const selectedJobIds = watch('jobIds');
   const onSubmit = (data) => {
     console.log('Form Data Submitted:', data);
-    // 실제 API 호출 로직
-    // 예: await api.post('/qa', data);
-    // 성공 시 페이지 이동
-    // navigate('/my-qa');
   };
-
-  // 공개/비공개 상태 처리
   const status = watch('status');
   const handleStatusChange = (newStatus) => {
     setValue('status', newStatus);
   };
 
-  // 드래그 앤 드롭 핸들러 (라이브러리 필요)
-  // const onDragEnd = (result) => {
-  //     if (!result.destination) return;
-  //     move(result.source.index, result.destination.index);
-  // };
+  // 💡 dnd-kit 센서 설정
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  ); // 💡 dnd-kit 드래그 종료 핸들러
+
+  const onDragEnd = (event) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      // useFieldArray의 'id' (item.id)를 기준으로 인덱스 찾기
+      const oldIndex = fields.findIndex((field) => field.id === active.id);
+      const newIndex = fields.findIndex((field) => field.id === over.id);
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        move(oldIndex, newIndex); // 💡 react-hook-form의 'move' 함수 호출
+      }
+    }
+  };
 
   return (
     <PageContainer header footer>
-      {/* FormProvider로 전체 폼 감싸기 */}
+      {' '}
       <FormProvider {...methods}>
+        {' '}
         <FormWrapper>
+          {' '}
           <Typography as='h1' size={7} weight='bold' style={{ marginBottom: '40px' }}>
-            새 질문답변 세트 만들기
-          </Typography>
-
+            새 질문답변 세트 만들기{' '}
+          </Typography>{' '}
           <form onSubmit={handleSubmit(onSubmit)}>
-            {/* 1. 직무 선택 */}
+            {/* 1. 직무 선택 */}{' '}
             <Section>
-              <SectionTitle>직무 선택 (최대 3개)</SectionTitle>
+              <SectionTitle>직무 선택 (최대 3개)</SectionTitle>{' '}
               <JobSelector
                 value={selectedJobIds}
-                // setValue를 사용하여 react-hook-form 상태 업데이트
                 onChange={(newJobIds) => setValue('jobIds', newJobIds, { shouldValidate: true })}
-              />
-              {/* react-hook-form validation (옵션) */}
-              {/* <input type="hidden" {...register('jobIds', { required: '직무를 선택해주세요.'})} /> */}
-              {errors.jobIds && <Typography color='error'>{errors.jobIds.message}</Typography>}
+              />{' '}
+              {errors.jobIds && <Typography color='error'>{errors.jobIds.message}</Typography>}{' '}
             </Section>
-
-            {/* 2. 제목 */}
+            {/* 2. 제목 */}{' '}
             <Section>
-              <SectionTitle>제목</SectionTitle>
+              <SectionTitle>제목</SectionTitle>{' '}
               <FormInput
                 placeholder='세트의 제목을 입력하세요'
-                {...register('title', { required: '제목은 필수 입력 항목입니다.' })}
-              />
-              {errors.title && <Typography color='error'>{errors.title.message}</Typography>}
+                {...register('title', { required: '제목은 필수 입력입니다.' })}
+              />{' '}
+              {errors.title && <Typography color='error'>{errors.title.message}</Typography>}{' '}
             </Section>
-
-            {/* 3. 세트 요약 */}
+            {/* 3. 세트 요약 */}{' '}
             <Section>
-              <SectionTitle>세트 요약 (선택)</SectionTitle>
+              <SectionTitle>세트 요약 (선택)</SectionTitle>{' '}
               <FormTextAreaSummary
                 placeholder='이 질문답변 세트에 대한 간단한 설명을 입력하세요'
                 {...register('summary')}
-              />
+              />{' '}
             </Section>
-
-            {/* 4. 질문답변 세트 목록 */}
+            {/* 4. 질문답변 세트 목록 (dnd-kit 적용) */}{' '}
             <Section>
               <SectionTitle>질문답변 세트</SectionTitle>
-              {/* Accordion Root로 QACreateInput 목록 감싸기 */}
-              <Accordion.Root type='multiple' /* 여러 개 열 수 있도록 multiple */>
-                <QASetListContainer>
-                  {/* DragDropContext 필요 */}
-                  {/* <DragDropContext onDragEnd={onDragEnd}> */}
-                  {/* <Droppable droppableId="qaSetsList"> */}
-                  {/* {(provided) => ( */}
-                  {/* <div {...provided.droppableProps} ref={provided.innerRef}> */}
-                  {fields.map((item, index) => (
-                    // Draggable 필요
-                    // <Draggable key={item.id} draggableId={item.id} index={index}>
-                    //   {(provided) => (
-                    //     <div ref={provided.innerRef} {...provided.draggableProps}>
-                    <QACreateInput
-                      key={item.id} // react-hook-form의 id 사용
-                      index={index}
-                      onDelete={() =>
-                        fields.length > 1
-                          ? remove(index)
-                          : alert('최소 1개의 질문 세트가 필요합니다.')
-                      }
-                      // dragHandleProps={provided.dragHandleProps} // DnD 핸들 props 전달
-                    />
-                    //     </div>
-                    //   )}
-                    // </Draggable>
-                  ))}
-                  {/* {provided.placeholder} */}
-                  {/* </div> */}
-                  {/* )} */}
-                  {/* </Droppable> */}
-                  {/* </DragDropContext> */}
-                </QASetListContainer>
-              </Accordion.Root>
-
+              {/* 💡 DragDropContext 대신 DndContext 사용 */}{' '}
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={onDragEnd}
+              >
+                {/* 💡 Droppable 대신 SortableContext 사용 */}
+                <SortableContext
+                  items={fields.map((field) => field.id)} // 💡 고유 ID 배열 전달
+                  strategy={verticalListSortingStrategy}
+                >
+                  {' '}
+                  <Accordion.Root type='multiple'>
+                    {' '}
+                    <QASetListContainer>
+                      {' '}
+                      {fields.map((item, index) => (
+                        // 💡 Draggable 대신 QACreateInput이 useSortable 훅을 사용
+                        <QACreateInput
+                          key={item.id}
+                          id={item.id} // 💡 dnd-kit에 ID 전달
+                          index={index}
+                          onDelete={() =>
+                            fields.length > 1
+                              ? remove(index)
+                              : alert('최소 1개의 질문 세트가 필요합니다.')
+                          }
+                        />
+                      ))}{' '}
+                    </QASetListContainer>{' '}
+                  </Accordion.Root>
+                </SortableContext>
+              </DndContext>{' '}
               <AddSetButton type='button' onClick={() => append({ question: '', answer: '' })}>
-                <PlusIcon width={30} height={30} />
-              </AddSetButton>
+                <PlusIcon width={30} height={30} />{' '}
+              </AddSetButton>{' '}
             </Section>
-
             {/* 5. 공개 설정 및 저장 */}
             <FormFooter>
               <CheckboxLabel htmlFor='status-public'>
@@ -295,9 +294,7 @@ export default function QACreatePage() {
                 </CheckboxRoot>
                 비공개
               </CheckboxLabel>
-              {/* 숨겨진 input으로 status 값 전달 */}
               <input type='hidden' {...register('status')} />
-
               <SubmitButton type='submit' disabled={isSubmitting}>
                 {isSubmitting ? '저장 중...' : '저장'}
               </SubmitButton>
