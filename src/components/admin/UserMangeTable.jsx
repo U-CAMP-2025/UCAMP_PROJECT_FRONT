@@ -1,8 +1,9 @@
+import { fetchGetAllUser, patchUserPass } from '@api/adminAPIS';
 import CertificateDialog from '@components/admin/CertificateDialog';
 import DataTable, { Pill } from '@components/common/DataTable';
 import Typography from '@components/common/Typography';
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 const Segmented = styled(ToggleGroup.Root)`
@@ -29,84 +30,7 @@ const SegmentItem = styled(ToggleGroup.Item)`
 
 // TODO: 합격 상태 변경 시 API 호출
 export const UserManageTable = () => {
-  const [rows, setRows] = useState([
-    {
-      id: 'u1',
-      nickName: '홍길동',
-      email: 'abc@kakao.com',
-      job: '프론트엔드',
-      passStatus: '합격자', // or '미합격'
-      status: '활성', // or '비활성'
-      createdAt: '2025-10-25',
-      role: 'User',
-      simulationStatus: '완료', // or '진행중'
-      certficate: {
-        certe_req_date: '2025-10-27',
-        certe_trmt_date: '2025-10-28',
-        certe_status: null, // or '거부완료', '확인필요'
-      },
-      simulation: {
-        completedAt: '2025-10-26 14:00',
-      },
-    },
-    {
-      id: 'u2',
-      nickName: '김길동',
-      email: 'def@kakao.com',
-      job: '백엔드',
-      passStatus: '미합격',
-      status: '비활성',
-      createdAt: '2025-10-20',
-      role: 'Admin',
-      simulationStatus: '진행중',
-      certficate: {
-        certe_req_date: '2025-10-21',
-        certe_trmt_date: '',
-        certe_status: 'PENDING',
-      },
-      simulation: {
-        completedAt: '',
-      },
-    },
-    {
-      id: 'u3',
-      nickName: '김길동',
-      email: 'def@kakao.com',
-      job: '백엔드',
-      passStatus: '미합격',
-      status: '비활성',
-      createdAt: '2025-10-20',
-      role: 'Admin',
-      simulationStatus: '진행중',
-      certficate: {
-        certe_req_date: '2025-10-21',
-        certe_trmt_date: '',
-        certe_status: 'REJECTED',
-      },
-      simulation: {
-        completedAt: '',
-      },
-    },
-    {
-      id: 'u4',
-      nickName: '김길동',
-      email: 'def@kakao.com',
-      job: '백엔드',
-      passStatus: '미합격',
-      status: '비활성',
-      createdAt: '2025-10-20',
-      role: 'Admin',
-      simulationStatus: '진행중',
-      certficate: {
-        certe_req_date: '2025-10-21',
-        certe_trmt_date: '',
-        certe_status: 'APPROVED',
-      },
-      simulation: {
-        completedAt: '',
-      },
-    },
-  ]);
+  const [rows, setRows] = useState([]);
 
   const [open, setOpen] = useState(false);
   const [target, setTarget] = useState(null);
@@ -118,6 +42,49 @@ export const UserManageTable = () => {
     if (filter === 'others') return r.certficate?.certe_status !== 'PENDING';
     return true; // all
   });
+
+  // 1️⃣ 데이터 요청
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const data = await fetchGetAllUser();
+
+        // 2️⃣ 데이터 매핑
+        const mapped = data.map((user, index) => ({
+          id: user.userId,
+          userId: user.userId, // PATCH에 쓸 진짜 아이디
+          nickName: user.nickname,
+          email: user.email,
+          job: user.jobName,
+          passStatus: user.passStatus === 'PASS' ? '합격자' : '구직자',
+          status: '활성', // 백엔드에 없다면 기본값 지정
+          createdAt: user.createdAt?.slice(0, 10) || '-',
+          role: user.role === 'ADMIN' ? 'Admin' : 'User',
+          simulationStatus:
+            user.simulationStatus === 'SUCCESS'
+              ? '완료'
+              : user.simulationStatus === 'INPROGRESS'
+                ? '진행중'
+                : '-',
+          simulation: {
+            completedAt: user.simulationCompletedAt
+              ? user.simulationCompletedAt.replace('T', ' ').slice(0, 16)
+              : null,
+          },
+          certficate: {
+            certe_req_date: user.certReqDate?.slice(0, 10) || '-',
+            certe_trmt_date: user.certTrmtDate?.slice(0, 10) || '-',
+            certe_status: user.certStatus || null, // PENDING / APPROVED / REJECTED 등
+          },
+        }));
+
+        setRows(mapped);
+      } catch (e) {
+        console.error('유저 데이터 로드 실패:', e);
+      }
+    };
+    loadData();
+  }, []);
 
   const renderCertStatus = (certe_status, row) => {
     if (!certe_status) return '-';
@@ -209,24 +176,38 @@ export const UserManageTable = () => {
         open={open}
         onOpenChange={setOpen}
         user={target}
-        onConfirm={(decision) => {
+        onConfirm={async (decision) => {
           if (!target) return;
-          setRows((prev) =>
-            prev.map((r) =>
-              r.id === target.id
-                ? {
-                    ...r,
-                    certficate: {
-                      ...r.certficate,
-                      certe_status: decision,
-                      certe_trmt_date: new Date().toISOString().slice(0, 10),
-                    },
-                  }
-                : r,
-            ),
-          );
-          setOpen(false);
-          setTarget(null);
+
+          try {
+            // 1️⃣ 백엔드로 PATCH 요청
+            await patchUserPass({
+              userId: target.userId, // target에 userId가 포함되어 있어야 함
+              passStatus: decision === 'APPROVED' ? 'APPROVED' : 'REJECTED',
+            });
+
+            // 2️⃣ 프론트 상태 업데이트
+            setRows((prev) =>
+              prev.map((r) =>
+                r.id === target.id
+                  ? {
+                      ...r,
+                      certficate: {
+                        ...r.certficate,
+                        certe_status: decision,
+                        certe_trmt_date: new Date().toISOString().slice(0, 10),
+                      },
+                    }
+                  : r,
+              ),
+            );
+
+            setOpen(false);
+            setTarget(null);
+          } catch (e) {
+            console.error('합격 상태 변경 실패:', e);
+            alert('합격 상태 변경 중 오류가 발생했습니다.');
+          }
         }}
       />
 
