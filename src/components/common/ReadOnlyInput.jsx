@@ -3,8 +3,9 @@ import styled from 'styled-components';
 const ReadonlyInput = styled.div`
   height: 48px;
   border: 1px solid ${({ theme }) => theme.colors.gray[7]};
+  font-size: ${({ theme }) => theme.font.size[2]};
   font-weight: ${({ theme }) => theme.font.weight.semiBold};
-  border-radius: ${({ theme }) => theme.radius.lg};
+  border-radius: ${({ theme }) => theme.radius.md};
   display: flex;
   align-items: center;
   padding: 0 ${({ theme }) => theme.space[4]};

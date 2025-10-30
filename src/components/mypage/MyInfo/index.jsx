@@ -4,6 +4,7 @@ import Button from '@components/common/Button';
 import ReadonlyInput from '@components/common/ReadOnlyInput';
 import SearchableSelect from '@components/common/SearchableSelect';
 import Typography from '@components/common/Typography';
+import theme from '@styles/theme';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
@@ -88,7 +89,13 @@ const MyInfo = () => {
                   options={jobs}
                   placeholder='직무 선택'
                 />
-                <Button variant='outline' onClick={() => setEditingJob(false)}>
+                <Button
+                  variant='outline'
+                  onClick={() => setEditingJob(false)}
+                  style={{
+                    fontSize: theme.font.size[2],
+                  }}
+                >
                   완료
                 </Button>
               </div>
@@ -177,7 +184,7 @@ const Footer = styled.div`
 `;
 
 const pillStyle = {
-  borderRadius: '999px',
+  borderRadius: '10px',
   background: 'rgba(170,153,236,0.3)',
   padding: '0 12px',
   height: '32px',

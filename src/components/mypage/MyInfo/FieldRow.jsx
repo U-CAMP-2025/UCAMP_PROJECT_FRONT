@@ -29,7 +29,7 @@ export const FieldRight = styled.div`
 
 export const FieldLabel = (props) => <Typography size={3} weight='semiBold' {...props} />;
 
-export const FieldValue = (props) => <Typography as='div' size={3} {...props} />;
+export const FieldValue = (props) => <Typography as='div' size={2} weight='semiBold' {...props} />;
 
 export const FieldActions = styled.div`
   display: flex;
