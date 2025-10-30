@@ -1,6 +1,7 @@
 import Button from '@components/common/Button';
 import Typography from '@components/common/Typography';
 import NotificationDrawer from '@components/notification/NotificationDrawer';
+import { KakaoLoginDialog } from '@components/signup/KakaoLoginDialog';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { ChevronDownIcon, PersonIcon, BellIcon } from '@radix-ui/react-icons';
 import theme from '@styles/theme';
@@ -63,17 +64,14 @@ export const Header = () => {
   ]);
   const unreadDerived = notifications.filter((n) => !n.read).length;
 
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+
   const handleClickLogoButton = () => {
     navigate('/');
   };
 
   const handleClickLoginButton = () => {
-    // TODO: 카카오 로그인으로 이동
-    login({
-      name: '유저 닉네임',
-      email: 'user@email.com',
-      profileImageUrl: '',
-    });
+    setLoginDialogOpen(true);
   };
 
   const handleClickLogout = () => {
@@ -160,9 +158,12 @@ export const Header = () => {
             />
           </>
         ) : (
-          <Button size='sm' onClick={handleClickLoginButton}>
-            로그인
-          </Button>
+          <>
+            <Button size='sm' onClick={handleClickLoginButton}>
+              로그인
+            </Button>
+            <KakaoLoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
+          </>
         )}
       </RightSection>
     </HeaderContainer>
