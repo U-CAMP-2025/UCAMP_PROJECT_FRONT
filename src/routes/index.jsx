@@ -16,7 +16,7 @@ const AppRoutes = () => {
     <BrowserRouter>
       <Routes>
         <Route path='/' element={<LandingPage />} />
-        <Route path='/signup' element={<SignupPage />} />
+        <Route path='/auth/signup' element={<SignupPage />} />
         <Route path='/test' element={<TestPage />} />
         <Route path='*' element={<NotFoundPage />} />
         <Route path='/mypage' element={<MyPage />} />

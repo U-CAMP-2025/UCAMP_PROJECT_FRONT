@@ -1,3 +1,4 @@
+import { postSignUp } from '@api/authAPIS';
 import SearchableSelect from '@components/common/SearchableSelect';
 import Typography from '@components/common/Typography';
 import theme from '@styles/theme';
@@ -29,10 +30,12 @@ export const SignupForm = ({
     mode: 'onBlur',
   });
 
-  const onSubmit = (data) => {
-    // data: { nickname, email, jobId }
-    if (onSubmitForm) return onSubmitForm(data);
-    console.log('signup submit:', data);
+  const onSubmit = async (data) => {
+    const { nickname, jobId } = data;
+    if (onSubmitForm) {
+      return await onSubmitForm(data);
+    }
+    return await postSignUp(nickname, jobId);
   };
 
   return (

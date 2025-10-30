@@ -24,7 +24,7 @@ export const KakaoLoginDialog = ({ open, onOpenChange }) => {
               type='button'
               onClick={() => {
                 window.location.href =
-                  import.meta.env.VITE_API_KAKAO_LOGIN || 'http://localhost:8080/api/auth/kakao';
+                  import.meta.env.VITE_API_KAKAO_LOGIN || 'http://localhost:8080/auth/kakao/login';
               }}
             >
               <img src='/images/kakao_login.png' alt='카카오 로그인' />

@@ -4,7 +4,7 @@ import axiosInstance from './axios';
  * POST: 회원가입
  */
 export const postSignUp = async (nickname, jobId) => {
-  const { data } = await axiosInstance.post('/api/auth/signup', {
+  const { data } = await axiosInstance.post('/auth/signup', {
     nickname,
     jobId,
   });
