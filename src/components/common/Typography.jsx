@@ -48,14 +48,19 @@ const scale = {
   `,
 };
 
-const Text = styled.p.withConfig({
-  shouldForwardProp: (prop) => !['size', 'weight', 'muted'].includes(prop),
+const Typography = styled.p.withConfig({
+  shouldForwardProp: (prop) => !['size', 'weight', 'muted', 'color'].includes(prop),
 })`
   margin: 0;
-  color: ${({ muted, theme }) => (muted ? theme.colors.textMuted : theme.colors.gray[12])};
+  color: ${({ color, muted, theme }) =>
+    color
+      ? theme.colors[color.split('.')[0]]?.[color.split('.')[1]] || color // theme 색상 or hex값
+      : muted
+        ? theme.colors.gray[3]
+        : theme.colors.gray[12]};
   ${({ size }) => scale[size || 'md']}
   font-weight: ${({ weight, theme }) =>
     weight ? theme.font.weight[weight] : theme.font.weight.regular};
 `;
 
-export default Text;
+export default Typography;
