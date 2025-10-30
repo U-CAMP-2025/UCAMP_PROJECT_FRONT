@@ -23,7 +23,9 @@ export const KakaoLoginDialog = ({ open, onOpenChange }) => {
             <KakaoButton
               type='button'
               onClick={() => {
-                window.location.href = 'https://kauth.kakao.com/oauth/authorize?...'; // TODO: 실제 카카오 로그인 URL로 교체
+                window.location.href = import.meta.env.VITE_API_BASE_URL
+                  ? `${import.meta.env.VITE_API_BASE_URL}/auth/kakao/login`
+                  : 'http://localhost:8080/auth/kakao/login';
               }}
             >
               <img src='/images/kakao_login.png' alt='카카오 로그인' />
