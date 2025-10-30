@@ -92,7 +92,7 @@ export default function SearchableSelect({
     >
       <Popover.Trigger asChild>
         <Trigger aria-haspopup='listbox' aria-expanded={open}>
-          <Typography as='span' size={3}>
+          <Typography as='span' size={2}>
             {currentLabel || placeholder}
           </Typography>
           <span>▾</span>
@@ -123,7 +123,7 @@ export default function SearchableSelect({
                   setQ('');
                 }}
               >
-                <Typography as='span' size={3}>
+                <Typography as='span' size={2}>
                   {opt.name}
                 </Typography>
               </Item>

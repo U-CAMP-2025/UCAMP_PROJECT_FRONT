@@ -4,6 +4,7 @@ import MyPage from '@pages/MyPage';
 import MyQAPage from '@pages/MyQA';
 import NotFoundPage from '@pages/NotFound';
 import QAListPage from '@pages/QAList';
+import SignupPage from '@pages/Signup';
 import TestPage from '@pages/Test';
 import RegistPage from '@pages/Users/RegistPage';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
@@ -13,6 +14,7 @@ const AppRoutes = () => {
     <BrowserRouter>
       <Routes>
         <Route path='/' element={<LandingPage />} />
+        <Route path='/signup' element={<SignupPage />} />
         <Route path='/test' element={<TestPage />} />
         <Route path='/admin' element={<RegistPage />} />
         <Route path='*' element={<NotFoundPage />} />
