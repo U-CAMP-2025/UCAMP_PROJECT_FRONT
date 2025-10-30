@@ -16,8 +16,8 @@ export const PageContainer = ({ children, header, footer }) => {
 const PageContainerWrapper = styled.div``;
 
 const ChildrenWrapper = styled.div`
-  width: 100vw;
-  display: flex;
-  justify-content: center;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 50px 0;
 `;
