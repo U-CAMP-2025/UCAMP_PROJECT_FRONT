@@ -9,19 +9,19 @@ import * as Tabs from '@radix-ui/react-tabs';
 import React from 'react';
 import { useForm, FormProvider, Controller } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import styled, { css, keyframes } from 'styled-components';
+import styled from 'styled-components';
 
 // --- [스타일 정의] ---
 
 const MainContentWrapper = styled.div`
-  max-width: 1200px;
+  width: 800px;
   margin: 0 auto;
   padding: ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[6]};
   min-height: 80vh;
 `;
 
 const PresetForm = styled.form`
-  max-width: 800px;
+  // max-width: 800px;
   margin: 0 auto;
 `;
 
@@ -134,7 +134,6 @@ const StyledSelectTrigger = styled(Select.Trigger)`
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
-  width: 100%;
   padding: ${({ theme }) => theme.space[4]}; /* 16px */
   font-size: ${({ theme }) => theme.font.size[3]};
   color: ${({ theme }) => theme.colors.gray[12]};
