@@ -10,7 +10,7 @@ import styled from 'styled-components';
  *  - onOpenChange: (open:boolean)=>void
  *  - items: Array<{ notiId:number|string, content:string, type:'TRANSCRIPTION'|'REVIEW'|'CERTIFICATE'|string, read:boolean, createdAt:string }>
  *  - onItemClick?: (item) => void
- *  - onMarkAllRead?: () => void
+ *  - onMarkAllRead?: () => void1
  */
 const sse = new EventSource('http://localhost:8080/api/notifications/sse');
 

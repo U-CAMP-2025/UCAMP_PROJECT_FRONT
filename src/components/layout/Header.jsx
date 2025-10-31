@@ -69,7 +69,7 @@ export const Header = () => {
   };
 
   const handleClickLoginButton = () => {
-    // TODO: 카카오 로그인으로 이동
+    // TODO: 카카오 로그인으로 이동d
     login({
       name: '유저 닉네임',
       email: 'user@email.com',

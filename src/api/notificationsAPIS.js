@@ -38,7 +38,6 @@ export const notiDel = async (notiId) => {
   const { data } = await axiosInstance.delete(`/notifications/${notiId}`);
   return data;
 };
-
 /**
  * DELETE: 전체 알람 삭제
  * @returns {Promise<Object>} response
