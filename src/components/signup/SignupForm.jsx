@@ -1,4 +1,4 @@
-import { postSignUp } from '@api/authAPIS';
+import { postSignUp, getCheckNickname } from '@api/authAPIS';
 import SearchableSelect from '@components/common/SearchableSelect';
 import Typography from '@components/common/Typography';
 import { useAuthStore } from '@store/auth/useAuthStore';
@@ -61,7 +61,21 @@ export const SignupForm = () => {
           {...register('nickname', {
             required: '닉네임을 입력해주세요',
             minLength: { value: 2, message: '닉네임은 2자 이상이어야 합니다' },
-            maxLength: { value: 20, message: '닉네임은 20자 이하로 입력해주세요' },
+            maxLength: { value: 10, message: '닉네임은 10자 이하로 입력해주세요' },
+            pattern: {
+              value: /^[A-Za-z0-9가-힣_]{2,10}$/,
+              message: '한글/영문/숫자/밑줄만 사용할 수 있습니다',
+            },
+            validate: async (value) => {
+              const v = (value ?? '').trim();
+              if (!v) return '닉네임을 입력해주세요';
+              try {
+                const res = await getCheckNickname(v);
+                return res.available || '이미 사용 중인 닉네임입니다';
+              } catch (e) {
+                return '닉네임 확인 중 오류가 발생했습니다';
+              }
+            },
           })}
         />
         {errors.nickname && <ErrorText>{errors.nickname.message}</ErrorText>}

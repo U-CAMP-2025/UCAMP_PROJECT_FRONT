@@ -25,3 +25,16 @@ export const postTokenRefresh = async () => {
 export const postLogout = async () => {
   await axiosInstance.post('/auth/logout', {});
 };
+
+/**
+ * GET: 닉네임 중복 체크
+ */
+export const getCheckNickname = async (nickname, excludeUserId) => {
+  const params = new URLSearchParams();
+  params.set('nickname', nickname);
+  if (excludeUserId !== undefined && excludeUserId !== null) {
+    params.set('excludeUserId', String(excludeUserId));
+  }
+  const { data } = await axiosInstance.get(`/auth/nickname/check?${params.toString()}`);
+  return data;
+};
