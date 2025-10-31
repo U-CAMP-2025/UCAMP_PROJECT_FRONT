@@ -13,7 +13,7 @@ const SimulationPage = () => {
       <Routes>
         <Route index='true' element={<SimulationStart />} />
         {/* <Route path='/record' element={<SimulationGO />} /> */}
-        <Route path='/:simulationId' element={<SimulationGO />} />
+        <Route path='/:simulationId/start' element={<SimulationGO />} />
       </Routes>
     </PageContainer>
   );

@@ -323,7 +323,7 @@ export default function SimulationPresetPage() {
       const simulationId = resp?.data?.data?.simulationId;
       if (simulationId) {
         console.log(simulationId);
-        navigate(`/simulation/${simulationId}`);
+        navigate(`/simulation/${simulationId}/start`);
       } else {
         console.warn('simulationId가 응답에 없습니다.', resp?.data);
       }

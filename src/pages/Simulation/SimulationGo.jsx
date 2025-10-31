@@ -34,7 +34,7 @@ export default function SimulationGO() {
     let cancelled = false;
     (async () => {
       try {
-        const resp = await axiosInstance.get(`/simulation/${simulationId}`);
+        const resp = await axiosInstance.get(`/simulation/${simulationId}/start`);
         const data = resp.data?.data;
         if (!data) return;
 
@@ -242,6 +242,7 @@ export default function SimulationGO() {
             ref={audioRef}
             maxSeconds={MAX_SECONDS}
             onSaved={handleSavedAudio}
+            simulationId={simulationId}
             onTick={handleTick}
             onRecordingChange={handleRecordingChange}
             onAutoFinish={handleAutoFinish}

@@ -27,7 +27,7 @@ const AppRoutes = () => {
         <Route path='/myqa' element={<MyQAPage />} />
         <Route path='/qa/create' element={<QACreatePage />} />
         <Route path='/simulation' element={<SimulationPage />} />
-        <Route path='/simulation/:simulationId' element={<SimulationGO />} />
+        <Route path='/simulation/:simulationId/start' element={<SimulationGO />} />
         <Route path='/admin/user' element={<AdminPage />} />
         <Route path='/admin/transcription' element={<AdminPage />} />
         <Route path='/login/bridge' element={<LoginBridge />} />

@@ -51,7 +51,7 @@ const SimulationStart = () => {
         interviewer: { interviewerId: Number(interviewer) },
       })
       .then((resp) => {
-        navigate(`/simulation/${resp.data.data.simulationId}`);
+        navigate(`/simulation/${resp.data.data.simulationId}/start`);
         console.log(resp);
       })
       .catch();
