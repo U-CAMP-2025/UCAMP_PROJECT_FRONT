@@ -5,12 +5,12 @@ const TextToSpeech = ({ voiceModel, currentQuestion, enabled = false }) => {
   const stopRef = useRef(false);
 
   useEffect(() => {
-    if (!currentQuestion || !voiceModel) return;
+    if (!enabled || !currentQuestion || !voiceModel) return;
 
-    if (stopRef.current === false) {
-      stopRef.current = true;
-      return;
-    }
+    // if (stopRef.current === false) {
+    //   stopRef.current = true;
+    //   return;
+    // }
 
     const fetchAudio = async () => {
       try {

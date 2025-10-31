@@ -48,7 +48,7 @@ const SimulationStart = () => {
       .post('/simulation', {
         simulationRandom: order,
         post: { postId: questionSet },
-        interviewer: { interviewerId: interviewer },
+        interviewer: { interviewerId: Number(interviewer) },
       })
       .then((resp) => {
         navigate(`/simulation/${resp.data.data.simulationId}`);

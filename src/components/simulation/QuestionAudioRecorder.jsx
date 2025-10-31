@@ -4,9 +4,10 @@ import RecordRTC, { RecordRTCPromisesHandler } from 'recordrtc';
 const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
   {
     maxSeconds = 60,
-    onSaved, // (url, questionIdx) => void
+    onSaved, // (url, qIdx) => void
     onTick, // (timeLeft) => void
     onRecordingChange, // (isRecording) => void
+    onAutoFinish, // (qIdx, url) => void
   },
   ref,
 ) {
@@ -20,13 +21,11 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
   const [currentIdx, setCurrentIdx] = useState(null);
 
   useImperativeHandle(ref, () => ({
-    // 질문 인덱스를 넘겨 시작
     start: async (questionIdx) => {
       if (isRecording) return;
       finishingRef.current = false;
       setCurrentIdx(questionIdx);
 
-      // 오디오 전용 스트림
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
       streamRef.current = stream;
 
@@ -44,7 +43,7 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
       onRecordingChange?.(true);
       onTick?.(maxSeconds);
 
-      // 1초 카운트다운
+      // 카운트다운
       timerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
           const next = prev - 1;
@@ -57,26 +56,17 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
         });
       }, 1000);
 
-      // 단발 타임아웃
-      timeoutRef.current = setTimeout(() => {
-        api.finish(); // 시간이 끝나면 자동 완료
+      // ★ 타임아웃: qIdx를 finish 전에 캡처
+      timeoutRef.current = setTimeout(async () => {
+        const qIdx = currentIdx; // <- 캡처!
+        const { url } = await api.finish(); // 저장 수행
+        if (qIdx != null && url) onAutoFinish?.(qIdx, url);
       }, maxSeconds * 1000);
     },
 
-    stop: async () => {
-      // 강제 중단(저장O)
-      await safeStop(false);
-    },
-
-    finish: async () => {
-      // 정상 완료(저장O)
-      await safeStop(false);
-    },
-
-    cancel: async () => {
-      // 취소(저장X)
-      await safeStop(true);
-    },
+    stop: async () => await safeStop(false),
+    finish: async () => await safeStop(false),
+    cancel: async () => await safeStop(true),
   }));
 
   const api = {
@@ -101,19 +91,24 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
     }
   };
 
+  // ★ 반환값을 { url, qIdx }로 변경
   async function safeStop(silent = false) {
-    if (finishingRef.current) return;
+    if (finishingRef.current) return { url: null, qIdx: null };
     finishingRef.current = true;
 
     cleanupTimers();
+
+    let url = null;
+    // ★ 현재 인덱스를 먼저 보관
+    const qIdx = currentIdx;
 
     try {
       if (recRef.current) {
         await recRef.current.stopRecording();
         const blob = await recRef.current.getBlob();
-        if (!silent && currentIdx != null) {
-          const url = URL.createObjectURL(blob);
-          onSaved?.(url, currentIdx);
+        if (!silent && qIdx != null) {
+          url = URL.createObjectURL(blob);
+          onSaved?.(url, qIdx);
         }
         recRef.current.reset();
         recRef.current.destroy();
@@ -125,8 +120,10 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
       cleanupStream();
       setIsRecording(false);
       onRecordingChange?.(false);
-      setCurrentIdx(null);
+      setCurrentIdx(null); // ← 이제 리셋해도 됨(이미 qIdx 보관)
     }
+
+    return { url, qIdx };
   }
 
   useEffect(() => {
@@ -136,7 +133,7 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
     };
   }, []);
 
-  return null; // UI는 부모에서 처리(타이머 등), 필요하면 표시용 요소를 넣어도 됨
+  return null;
 });
 
 export default QuestionAudioRecorder;
