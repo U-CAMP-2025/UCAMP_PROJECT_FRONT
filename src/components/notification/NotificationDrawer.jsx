@@ -12,6 +12,12 @@ import styled from 'styled-components';
  *  - onItemClick?: (item) => void
  *  - onMarkAllRead?: () => void
  */
+const sse = new EventSource('http://localhost:8080/api/notifications/sse');
+
+sse.addEventListener('message', (event) => {
+  console.log(event);
+});
+
 export default function NotificationDrawer({
   open,
   onOpenChange,
