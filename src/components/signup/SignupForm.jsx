@@ -12,8 +12,6 @@ import styled from 'styled-components';
  *  - jobOptions?: { jobId:number, name:string }[]
  *  - onSubmitForm?: (data:{ nickname:string; email:string; jobId:number }) => void
  */
-
-// TODO: 닉네임 중복체크 API 연결
 export const SignupForm = () => {
   const {
     register,
