@@ -1,5 +1,6 @@
+import { fetchJobList } from '@api/jobAPIS';
 import * as Popover from '@radix-ui/react-popover';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import Typography from './Typography';
@@ -67,20 +68,26 @@ const Item = styled.button`
 export default function SearchableSelect({
   value, // number (jobId)
   onChange,
-  options, // [{ jobId, name }]
   placeholder = '선택하세요',
 }) {
+  const [options, setOptions] = useState([]);
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
   const inputRef = useRef(null);
 
+  useEffect(() => {
+    fetchJobList().then((data) => {
+      setOptions(data);
+    });
+  }, []);
+
   const filtered = useMemo(() => {
     if (!q) return options;
     const s = q.toLowerCase();
-    return options.filter((o) => o.name.toLowerCase().includes(s));
+    return options?.filter((o) => o.jobName.toLowerCase().includes(s));
   }, [options, q]);
 
-  const currentLabel = options.find((o) => o.jobId === value)?.name;
+  const currentLabel = options?.find((o) => o.jobId === value)?.jobName;
 
   return (
     <Popover.Root
@@ -124,7 +131,7 @@ export default function SearchableSelect({
                 }}
               >
                 <Typography as='span' size={2}>
-                  {opt.name}
+                  {opt.jobName}
                 </Typography>
               </Item>
             ))}

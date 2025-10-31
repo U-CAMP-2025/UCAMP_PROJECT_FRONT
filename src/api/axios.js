@@ -1,7 +1,4 @@
-import { useAuthStore } from '@store/auth/authStore';
 import axios from 'axios';
-
-import { postTokenRefresh } from './authAPIS';
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
@@ -11,8 +8,8 @@ const axiosInstance = axios.create({
 // request interceptor
 // 로컬 스토리지에 accsssToken이 있다면 헤더에 추가
 axiosInstance.interceptors.request.use((config) => {
-  const { accessToken } = useAuthStore.getState();
-  if (accessToken) config.headers.Authorization = `Bearer ${accessToken}`;
+  const at = localStorage.getItem('accessToken');
+  if (at) config.headers.Authorization = `Bearer ${at}`;
   return config;
 });
 
@@ -21,43 +18,34 @@ let refreshing = null;
 // response interceptor
 axiosInstance.interceptors.response.use(
   (res) => res,
-  async (error) => {
-    const original = error.config;
+  async (err) => {
+    const original = err.config;
+    if (err.response?.status === 401 && !original._retry) {
+      original._retry = true;
+      try {
+        if (!refreshing) {
+          const rt = localStorage.getItem('refreshToken');
+          refreshing = axiosInstance.post('/auth/refresh', { refreshToken: rt });
+        }
+        const { data } = await refreshing;
+        refreshing = null;
 
-    // 이미 재시도 요청이면 그대로 실패
-    if (error?.response?.status !== 401 || original?._retry) {
-      return Promise.reject(error);
-    }
-    original._retry = true;
+        localStorage.setItem('isLogin', true);
+        localStorage.setItem('accessToken', data.accessToken);
+        localStorage.setItem('refreshToken', data.refreshToken);
 
-    try {
-      if (!refreshing) {
-        refreshing = (async () => {
-          const data = postTokenRefresh(); // refreshToken 쿠키 전송됨
-          useAuthStore.getState().setAccessToken(data.accessToken);
-          refreshing = null;
-        })().catch((e) => {
-          refreshing = null;
-          useAuthStore.getState().logoutLocal();
-          throw e;
-        });
+        original.headers.Authorization = `Bearer ${data.accessToken}`;
+        return axiosInstance(original); // 원래 요청 재시도
+      } catch (e) {
+        refreshing = null;
+        // 토큰 만료 → 로그아웃 처리
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.setItem('isLogin', false);
+        window.location.replace('/');
       }
-      await refreshing;
-      return axiosInstance(original);
-    } catch (e) {
-      return Promise.reject(e);
     }
-  },
-);
-
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // TODO: 공통 401 에러 처리(로그아웃/토큰 리프레쉬)
-      console.warn('Unauthorized');
-    }
-    return Promise.reject(error);
+    throw err;
   },
 );
 

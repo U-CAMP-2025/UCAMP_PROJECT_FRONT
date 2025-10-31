@@ -1,5 +1,6 @@
 import AdminPage from '@pages/Admin';
 import LandingPage from '@pages/Landing';
+import LoginBridge from '@pages/Login/Bridge';
 import MyPage from '@pages/MyPage';
 import MyQAPage from '@pages/MyQA';
 import QACreatePage from '@pages/MyQA/QaCreatePage';
@@ -16,7 +17,7 @@ const AppRoutes = () => {
     <BrowserRouter>
       <Routes>
         <Route path='/' element={<LandingPage />} />
-        <Route path='/auth/signup' element={<SignupPage />} />
+        <Route path='/signup' element={<SignupPage />} />
         <Route path='/test' element={<TestPage />} />
         <Route path='*' element={<NotFoundPage />} />
         <Route path='/mypage' element={<MyPage />} />
@@ -27,6 +28,7 @@ const AppRoutes = () => {
         <Route path='/simulation' element={<SimulationPage />} />
         <Route path='/admin/user' element={<AdminPage />} />
         <Route path='/admin/transcription' element={<AdminPage />} />
+        <Route path='/login/bridge' element={<LoginBridge />} />
       </Routes>
     </BrowserRouter>
   );
