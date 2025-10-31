@@ -1,5 +1,6 @@
 import AdminPage from '@pages/Admin';
 import LandingPage from '@pages/Landing';
+import LoginBridge from '@pages/Login/Bridge';
 import MyPage from '@pages/MyPage';
 import MyQAPage from '@pages/MyQA';
 import QACreatePage from '@pages/MyQA/QaCreatePage';
@@ -29,6 +30,7 @@ const AppRoutes = () => {
         <Route path='/simulation/:simulationId' element={<SimulationGO />} />
         <Route path='/admin/user' element={<AdminPage />} />
         <Route path='/admin/transcription' element={<AdminPage />} />
+        <Route path='/login/bridge' element={<LoginBridge />} />
       </Routes>
     </BrowserRouter>
   );

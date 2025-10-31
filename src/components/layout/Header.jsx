@@ -1,13 +1,15 @@
+import { getNoti, notiDel, notiDelAll, notiRead, notiReadAll } from '@api/notificationsAPIS';
 import Button from '@components/common/Button';
 import Typography from '@components/common/Typography';
 import NotificationDrawer from '@components/notification/NotificationDrawer';
+import { KakaoLoginDialog } from '@components/signup/KakaoLoginDialog';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { ChevronDownIcon, PersonIcon, BellIcon } from '@radix-ui/react-icons';
+import { useAuthStore } from '@store/auth/useAuthStore';
 import theme from '@styles/theme';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
-import { useAuthStore } from 'src/store/auth/useAuthStore';
+import { useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import {
   HeaderContainer,
@@ -26,7 +28,7 @@ import {
 } from '../common/HeaderStyles';
 
 export const Header = () => {
-  const { isLogin, user, login, logout } = useAuthStore();
+  const { isLogin, logout, user } = useAuthStore();
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
@@ -63,23 +65,29 @@ export const Header = () => {
   ]);
   const unreadDerived = notifications.filter((n) => !n.read).length;
 
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+
   const handleClickLogoButton = () => {
     navigate('/');
   };
 
   const handleClickLoginButton = () => {
-    // TODO: 카카오 로그인으로 이동
-    login({
-      name: '유저 닉네임',
-      email: 'user@email.com',
-      profileImageUrl: '',
-    });
+    setLoginDialogOpen(true);
   };
 
   const handleClickLogout = () => {
     logout();
     navigate('/');
   };
+
+  useEffect(() => {
+    getNoti()
+      .then((response) => {
+        console.log(response);
+        setNotifications(response?.data ?? null);
+      })
+      .catch(() => setNotifications(null));
+  }, []);
 
   return (
     <HeaderContainer>
@@ -150,19 +158,46 @@ export const Header = () => {
               items={notifications}
               onItemClick={(item) => {
                 // 예시: 클릭 시 읽음 처리
-                setNotifications((prev) =>
-                  prev.map((n) => (n.notiId === item.notiId ? { ...n, read: true } : n)),
-                );
+                if (!item.read) {
+                  notiRead(item.notiId)
+                    .then((response) => {
+                      setNotifications((prev) =>
+                        prev.map((n) => (n.notiId === item.notiId ? { ...n, read: true } : n)),
+                      );
+                    })
+                    .catch(() => setNotifications(null));
+                } else {
+                  notiDel(item.notiId)
+                    .then((response) => {
+                      setNotifications((prev) => prev.filter((n) => n.notiId !== item.notiId));
+                    })
+                    .catch(() => setNotifications(null));
+                }
               }}
-              onMarkAllRead={() =>
-                setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
-              }
+              onMarkAllRead={() => {
+                if (unreadDerived !== 0) {
+                  notiReadAll()
+                    .then((response) => {
+                      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+                    })
+                    .catch(() => setNotifications(null));
+                } else {
+                  notiDelAll()
+                    .then((response) => {
+                      setNotifications([]);
+                    })
+                    .catch(() => setNotifications(null));
+                }
+              }}
             />
           </>
         ) : (
-          <Button size='sm' onClick={handleClickLoginButton}>
-            로그인
-          </Button>
+          <>
+            <Button size='sm' onClick={handleClickLoginButton}>
+              로그인
+            </Button>
+            <KakaoLoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
+          </>
         )}
       </RightSection>
     </HeaderContainer>
