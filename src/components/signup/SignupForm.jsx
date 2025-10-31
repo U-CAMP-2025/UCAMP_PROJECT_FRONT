@@ -1,7 +1,10 @@
+import { postSignUp } from '@api/authAPIS';
 import SearchableSelect from '@components/common/SearchableSelect';
 import Typography from '@components/common/Typography';
+import { useAuthStore } from '@store/auth/useAuthStore';
 import theme from '@styles/theme';
 import { useForm, Controller } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 /**
@@ -10,15 +13,8 @@ import styled from 'styled-components';
  *  - onSubmitForm?: (data:{ nickname:string; email:string; jobId:number }) => void
  */
 
-// TODO: 이메일 자동으로 입력, 닉네임 중복체크 API 연결, 관심 직무 API 연결, 회원가입 API 연결
-export const SignupForm = ({
-  jobOptions = [
-    { jobId: 1, name: '프론트엔드 개발자' },
-    { jobId: 2, name: '백엔드 개발자' },
-    { jobId: 3, name: '풀스택 개발자' },
-  ],
-  onSubmitForm,
-}) => {
+// TODO: 닉네임 중복체크 API 연결
+export const SignupForm = () => {
   const {
     register,
     handleSubmit,
@@ -28,15 +24,24 @@ export const SignupForm = ({
     defaultValues: { nickname: '', email: '', jobId: undefined },
     mode: 'onBlur',
   });
+  const navigate = useNavigate();
+  const { login } = useAuthStore();
 
-  const onSubmit = (data) => {
-    // data: { nickname, email, jobId }
-    if (onSubmitForm) return onSubmitForm(data);
-    console.log('signup submit:', data);
+  const handleSubmitForm = (data) => {
+    const { nickname, jobId } = data;
+    postSignUp(nickname, jobId).then((response) => {
+      localStorage.setItem('accessToken', response.accessToken);
+      localStorage.setItem('refreshToken', response.refreshToken);
+      login({
+        name: response.nickname,
+        profileImageUrl: response.profileImageUrl,
+      });
+      navigate('/', { replace: true });
+    });
   };
 
   return (
-    <Form onSubmit={handleSubmit(onSubmit)}>
+    <Form onSubmit={handleSubmit(handleSubmitForm)}>
       <Header>
         <Typography size={7} weight='bold' style={{ color: theme.colors.primary[10] }}>
           면접톡
@@ -62,20 +67,6 @@ export const SignupForm = ({
         {errors.nickname && <ErrorText>{errors.nickname.message}</ErrorText>}
       </Field>
 
-      {/* 이메일 */}
-      <Field>
-        <Label htmlFor='email'>이메일</Label>
-        <Input
-          id='email'
-          type='email'
-          placeholder='가져온 이메일'
-          autoComplete='email'
-          disabled
-          {...register('email')}
-        />
-        {errors.email && <ErrorText>{errors.email.message}</ErrorText>}
-      </Field>
-
       {/* 관심 직무 */}
       <Field>
         <Label>관심 직무</Label>
@@ -87,7 +78,6 @@ export const SignupForm = ({
             <SearchableSelect
               value={value}
               onChange={onChange}
-              options={jobOptions}
               placeholder='관심 직무를 선택하세요'
             />
           )}

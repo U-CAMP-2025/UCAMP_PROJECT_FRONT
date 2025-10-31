@@ -11,7 +11,8 @@
       "@styles/*": ["src/styles/*"],
       "@api/*": ["src/api/*"],
       "@assets/*": ["src/assets/*"],
-      "@routes/*": ["src/routes/*"]
+      "@routes/*": ["src/routes/*"],
+      "@store/*": ["src/store/*"]
     },
     "typeRoots": ["./node_modules/@types", "./src/types"],
     "moduleResolution": "bundler",
