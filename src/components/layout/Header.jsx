@@ -8,6 +8,7 @@ import { ChevronDownIcon, PersonIcon, BellIcon } from '@radix-ui/react-icons';
 import { useAuthStore } from '@store/auth/useAuthStore';
 import theme from '@styles/theme';
 import { useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import {
