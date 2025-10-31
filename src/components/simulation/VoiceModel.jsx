@@ -18,7 +18,7 @@ const VoiceModel = [
     },
   },
   {
-    voiceId: 'WzMnDIgiICcj1oXbUBO0',
+    voiceId: 'WzMnDIgiICcj1oXbUBO0', // 남
     voice_settings: {
       stability: 0.2, // 감정 다양
       similarity_boost: 0.6, // 약간 거칠고 강한 느낌
@@ -27,7 +27,7 @@ const VoiceModel = [
     },
   },
   {
-    voiceId: 'ksaI0TCD9BstzEzlxj4q',
+    voiceId: 'ksaI0TCD9BstzEzlxj4q', // 여
     voice_settings: {
       stability: 0.3, // 밝고 감정 표현 있음
       similarity_boost: 0.8, // 자연스럽고 친근한 톤
@@ -36,7 +36,7 @@ const VoiceModel = [
     },
   },
   {
-    voiceId: 'WzMnDIgiICcj1oXbUBO0',
+    voiceId: 'WzMnDIgiICcj1oXbUBO0', // 남
     voice_settings: {
       stability: 0.8, // 일정하고 단호
       similarity_boost: 0.9, // 음색 명료
@@ -45,7 +45,7 @@ const VoiceModel = [
     },
   },
   {
-    voiceId: 'ksaI0TCD9BstzEzlxj4q',
+    voiceId: 'ksaI0TCD9BstzEzlxj4q', // 여
     voice_settings: {
       stability: 0.6, // 적당히 안정
       similarity_boost: 0.8, // 부드러운 음색
@@ -54,7 +54,7 @@ const VoiceModel = [
     },
   },
   {
-    voiceId: 'WzMnDIgiICcj1oXbUBO0',
+    voiceId: 'WzMnDIgiICcj1oXbUBO0', // 남
     voice_settings: {
       stability: 0.35, // 활기 있고 반응적
       similarity_boost: 0.75, // 자연스러운 변조
@@ -63,7 +63,7 @@ const VoiceModel = [
     },
   },
   {
-    voiceId: 'ksaI0TCD9BstzEzlxj4q',
+    voiceId: 'ksaI0TCD9BstzEzlxj4q', // 여
     voice_settings: {
       stability: 0.9, // 매우 안정적
       similarity_boost: 0.95, // 일정하고 잔잔
@@ -72,7 +72,7 @@ const VoiceModel = [
     },
   },
   {
-    voiceId: 'WzMnDIgiICcj1oXbUBO0',
+    voiceId: 'WzMnDIgiICcj1oXbUBO0', // 남
     voice_settings: {
       stability: 0.8, // 안정적이고 논리적인 느낌
       similarity_boost: 0.9, // 일관성 유지
@@ -81,7 +81,7 @@ const VoiceModel = [
     },
   },
   {
-    voiceId: 'ksaI0TCD9BstzEzlxj4q',
+    voiceId: 'ksaI0TCD9BstzEzlxj4q', // 여
     voice_settings: {
       stability: 0.25, // 감정 활발
       similarity_boost: 0.75, // 자연스럽게 변조

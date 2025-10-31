@@ -2,18 +2,10 @@ import axiosInstance from '@api/axios';
 import QuestionAudioRecorder from '@components/simulation/QuestionAudioRecorder';
 import SessionVideoRecorder from '@components/simulation/SessionVideoRecorder';
 import VoiceModel from '@components/simulation/VoiceModel';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import TextToSpeech from './TextToSpeech';
-
-const QUESTIONS = [
-  '자기소개를 해주세요.',
-  '우리 회사에 지원한 동기는 무엇인가요?',
-  '최근에 해결한 어려운 문제 하나를 설명해 주세요.',
-  '협업에서 가장 중요하게 생각하는 점은?',
-  '입사 후 3년 목표는 무엇인가요?',
-];
 
 const MAX_SECONDS = 60;
 
@@ -27,82 +19,148 @@ export default function SimulationGO() {
   const [interviewerId, setInterviewerId] = useState(null);
   const [audioUrls, setAudioUrls] = useState([]);
   const [videoUrl, setVideoUrl] = useState(null);
+  const [imageUrl, setImageUrl] = useState(null);
+  const [questionList, setQaList] = useState([]); // 서버에서 온 {qaId, qaOrder, qaQuestion, qaAnswer}
+  const [simPost, setPost] = useState(null);
 
   const videoRef = useRef(null); // SessionVideoRecorder 제어
   const audioRef = useRef(null); // QuestionAudioRecorder 제어
 
-  // 시뮬레이션 상세 → interviewerId 추출
+  // ===== 1) 시뮬레이션 상세 조회 (interviewer, post, qaList) =====
   useEffect(() => {
     if (!simulationId) return;
-    axiosInstance
-      .get(`/simulation/${simulationId}`)
-      .then((resp) => {
-        const id = resp.data?.data?.interviewer?.interviewerId;
-        setInterviewerId(id);
-        console.log(id);
-      })
-      .catch((err) => console.error('에러:', err));
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const resp = await axiosInstance.get(`/simulation/${simulationId}`);
+        const data = resp.data && resp.data.data;
+
+        if (!data) return;
+
+        const _interviewerId = (data.interviewer && data.interviewer.interviewerId) ?? null;
+        const _imageUrl = (data.interviewer && data.interviewer.interviewerImageUrl) ?? null;
+        const post = data.post ?? null;
+        const qaList = (post && post.qaList) ?? [];
+
+        if (!cancelled) {
+          setInterviewerId(_interviewerId);
+          setImageUrl(_imageUrl);
+          setPost(post);
+          setQaList(Array.isArray(qaList) ? qaList : []);
+        }
+      } catch (err) {
+        console.error('에러:', err);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [simulationId]);
 
-  // 세션 시작/종료
+  // ===== 2) qaList → 질문 문자열 배열 (정렬 보강) =====
+  const questions = useMemo(() => {
+    if (!questionList || questionList.length === 0) return [];
+    const sorted = [...questionList].sort(
+      (a, b) => (a && a.qaOrder ? a.qaOrder : 0) - (b && b.qaOrder ? b.qaOrder : 0),
+    );
+    return sorted.map((q) => (q && q.qaQuestion) || '');
+  }, [questionList]);
+
+  const totalQuestions = questions.length;
+
+  // ===== 3) qaList가 들어오면 첫 질문 세팅 =====
+  useEffect(() => {
+    if (totalQuestions > 0) {
+      setCurrentIdx(0);
+      setcurrentQuestion(questions[0]);
+      setTimeLeft(MAX_SECONDS);
+    } else {
+      setCurrentIdx(0);
+      setcurrentQuestion('');
+    }
+  }, [totalQuestions, questions]);
+
+  // ===== 4) 세션 시작/종료 =====
   const startSession = async () => {
     if (isSessionStarted) return;
-    await videoRef.current?.start(); // 비디오 녹화 시작
+    if (videoRef.current && videoRef.current.start) {
+      await videoRef.current.start(); // 비디오 녹화 시작
+    }
     setIsSessionStarted(true);
     setTimeLeft(MAX_SECONDS);
-    setcurrentQuestion(QUESTIONS[0]); // 첫 질문 세팅 (TTS용)
+    setcurrentQuestion(questions[0]); // 첫 질문 세팅 (TTS용)
   };
 
   const stopSession = async () => {
-    await audioRef.current?.cancel(); // 진행 중 오디오 취소
-    const url = await videoRef.current?.stop(); // 비디오 저장
+    if (audioRef.current && audioRef.current.cancel) {
+      await audioRef.current.cancel(); // 진행 중 오디오 취소
+    }
+    let url = null;
+    if (videoRef.current && videoRef.current.stop) {
+      url = await videoRef.current.stop(); // 비디오 저장
+    }
     if (url) setVideoUrl(url);
     setIsSessionStarted(false);
   };
 
-  // 질문 오디오
+  // ===== 5) 질문 오디오 =====
   const startAnswer = async () => {
     if (!isSessionStarted || isQuestionRecording) return;
-    await audioRef.current?.start(currentIdx); // 현재 질문 인덱스로 시작
+    if (audioRef.current && audioRef.current.start) {
+      await audioRef.current.start(currentIdx); // 현재 질문 인덱스로 시작
+    }
   };
 
   const finishAnswer = async () => {
-    await audioRef.current?.finish(); // 저장 후 종료
+    if (audioRef.current && audioRef.current.finish) {
+      await audioRef.current.finish(); // 저장 후 종료
+    }
     goNextQuestion();
   };
 
   const goNextQuestion = () => {
-    if (currentIdx < QUESTIONS.length - 1) {
+    if (currentIdx < totalQuestions - 1) {
       setCurrentIdx((idx) => idx + 1);
       setTimeLeft(MAX_SECONDS);
-      setcurrentQuestion(QUESTIONS[currentIdx + 1]);
+      setcurrentQuestion(questions[currentIdx + 1]);
     } else {
       stopSession();
     }
   };
 
-  // 콜백들 (오디오 컴포넌트에서 올려줌)
+  // ===== 6) 콜백들 (오디오 컴포넌트에서 올려줌) =====
   const handleSavedAudio = (url, qIdx) => {
     setAudioUrls((prev) => {
       const next = [...prev];
       next[qIdx] = url;
       return next;
     });
+
+    // (선택) qaId 활용하고 싶을 때:
+    // const qaId = questionList?.[qIdx]?.qaId;
+    // await axiosInstance.post('/answers', { simulationId, qaId, audioUrl: url });
   };
 
   const handleTick = (left) => setTimeLeft(left);
   const handleRecordingChange = (rec) => setIsQuestionRecording(rec);
 
-  // UI
+  // ===== 7) UI =====
   return (
     <div style={{ padding: 24, fontFamily: 'Inter, system-ui, sans-serif' }}>
       {/* ElevenLabs TTS */}
       {!!interviewerId && (
         <TextToSpeech
-          voiceModel={VoiceModel[interviewerId - 1]}
+          voiceModel={VoiceModel[(parseInt(interviewerId, 10) || interviewerId) - 1]}
           currentQuestion={currentQuestion}
+          enabled={isSessionStarted}
         />
       )}
+
+      {/* 면접관 이미지 URL (디버그/프리뷰용) */}
+      <p>{imageUrl}</p>
 
       {/* 비디오 레코더 (세션 전체) */}
       <SessionVideoRecorder ref={videoRef} />
@@ -143,7 +201,7 @@ export default function SimulationGO() {
         </div>
 
         <span style={{ marginLeft: 8 }}>
-          {currentIdx + 1}/{QUESTIONS.length}
+          {Math.min(currentIdx + 1, totalQuestions)}/{totalQuestions || 0}
         </span>
 
         {isQuestionRecording && <span style={{ fontSize: 12 }}>녹음 중...</span>}
@@ -161,16 +219,16 @@ export default function SimulationGO() {
             padding: '2px 6px',
           }}
         >
-          Q{currentIdx + 1}
+          Q{totalQuestions === 0 ? 0 : currentIdx + 1}
         </span>
-        <span>{QUESTIONS[currentIdx]}</span>
+        <span>{currentQuestion || '질문이 없습니다.'}</span>
       </div>
 
       {/* 녹음 파일(질문별) */}
       <div>
         <h4 style={{ margin: '12px 0 8px' }}>녹음 파일(질문별)</h4>
         <ol style={{ paddingLeft: 18, lineHeight: 1.9 }}>
-          {QUESTIONS.map((_, i) => (
+          {questions.map((q, i) => (
             <li key={i}>
               Q{i + 1}.{' '}
               {audioUrls[i] ? (
@@ -180,8 +238,10 @@ export default function SimulationGO() {
               ) : (
                 <span style={{ color: '#999' }}>아직 생성되지 않음</span>
               )}
+              <div style={{ fontSize: 12, color: '#666' }}>{q}</div>
             </li>
           ))}
+          {questions.length === 0 && <li style={{ color: '#999' }}>질문이 없습니다.</li>}
         </ol>
       </div>
 
@@ -203,11 +263,12 @@ export default function SimulationGO() {
   );
 }
 
-// 스타일
+// ===== 스타일 & 유틸 =====
 const btnStyle = {
   borderRadius: 10,
   cursor: 'pointer',
 };
+
 const pillStyle = {
   background: '#000',
   color: '#fff',
@@ -216,6 +277,7 @@ const pillStyle = {
   minWidth: 120,
   textAlign: 'center',
 };
+
 function formatTime(s) {
   const mm = String(Math.floor(s / 60)).padStart(2, '0');
   const ss = String(s % 60).padStart(2, '0');

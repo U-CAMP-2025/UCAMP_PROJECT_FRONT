@@ -1,60 +1,78 @@
 import styled, { css } from 'styled-components';
 
-const variants = {
-  primary: css`
-    background: ${({ theme }) => theme.colors.primary[10]};
-    color: ${({ theme }) => theme.colors.primary[2]};
-    &:hover {
-      background: ${({ theme }) => theme.colors.primary[9]};
-    }
-  `,
-  secondary: css`
-    background: ${({ theme }) => theme.colors.primary[6]};
-    color: ${({ theme }) => theme.colors.primary[10]};
-    &:hover {
-      background-color: ${({ theme }) => theme.colors.primary[5]};
-    }
-  `,
-};
-
 const sizes = {
   sm: css`
-    padding: 6px 10px;
-    font-size: 14px;
+    height: 32px;
+    padding: 0 ${({ theme }) => theme.space[3]};
+    font-size: ${({ theme }) => theme.font.size[2]};
+    border-radius: ${({ theme }) => theme.radius.sm};
   `,
   md: css`
-    padding: 10px 14px;
-    font-size: 16px;
+    height: 40px;
+    padding: 0 ${({ theme }) => theme.space[4]};
+    font-size: ${({ theme }) => theme.font.size[3]};
+    border-radius: ${({ theme }) => theme.radius.md};
   `,
   lg: css`
-    padding: 12px 18px;
-    font-size: 18px;
+    height: 48px;
+    padding: 0 ${({ theme }) => theme.space[5]};
+    font-size: ${({ theme }) => theme.font.size[4]};
+    border-radius: ${({ theme }) => theme.radius.lg};
   `,
 };
 
-const Base = styled.button`
-  border: none;
-  border-radius: ${({ theme }) => theme.radius.md};
+const variants = {
+  primary: css`
+    background: ${({ theme }) => theme.colors.primary[9]};
+    color: white;
+    &:hover {
+      background: ${({ theme }) => theme.colors.primary[10]};
+    }
+    &:active {
+      background: ${({ theme }) => theme.colors.primary[11]};
+    }
+  `,
+  outline: css`
+    background: transparent;
+    border: 1px solid ${({ theme }) => theme.colors.gray[6]};
+    color: ${({ theme }) => theme.colors.text};
+    &:hover {
+      background: ${({ theme }) => theme.colors.gray[2]};
+    }
+  `,
+  ghost: css`
+    background: transparent;
+    color: ${({ theme }) => theme.colors.text};
+    &:hover {
+      background: ${({ theme }) => theme.colors.gray[2]};
+    }
+  `,
+};
+
+const Button = styled.button.withConfig({
+  shouldForwardProp: (prop) => !['variant', 'size', 'block'].includes(prop),
+})`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: ${({ theme }) => theme.space[2]};
+  border: 0;
   cursor: pointer;
-  ${({ $variant }) => variants[$variant] || variants.primary}
-  ${({ $size }) => sizes[$size] || sizes.md}
+  font-weight: ${({ theme }) => theme.font.weight.semiBold};
+  box-shadow: none;
+  transition:
+    transform 0.02s ease,
+    opacity 0.2s ease;
+  ${({ size = 'md' }) => sizes[size]}
+  ${({ variant = 'primary' }) => variants[variant]}
+  width: ${({ block }) => (block ? '100%' : 'auto')};
   &:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
   }
-  font-weight: ${({ theme }) => theme.font.weight.semiBold};
-  transition: all 0.3s ease;
-  &:hover {
-    transition: all 0.3s ease;
+  &:active {
+    transform: translateY(1px);
   }
 `;
-
-const Button = ({ children, variant = 'primary', size = 'md', ...rest }) => {
-  return (
-    <Base $variant={variant} $size={size} {...rest}>
-      {children}
-    </Base>
-  );
-};
 
 export default Button;

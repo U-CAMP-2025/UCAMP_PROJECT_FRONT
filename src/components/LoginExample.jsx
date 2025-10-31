@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useAuthStore } from 'src/store/auth/useAuthStore';
 import styled from 'styled-components';
 
-import Text from './common/Text';
+import Typography from './common/Typography';
 
 export const LoginExample = () => {
   // 예시 추가
@@ -35,9 +35,9 @@ export const LoginExample = () => {
 
   return (
     <StyledStack direction='column' justify='center' align='center' wrap>
-      <Text size='6' weight='bold'>
+      <Typography size='6' weight='bold'>
         로그인 여부: {isLogin ? '로그인됨' : '로그인 안됨'}
-      </Text>
+      </Typography>
       <div>
         닉네임: {user.name} 이메일: {user.email}
       </div>
