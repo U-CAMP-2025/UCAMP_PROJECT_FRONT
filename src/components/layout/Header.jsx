@@ -1,10 +1,11 @@
+import { getNoti, notiDel, notiDelAll, notiRead, notiReadAll } from '@api/notificationsAPIS';
 import Button from '@components/common/Button';
 import Typography from '@components/common/Typography';
 import NotificationDrawer from '@components/notification/NotificationDrawer';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { ChevronDownIcon, PersonIcon, BellIcon } from '@radix-ui/react-icons';
 import theme from '@styles/theme';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { useAuthStore } from 'src/store/auth/useAuthStore';
@@ -68,7 +69,7 @@ export const Header = () => {
   };
 
   const handleClickLoginButton = () => {
-    // TODO: 카카오 로그인으로 이동
+    // TODO: 카카오 로그인으로 이동d
     login({
       name: '유저 닉네임',
       email: 'user@email.com',
@@ -80,6 +81,15 @@ export const Header = () => {
     logout();
     navigate('/');
   };
+
+  useEffect(() => {
+    getNoti()
+      .then((response) => {
+        console.log(response);
+        setNotifications(response?.data ?? null);
+      })
+      .catch(() => setNotifications(null));
+  }, []);
 
   return (
     <HeaderContainer>
@@ -150,13 +160,37 @@ export const Header = () => {
               items={notifications}
               onItemClick={(item) => {
                 // 예시: 클릭 시 읽음 처리
-                setNotifications((prev) =>
-                  prev.map((n) => (n.notiId === item.notiId ? { ...n, read: true } : n)),
-                );
+                if (!item.read) {
+                  notiRead(item.notiId)
+                    .then((response) => {
+                      setNotifications((prev) =>
+                        prev.map((n) => (n.notiId === item.notiId ? { ...n, read: true } : n)),
+                      );
+                    })
+                    .catch(() => setNotifications(null));
+                } else {
+                  notiDel(item.notiId)
+                    .then((response) => {
+                      setNotifications((prev) => prev.filter((n) => n.notiId !== item.notiId));
+                    })
+                    .catch(() => setNotifications(null));
+                }
               }}
-              onMarkAllRead={() =>
-                setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
-              }
+              onMarkAllRead={() => {
+                if (unreadDerived !== 0) {
+                  notiReadAll()
+                    .then((response) => {
+                      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+                    })
+                    .catch(() => setNotifications(null));
+                } else {
+                  notiDelAll()
+                    .then((response) => {
+                      setNotifications([]);
+                    })
+                    .catch(() => setNotifications(null));
+                }
+              }}
             />
           </>
         ) : (
