@@ -1,6 +1,7 @@
+import { fetchTranscriptions } from '@api/adminAPIS';
 import DataTable, { Pill } from '@components/common/DataTable';
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 // Segmented control (same look & feel as UserMangeTable)
@@ -39,22 +40,36 @@ const SegmentItem = styled(ToggleGroup.Item)`
  * }]
  */
 export default function TranscriptionTable() {
-  const [rows, setRows] = useState([
-    {
-      id: 'u1',
-      nickName: '홍길동',
-      email: 'abc@kakao.com',
-      simulation: { completedAt: '2025-10-26 14:00' },
-      status: 'PROCESSING', // 또는 '진행 중' | 'COMPLETED' | '완료'
-    },
-  ]);
   const [filter, setFilter] = useState('all'); // 'all' | 'inprogress' | 'done'
+  const [rows, setRows] = useState([]);
+
+  // 1️⃣ 데이터 불러오기
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const data = await fetchTranscriptions(); // 백엔드 요청
+        // 백엔드 → 프론트 구조로 변환
+        const mapped = data.map((item, index) => ({
+          id: `u${index + 1}`,
+          nickName: item.nickname,
+          email: item.email,
+          simulation: { completedAt: item.completedAt },
+          status: item.status, // SUCCESS / INPROGRESS
+        }));
+        setRows(mapped);
+      } catch (err) {
+        console.error('데이터 로드 실패:', err);
+      }
+    };
+    loadData();
+  }, []);
 
   // 상태 노멀라이즈 ('진행 중'/'완료' 한글 또는 영문 코드 모두 허용)
   const normalizeStatus = (s) => {
     if (!s) return 'unknown';
-    if (s === '완료' || s === 'COMPLETED') return 'done';
-    if (s === '진행 중' || s === 'PROCESSING' || s === 'IN_PROGRESS') return 'inprogress';
+    if (s === '완료' || s === 'COMPLETED' || s === 'SUCCESS') return 'done';
+    if (s === '진행 중' || s === 'PROCESSING' || s === 'IN_PROGRESS' || s === 'INPROGRESS')
+      return 'inprogress';
     return 'unknown';
   };
 

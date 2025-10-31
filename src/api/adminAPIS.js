@@ -23,11 +23,20 @@ export const fetchGetAllUser = async () => {
  * PATCH: 관리자 유저 합격 여부 변경
  *
  * @param {Object} payload - 요청 바디
- * @param {string} payload.nickName - 유저 닉네임
+ * @param {string} payload.userId - 유저 아이디
  * @param {string} payload.passStatus - 합격 여부 ("PASS" | "FAIL" 등)
  * @returns {Promise<Object>} response
  */
 export const patchUserPass = async (payload) => {
   const { data } = await axiosInstance.patch('/admin/pathPass', payload);
   return data;
+};
+
+/**
+ * GET: 관리자 음성 변환 데이터 조회
+ * @returns {Promise<Array>} response
+ */
+export const fetchTranscriptions = async () => {
+  const { data } = await axiosInstance.get('/admin/transcription');
+  return data; // [{ title, nickname, email, completedAt, status }, ...]
 };

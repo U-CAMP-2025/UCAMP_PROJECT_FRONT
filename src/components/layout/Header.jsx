@@ -1,3 +1,4 @@
+import { getNoti, notiDel, notiDelAll, notiRead, notiReadAll } from '@api/notificationsAPIS';
 import Button from '@components/common/Button';
 import Typography from '@components/common/Typography';
 import NotificationDrawer from '@components/notification/NotificationDrawer';
@@ -78,6 +79,15 @@ export const Header = () => {
     navigate('/');
   };
 
+  useEffect(() => {
+    getNoti()
+      .then((response) => {
+        console.log(response);
+        setNotifications(response?.data ?? null);
+      })
+      .catch(() => setNotifications(null));
+  }, []);
+
   return (
     <HeaderContainer>
       <LeftSection>
@@ -147,13 +157,37 @@ export const Header = () => {
               items={notifications}
               onItemClick={(item) => {
                 // 예시: 클릭 시 읽음 처리
-                setNotifications((prev) =>
-                  prev.map((n) => (n.notiId === item.notiId ? { ...n, read: true } : n)),
-                );
+                if (!item.read) {
+                  notiRead(item.notiId)
+                    .then((response) => {
+                      setNotifications((prev) =>
+                        prev.map((n) => (n.notiId === item.notiId ? { ...n, read: true } : n)),
+                      );
+                    })
+                    .catch(() => setNotifications(null));
+                } else {
+                  notiDel(item.notiId)
+                    .then((response) => {
+                      setNotifications((prev) => prev.filter((n) => n.notiId !== item.notiId));
+                    })
+                    .catch(() => setNotifications(null));
+                }
               }}
-              onMarkAllRead={() =>
-                setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
-              }
+              onMarkAllRead={() => {
+                if (unreadDerived !== 0) {
+                  notiReadAll()
+                    .then((response) => {
+                      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+                    })
+                    .catch(() => setNotifications(null));
+                } else {
+                  notiDelAll()
+                    .then((response) => {
+                      setNotifications([]);
+                    })
+                    .catch(() => setNotifications(null));
+                }
+              }}
             />
           </>
         ) : (
