@@ -1,6 +1,8 @@
+import { deleteReview, fetchReviewList, postReview } from '@api/reviewAPIS';
 import Button from '@components/common/Button';
 import Typography from '@components/common/Typography';
 import { PersonIcon } from '@radix-ui/react-icons';
+import { useAuthStore } from '@store/auth/useAuthStore';
 import { useEffect, useState, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import styled, { ThemeContext } from 'styled-components';
@@ -16,25 +18,78 @@ import QAReviewForm from './QAReviewForm';
  *  - onSubmit?: (text: string) => void
  *  - onDelete?: (reviewId: number|string) => void
  */
-const sampleData = [
-  {
-    reviewId: 1,
-    nickname: '등록한 유저 닉네임',
-    content: '질문 셋에 대한 리뷰 내용',
-    createdAt: '2025-10-27T06:00:00Z',
-    profileImage: '이미지 url',
-  },
-];
-export const QAReviews = ({ showForm = true, onSubmit, onDelete }) => {
-  const qaId = useParams().qaId;
+// const sampleData = [
+//   {
+//     reviewId: 1,
+//     nickname: '등록한 유저 닉네임',
+//     content: '질문 셋에 대한 리뷰 내용',
+//     createdAt: '2025-10-27T06:00:00Z',
+//     profileImage: '이미지 url',
+//   },
+// ];
+export const QAReviews = () => {
+  const { qaId: postId } = useParams();
   const [reviews, setReviews] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const theme = useContext(ThemeContext);
+  const isLogin = useAuthStore((state) => state.isLogin);
+  const authUser = useAuthStore((state) => state.user);
+
+  const formUserProp = {
+    nickname: authUser.name, // name -> nickname
+    profileImage: authUser.profileImageUrl, // profileImageUrl -> profileImage
+  };
 
   const count = reviews?.length ?? 0;
 
+  // 1. API로 리뷰 목록 불러오기
   useEffect(() => {
-    setReviews(sampleData);
-  }, [qaId]);
+    if (!postId) return;
+
+    const loadReviews = async () => {
+      try {
+        const data = await fetchReviewList(postId);
+        setReviews(data);
+      } catch (error) {
+        console.error('리뷰 목록을 불러오는 데 실패했습니다:', error);
+      }
+    };
+    loadReviews();
+  }, [postId]);
+
+  // 리뷰 생성 핸들러
+  const handleCreateReview = async (payload) => {
+    if (!postId) return;
+
+    setIsSubmitting(true);
+    try {
+      const newReview = await postReview(postId, payload);
+      setReviews((prevReviews) => [...prevReviews, newReview]);
+    } catch (error) {
+      console.error('리뷰 등록에 실패했습니다:', error);
+      alert('리뷰 등록에 실패했습니다. 다시 시도해주세요.');
+      throw error;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // 3. 리뷰 삭제 핸들러
+  const handleDeleteReview = async (reviewId) => {
+    if (!postId) return;
+
+    if (!window.confirm('이 리뷰를 정말 삭제하시겠습니까?')) {
+      return;
+    }
+
+    try {
+      await deleteReview(postId, reviewId);
+      setReviews((prevReviews) => prevReviews.filter((r) => r.reviewId !== reviewId));
+    } catch (error) {
+      console.error('리뷰 삭제에 실패했습니다:', error);
+      alert('리뷰 삭제에 실패했습니다. 본인이 작성한 리뷰인지 확인해주세요.');
+    }
+  };
 
   return (
     <Wrap>
@@ -47,7 +102,13 @@ export const QAReviews = ({ showForm = true, onSubmit, onDelete }) => {
         </Typography>
       </Header>
 
-      {showForm && <QAReviewForm />}
+      {isLogin && (
+        <QAReviewForm
+          onSubmit={handleCreateReview}
+          isSubmitting={isSubmitting}
+          user={formUserProp}
+        />
+      )}
 
       <List>
         {reviews.map((r) => (
@@ -79,11 +140,9 @@ export const QAReviews = ({ showForm = true, onSubmit, onDelete }) => {
               </Typography>
             </Body>
 
-            {onDelete && (
-              <Button variant='ghost' onClick={() => onDelete(r.reviewId)}>
-                삭제하기
-              </Button>
-            )}
+            <Button variant='ghost' onClick={() => handleDeleteReview(r.reviewId)}>
+              삭제하기
+            </Button>
           </Item>
         ))}
       </List>
