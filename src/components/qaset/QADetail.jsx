@@ -1,9 +1,10 @@
+import { delPost, getPost } from '@api/postAPIS';
 import Tag, { TagGroup } from '@components/common/Tag';
 import Typography from '@components/common/Typography';
-import { TrashIcon } from '@radix-ui/react-icons';
+import { Pencil1Icon, TrashIcon } from '@radix-ui/react-icons';
 import theme from '@styles/theme';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 // TODO: 유저 자신의 QA셋인 경우에만 삭제 아이콘 노출
@@ -31,17 +32,52 @@ const sampleData = {
     },
   ],
 };
-export const QADetail = ({ onDelete }) => {
+export const QADetail = () => {
   const params = useParams();
   const qaId = params.qaId;
   const [qaData, setQaData] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    setQaData(sampleData);
+    getPost(qaId)
+      .then((resp) => {
+        setQaData(resp?.data ?? null);
+        console.log(resp);
+      })
+      .catch(setQaData([]));
   }, [qaId]);
 
+  const onUpdate = () => {
+    navigate('/qa/update', {
+      state: {
+        qaId: qaId,
+      },
+    });
+  };
+
+  const onDelete = () => {
+    if (confirm('해당 질문셋을 삭제하시겠습니까?')) {
+      delPost(qaId)
+        .then((response) => {
+          navigate('/myqa');
+        })
+        .catch();
+    }
+  };
+
   if (!qaData) return null;
-  const { job = [], title, nickname, description, createAt, isPassed, qa = [] } = qaData;
+  const {
+    job = [],
+    title,
+    nickname,
+    description,
+    createAt,
+    isPassed,
+    qa = [],
+    me,
+    otherWriter,
+  } = qaData;
+  const dateOnly = createAt ? createAt.split('T')[0] : '';
 
   return (
     <Wrap>
@@ -84,15 +120,32 @@ export const QADetail = ({ onDelete }) => {
                 color: (theme) => theme.colors.primary[11],
               }}
             >
-              {createAt}
+              {dateOnly}
             </Typography>
             {isPassed && <PassBadge>합격자</PassBadge>}
             {!isPassed && <FailBadge>구직자</FailBadge>}
           </Meta>
+          {otherWriter && (
+            <Typography
+              as='p'
+              size={1}
+              weight='regular'
+              style={{ marginTop: 4, color: theme.colors.gray[9] }}
+            >
+              가져온 글 (From: {otherWriter})
+            </Typography>
+          )}{' '}
         </div>
-        <IconButton aria-label='삭제' onClick={onDelete}>
-          <TrashIcon width={24} height={24} fill={true} />
-        </IconButton>
+        {me && (
+          <div>
+            <IconButton1 aria-label='수정' onClick={onUpdate}>
+              <Pencil1Icon width={24} height={24} fill='true' />
+            </IconButton1>
+            <IconButton2 aria-label='삭제' onClick={onDelete}>
+              <TrashIcon width={24} height={24} fill='true' />
+            </IconButton2>
+          </div>
+        )}
       </HeaderRow>
 
       {job.length > 0 && (
@@ -113,10 +166,10 @@ export const QADetail = ({ onDelete }) => {
 
       {qa.map((item, idx) => (
         <QABox key={item.qaId || idx}>
-          <Placeholder>질문</Placeholder>
+          <Placeholder>질문{idx + 1}</Placeholder>
           <Pre>{item.question || '-'}</Pre>
           <Divider />
-          <Placeholder>답변</Placeholder>
+          <Placeholder>답변{idx + 1}</Placeholder>
           <Pre>{item.answer || '-'}</Pre>
         </QABox>
       ))}
@@ -148,7 +201,27 @@ const Dot = styled.span`
   color: ${({ theme }) => theme.colors.gray[9]};
 `;
 
-const IconButton = styled.button`
+const IconButton1 = styled.button`
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: ${({ theme }) => theme.radius.md};
+  color: ${({ theme }) => theme.colors.primary[10]};
+  background: ${({ theme }) => theme.colors.primary[3]};
+  &:hover {
+    filter: brightness(0.98);
+    cursor: pointer;
+  }
+  &:active {
+    transform: translateY(1px);
+  }
+  margin: 0 10px;
+`;
+
+const IconButton2 = styled.button`
   all: unset;
   display: inline-flex;
   align-items: center;
