@@ -96,6 +96,7 @@ export default function SimulationGO() {
     setIsSessionStarted(false);
     setcurrentQuestion('');
     moveNextGuardRef.current = false;
+    setCurrentIdx(0);
   };
 
   // ===== 5) 질문 녹음 제어 =====
