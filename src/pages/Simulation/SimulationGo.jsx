@@ -9,29 +9,45 @@ import TextToSpeech from './TextToSpeech';
 
 const MAX_SECONDS = 60;
 
+// 1..n 배열 만들고 셔플 (표시용은 1-based를 유지)
+function makeOneBasedShuffled(n) {
+  const arr = Array.from({ length: n }, (_, i) => i + 1); // [1..n]
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 export default function SimulationGO() {
   const { simulationId } = useParams();
-  const [currentIdx, setCurrentIdx] = useState(0);
+
+  const [currentIdx, setCurrentIdx] = useState(0); // 진행 중인 "랜덤 순서"의 인덱스(0-based)
   const [currentQuestion, setcurrentQuestion] = useState('');
   const [timeLeft, setTimeLeft] = useState(MAX_SECONDS);
   const [isSessionStarted, setIsSessionStarted] = useState(false);
   const [isQuestionRecording, setIsQuestionRecording] = useState(false);
+
   const [interviewerId, setInterviewerId] = useState(null);
-  const [audioUrls, setAudioUrls] = useState([]);
+  const [audioById, setAudioById] = useState({}); // qaId -> url
   const [videoUrl, setVideoUrl] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
-  const [questionList, setQaList] = useState([]);
-  const [simPost, setPost] = useState(null);
 
+  const [questionList, setQaList] = useState([]); // ✅ 서버 원본 (순서 절대 변경 X)
+  const [randomOrder, setRandomOrder] = useState([]); // ✅ [1..N] 랜덤 숫자 배열 (표시/진행 전용)
+  const [qaState, setQaState] = useState(null);
+  const [simPost, setPost] = useState(null);
   const [scriptMode, setScriptMode] = useState(false);
+
   const videoRef = useRef(null);
   const audioRef = useRef(null);
   const moveNextGuardRef = useRef(false);
 
-  // ===== 1) 시뮬레이션 상세 조회 =====
+  // ===== 1) 시뮬레이션 상세 조회: 원본 저장 + 1..N 랜덤 목록 생성 =====
   useEffect(() => {
     if (!simulationId) return;
     let cancelled = false;
+
     (async () => {
       try {
         const resp = await axiosInstance.get(`/simulation/${simulationId}/start`);
@@ -41,31 +57,50 @@ export default function SimulationGO() {
         const _interviewerId = data.interviewer?.interviewerId ?? null;
         const _imageUrl = data.interviewer?.interviewerImageUrl ?? null;
         const post = data.post ?? null;
-        const qaList = post?.qaList ?? [];
+        const qaList = Array.isArray(post?.qaList) ? post.qaList : [];
+        const rand = data.simulationRandom;
+        console.log(rand);
         if (!cancelled) {
           setInterviewerId(_interviewerId);
           setImageUrl(_imageUrl);
           setPost(post);
-          setQaList(Array.isArray(qaList) ? qaList : []);
+          setQaList(qaList);
+          setAudioById({});
+
+          // ✅ simulationRandom 값에 따라 randomOrder 다르게 생성
+          if (data.simulationRandom === 'Y') {
+            setRandomOrder(makeOneBasedShuffled(qaList.length)); // 랜덤
+          } else {
+            setRandomOrder(Array.from({ length: qaList.length }, (_, i) => i + 1)); // 순차
+          }
+          console.log(data.simulationRandom);
+
+          setCurrentIdx(0);
+          setcurrentQuestion('');
+          setTimeLeft(MAX_SECONDS);
+          moveNextGuardRef.current = false;
         }
       } catch (err) {
         console.error('에러:', err);
       }
     })();
-    return () => (cancelled = true);
+
+    return () => {
+      cancelled = true;
+    };
   }, [simulationId]);
 
-  // ===== 2) qaList → 질문/답변 정렬 =====
-  const sortedQa = useMemo(() => {
-    if (!questionList?.length) return [];
-    return [...questionList].sort((a, b) => (a?.qaOrder ?? 0) - (b?.qaOrder ?? 0));
-  }, [questionList]);
+  // ===== 2) 표시/진행용 파생 배열: orderedQa (원본 + 1-based 인덱스) =====
+  const orderedQa = useMemo(() => {
+    if (!questionList?.length || !randomOrder?.length) return [];
+    return randomOrder.map((oneBased) => questionList[oneBased - 1]); // qaList[1], qaList[4], ...
+  }, [questionList, randomOrder]);
 
-  const questions = sortedQa.map((q) => q?.qaQuestion || '');
-  const answers = sortedQa.map((q) => q?.qaAnswer || '');
+  const questions = useMemo(() => orderedQa.map((q) => q?.qaQuestion || ''), [orderedQa]);
+  const answers = useMemo(() => orderedQa.map((q) => q?.qaAnswer || ''), [orderedQa]);
   const totalQuestions = questions.length;
 
-  // ===== 3) 초기화 =====
+  // ===== 3) 초기화(orderedQa가 준비되면) =====
   useEffect(() => {
     if (totalQuestions > 0) {
       setCurrentIdx(0);
@@ -84,7 +119,7 @@ export default function SimulationGO() {
     if (videoRef.current?.start) await videoRef.current.start();
     setIsSessionStarted(true);
     setTimeLeft(MAX_SECONDS);
-    setcurrentQuestion(questions[0]);
+    setcurrentQuestion(orderedQa?.[0]?.qaQuestion || '');
     moveNextGuardRef.current = false;
   };
 
@@ -99,44 +134,34 @@ export default function SimulationGO() {
     setCurrentIdx(0);
   };
 
-  // ===== 5) 질문 녹음 제어 =====
+  // ===== 5) 질문 녹음 제어 (qaId 기반) =====
   const startAnswer = async () => {
     if (!isSessionStarted || isQuestionRecording) return;
-    if (audioRef.current?.start) await audioRef.current.start(currentIdx);
+    const qaId = orderedQa?.[currentIdx]?.qaId; // ✅ 현재 표시 순서의 qaId
+    if (!qaId) return;
+    if (audioRef.current?.start) await audioRef.current.start({ qaId, qIdx: currentIdx });
   };
 
   const finishAnswer = async () => {
     if (!audioRef.current?.finish) return;
-    const { url, qIdx } = await audioRef.current.finish();
-    if (url && typeof qIdx === 'number') {
-      setAudioUrls((prev) => {
-        const next = [...prev];
-        next[qIdx] = url;
-        return next;
-      });
+    const { url, qaId } = await audioRef.current.finish(); // ✅ qaId 반환 받음
+    if (url && qaId) {
+      setAudioById((prev) => ({ ...prev, [qaId]: url }));
     }
     goNextQuestionGuarded();
   };
 
-  const handleSavedAudio = (url, qIdx) => {
-    setAudioUrls((prev) => {
-      const next = [...prev];
-      next[qIdx] = url;
-      return next;
-    });
+  const handleSavedAudio = (url, qaId) => {
+    if (!qaId) return;
+    setAudioById((prev) => ({ ...prev, [qaId]: url }));
   };
 
   const handleTick = (left) => setTimeLeft(left);
   const handleRecordingChange = (rec) => setIsQuestionRecording(rec);
 
-  // ===== 타임아웃 자동완료 콜백 =====
-  const handleAutoFinish = (qIdx, url) => {
-    if (url && typeof qIdx === 'number') {
-      setAudioUrls((prev) => {
-        const next = [...prev];
-        next[qIdx] = url;
-        return next;
-      });
+  const handleAutoFinish = (qaId, url) => {
+    if (url && qaId) {
+      setAudioById((prev) => ({ ...prev, [qaId]: url }));
     }
     goNextQuestionGuarded();
   };
@@ -160,14 +185,13 @@ export default function SimulationGO() {
       const nextIdx = currentIdx + 1;
       setCurrentIdx(nextIdx);
       setTimeLeft(MAX_SECONDS);
-      setcurrentQuestion(questions[nextIdx]);
+      setcurrentQuestion(orderedQa?.[nextIdx]?.qaQuestion || '');
       moveNextGuardRef.current = false;
     } else {
       stopSession();
     }
   };
 
-  // ===== 7) UI =====
   return (
     <div style={{ padding: 24, fontFamily: 'Inter, system-ui, sans-serif' }}>
       {!!interviewerId && isSessionStarted && currentQuestion && (
@@ -242,30 +266,34 @@ export default function SimulationGO() {
           <QuestionAudioRecorder
             ref={audioRef}
             maxSeconds={MAX_SECONDS}
-            onSaved={handleSavedAudio}
             simulationId={simulationId}
+            onSaved={handleSavedAudio} // (url, qaId)
             onTick={handleTick}
             onRecordingChange={handleRecordingChange}
-            onAutoFinish={handleAutoFinish}
+            onAutoFinish={handleAutoFinish} // (qaId, url)
           />
 
-          {/* 녹음 리스트 */}
+          {/* 녹음 리스트: 랜덤 순서(orderedQa)에 맞게 표시. 다운로드 파일명은 qaId 기반 */}
           <div style={{ marginTop: 12 }}>
             <h4>녹음 파일(질문별)</h4>
             <ol style={{ paddingLeft: 18, lineHeight: 1.9 }}>
-              {questions.map((q, i) => (
-                <li key={i}>
-                  Q{i + 1}.{' '}
-                  {audioUrls[i] ? (
-                    <a href={audioUrls[i]} download={`q${i + 1}.webm`}>
-                      다운로드
-                    </a>
-                  ) : (
-                    <span style={{ color: '#999' }}>아직 생성되지 않음</span>
-                  )}
-                  <div style={{ fontSize: 12, color: '#666' }}>{q}</div>
-                </li>
-              ))}
+              {orderedQa.map((q, i) => {
+                const qaId = q?.qaId;
+                const url = qaId ? audioById[qaId] : null;
+                return (
+                  <li key={qaId ?? i}>
+                    Q{i + 1}.{' '}
+                    {url ? (
+                      <a href={url} download={`audio${String(qaId).padStart(2, '0')}.webm`}>
+                        다운로드
+                      </a>
+                    ) : (
+                      <span style={{ color: '#999' }}>아직 생성되지 않음</span>
+                    )}
+                    <div style={{ fontSize: 12, color: '#666' }}>{q?.qaQuestion || ''}</div>
+                  </li>
+                );
+              })}
             </ol>
           </div>
 
@@ -285,7 +313,7 @@ export default function SimulationGO() {
           </div>
         </div>
 
-        {/* 우측 스크립트 */}
+        {/* 우측 스크립트: 랜덤 순서(orderedQa) 그대로 */}
         {scriptMode && (
           <div
             style={{
@@ -316,11 +344,7 @@ export default function SimulationGO() {
 }
 
 // ===== 스타일 & 유틸 =====
-const btnStyle = {
-  borderRadius: 10,
-  cursor: 'pointer',
-};
-
+const btnStyle = { borderRadius: 10, cursor: 'pointer' };
 const pillStyle = {
   background: '#000',
   color: '#fff',
@@ -329,7 +353,6 @@ const pillStyle = {
   minWidth: 120,
   textAlign: 'center',
 };
-
 function formatTime(s) {
   const mm = String(Math.floor(s / 60)).padStart(2, '0');
   const ss = String(s % 60).padStart(2, '0');

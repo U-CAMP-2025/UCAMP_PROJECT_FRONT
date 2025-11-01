@@ -5,10 +5,10 @@ import RecordRTC, { RecordRTCPromisesHandler } from 'recordrtc';
 const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
   {
     maxSeconds = 60,
-    onSaved, // (url, qIdx) => void
-    onTick, // (timeLeft) => void
-    onRecordingChange, // (isRecording) => void
-    onAutoFinish, // (qIdx, url) => void
+    onSaved, // (url, qaId)
+    onTick, // (timeLeft)
+    onRecordingChange, // (isRecording)
+    onAutoFinish, // (qaId, url)
     simulationId,
   },
   ref,
@@ -18,15 +18,23 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
   const timerRef = useRef(null);
   const timeoutRef = useRef(null);
   const finishingRef = useRef(false);
+
+  // 현재 녹음 메타
+  const qaIdRef = useRef(null);
+  const qIdxRef = useRef(null);
+
   const [timeLeft, setTimeLeft] = useState(maxSeconds);
   const [isRecording, setIsRecording] = useState(false);
-  const [currentIdx, setCurrentIdx] = useState(null);
 
   useImperativeHandle(ref, () => ({
-    start: async (questionIdx) => {
+    // 부모에서: start({ qaId, qIdx })
+    start: async ({ qaId, qIdx } = {}) => {
       if (isRecording) return;
+      if (!qaId && qIdx == null) return; // 최소한 하나는 필요
       finishingRef.current = false;
-      setCurrentIdx(questionIdx);
+
+      qaIdRef.current = qaId ?? null;
+      qIdxRef.current = typeof qIdx === 'number' ? qIdx : null;
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
       streamRef.current = stream;
@@ -58,11 +66,10 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
         });
       }, 1000);
 
-      //  타임아웃: qIdx를 finish 전에 캡처
+      // 타임아웃 → finish 후 (qaId, url)로 통지
       timeoutRef.current = setTimeout(async () => {
-        const qIdx = currentIdx; // <- 캡처!
-        const { url } = await api.finish(); // 저장 수행
-        if (qIdx != null && url) onAutoFinish?.(qIdx, url);
+        const { url, qaId: _qaId } = await api.finish();
+        if (_qaId && url) onAutoFinish?.(_qaId, url);
       }, maxSeconds * 1000);
     },
 
@@ -93,56 +100,56 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
     }
   };
 
-  // 반환값을 { url, qIdx }로 변경
+  // qaId 기반 업로드 & 반환 { url, qaId, qIdx }
   async function safeStop(silent = false) {
-    if (finishingRef.current) return { url: null, qIdx: null };
+    if (finishingRef.current) return { url: null, qaId: qaIdRef.current, qIdx: qIdxRef.current };
     finishingRef.current = true;
 
     cleanupTimers();
 
     let url = null;
-    const qIdx = currentIdx; // 현재 질문 인덱스 보관
+    const qaId = qaIdRef.current;
+    const qIdx = qIdxRef.current;
 
     try {
       if (recRef.current) {
         await recRef.current.stopRecording();
         const blob = await recRef.current.getBlob();
 
-        // 1) 로컬 미리보기 URL (선택)
+        // 로컬 프리뷰 URL (업로드 실패 시 폴백)
         const localPreviewUrl = URL.createObjectURL(blob);
 
-        // 2) silent가 아니면 업로드 시도
-        if (!silent && qIdx != null) {
+        if (!silent && (qaId || qIdx != null)) {
           try {
-            const file = new File([blob], `q${(qIdx ?? 0) + 1}.webm`, { type: 'audio/webm' });
+            // 파일명: qaId가 있으면 audio{qaId(2자리)}.webm, 없으면 인덱스
+            const prettyId =
+              qaId != null
+                ? String(qaId).padStart(2, '0')
+                : String((qIdx ?? 0) + 1).padStart(2, '0');
+            const file = new File([blob], `audio${prettyId}.webm`, { type: 'audio/webm' });
+
             const form = new FormData();
             form.append('file', file);
+            if (simulationId) form.append('simulationId', simulationId);
+            if (qaId != null) form.append('qaId', String(qaId)); // ✅ 서버 식별자
 
-            // Content-Type 수동 설정 금지 (Axios가 자동 설정)
+            // ✅ 권장: 경로에 qaId 포함
             const res = await axiosInstance.post(
-              `/simulation/${simulationId}/answers/${qIdx}/audio`,
+              qaId != null && simulationId
+                ? `/simulation/${simulationId}/answers/${qaId}/audio`
+                : `/simulation/answers/audio`,
               form,
             );
 
-            // 서버가 url을 줄 수도/안 줄 수도 있음 (지금 단계는 보통 없음)
-            const serverUrl =
-              res?.data?.data?.url ?? // (나중에 URL 주도록 바꾸면 여기서 잡힘)
-              res?.data?.url ?? // 널가드
-              null;
-
-            // 현재 단계(저장만)에서는 serverUrl이 보통 null 이므로, 로컬 프리뷰로 폴백
+            const serverUrl = res?.data?.data?.url || res?.data?.url || null;
             url = serverUrl || localPreviewUrl;
 
-            // 필요하면 업로드 메타를 참고할 수도 있음
-            // const { ok, storedName, originalName, size, contentType } = res?.data || {};
+            onSaved?.(url, qaId ?? qIdx); // ✅ 부모는 (url, qaId)로 처리
             console.log('upload result:', res.data);
-
-            onSaved?.(url, qIdx);
           } catch (uploadErr) {
             console.error('오디오 업로드 실패:', uploadErr);
-            // 업로드 실패 시에도 로컬 프리뷰로 UI 지속
             url = localPreviewUrl;
-            onSaved?.(url, qIdx);
+            onSaved?.(url, qaId ?? qIdx);
           }
         }
 
@@ -156,10 +163,11 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
       cleanupStream();
       setIsRecording(false);
       onRecordingChange?.(false);
-      setCurrentIdx(null); // qIdx는 이미 보관했으므로 리셋 OK
+      qaIdRef.current = null;
+      qIdxRef.current = null;
     }
 
-    return { url, qIdx };
+    return { url, qaId, qIdx };
   }
 
   useEffect(() => {
