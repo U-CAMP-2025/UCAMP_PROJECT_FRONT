@@ -126,7 +126,9 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
               qaId != null
                 ? String(qaId).padStart(2, '0')
                 : String((qIdx ?? 0) + 1).padStart(2, '0');
-            const file = new File([blob], `audio${prettyId}.webm`, { type: 'audio/webm' });
+            const file = new File([blob], `audio_${prettyId}_${simulationId}.webm`, {
+              type: 'audio/webm',
+            });
 
             const form = new FormData();
             form.append('file', file);
