@@ -48,7 +48,7 @@ export const UserManageTable = () => {
     const loadData = async () => {
       try {
         const data = await fetchGetAllUser();
-
+        console.log(data);
         // 2️⃣ 데이터 매핑
         const mapped = data.map((user, index) => ({
           id: user.userId,
@@ -56,7 +56,7 @@ export const UserManageTable = () => {
           nickName: user.nickname,
           email: user.email,
           job: user.jobName,
-          passStatus: user.passStatus === 'PASS' ? '합격자' : '구직자',
+          passStatus: user.passStatus === 'Y' ? '합격자' : '구직자',
           status: '활성', // 백엔드에 없다면 기본값 지정
           createdAt: user.createdAt?.slice(0, 10) || '-',
           role: user.role === 'ADMIN' ? 'Admin' : 'User',
@@ -74,6 +74,7 @@ export const UserManageTable = () => {
           certficate: {
             certe_req_date: user.certReqDate?.slice(0, 10) || '-',
             certe_trmt_date: user.certTrmtDate?.slice(0, 10) || '-',
+            certe_file_url: user.certFileUrl,
             certe_status: user.certStatus || null, // PENDING / APPROVED / REJECTED 등
           },
         }));
@@ -197,6 +198,7 @@ export const UserManageTable = () => {
                         certe_status: decision,
                         certe_trmt_date: new Date().toISOString().slice(0, 10),
                       },
+                      passStatus: decision === 'APPROVED' ? '합격자' : '구직자',
                     }
                   : r,
               ),
