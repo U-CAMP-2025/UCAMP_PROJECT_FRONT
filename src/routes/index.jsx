@@ -9,6 +9,7 @@ import QADetailPage from '@pages/QADetail';
 import QAListPage from '@pages/QAList';
 import SignupPage from '@pages/Signup';
 import SimulationPage from '@pages/Simulation';
+import SimulationGO from '@pages/Simulation/SimulationGo';
 import TestPage from '@pages/Test';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
 
@@ -26,6 +27,7 @@ const AppRoutes = () => {
         <Route path='/myqa' element={<MyQAPage />} />
         <Route path='/qa/create' element={<QACreatePage />} />
         <Route path='/simulation' element={<SimulationPage />} />
+        <Route path='/simulation/:simulationId/start' element={<SimulationGO />} />
         <Route path='/admin/user' element={<AdminPage />} />
         <Route path='/admin/transcription' element={<AdminPage />} />
         <Route path='/login/bridge' element={<LoginBridge />} />
