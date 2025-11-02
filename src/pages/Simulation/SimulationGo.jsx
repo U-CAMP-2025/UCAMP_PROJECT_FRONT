@@ -62,7 +62,6 @@ export default function SimulationGO() {
         const post = data.post ?? null;
         const qaList = Array.isArray(post?.qaList) ? post.qaList : [];
         const rand = data.simulationRandom;
-
         if (!cancelled) {
           setInterviewerId(_interviewerId);
           setImageUrl(_imageUrl);
@@ -291,7 +290,7 @@ export default function SimulationGO() {
             onAutoFinish={handleAutoFinish} // (qaId, url)
           />
 
-          {/* 녹음 리스트: 전사 텍스트는 화면에 표시하지 않음 */}
+          {/* 녹음 리스트: 랜덤 순서(orderedQa)에 맞게 표시. 다운로드 파일명은 qaId 기반 */}
           <div style={{ marginTop: 12 }}>
             <h4>녹음 파일(질문별)</h4>
             <ol style={{ paddingLeft: 18, lineHeight: 1.9 }}>
@@ -331,7 +330,7 @@ export default function SimulationGO() {
           </div>
         </div>
 
-        {/* 우측 스크립트: 전사(STT)는 더 이상 표시하지 않음 */}
+        {/* 우측 스크립트: 랜덤 순서(orderedQa) 그대로 */}
         {scriptMode && (
           <div
             style={{

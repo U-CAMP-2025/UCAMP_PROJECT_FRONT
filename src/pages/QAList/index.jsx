@@ -1,4 +1,7 @@
 // 💡 새로운 컴포넌트 임포트
+import { fetchJobList } from '@api/jobAPIS';
+import { scrollQaSet } from '@api/postAPIS';
+import { fetchUserMypage } from '@api/userAPIS';
 import { JobSelector } from '@components/common/JobSelector';
 import { SortSelector } from '@components/common/SortSelector';
 import Typography from '@components/common/Typography';
@@ -6,7 +9,9 @@ import { PageContainer } from '@components/layout/PageContainer';
 import QASetList from '@components/qaset/QASetList';
 import { ALL_JOBS_MAP } from '@pages/List/AllJobsMap';
 import { qaList } from '@pages/List/qaList';
-import React, { useMemo, useState } from 'react';
+import { useAuthStore } from '@store/auth/useAuthStore';
+import React, { useEffect, useMemo, useState } from 'react';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import styled from 'styled-components';
 
 // --- 페이지 스타일 정의 ---
@@ -54,69 +59,107 @@ const MainContentWrapper = styled.div`
 `;
 
 export default function QAListPage() {
-  const [currentSort, setCurrentSort] = useState('bookcount_asc');
+  const { isLogin } = useAuthStore();
+  const [currentSort, setCurrentSort] = useState('bookcount_desc');
+  const [selectedJobIds, setSelectedJobIds] = useState([99]);
 
-  const [selectedJobIds, setSelectedJobIds] = useState([]);
+  // 무한 스크롤 상태
+  const [displayList, setDisplayList] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const ITEMS_PER_PAGE = 9;
 
+  // 정렬 변경
   const handleSortChange = (newSort) => {
     setCurrentSort(newSort);
-    console.log('정렬 방식 변경:', newSort);
+    setPage(1);
+    setDisplayList([]);
+    setHasMore(true);
   };
 
-  // 💡 2. 필터링과 정렬을 모두 처리하는 useMemo
-  const filteredAndSortedList = useMemo(() => {
-    // --- 1. 필터링 ---
-    let filteredList = [...qaList];
-    if (selectedJobIds.length > 0) {
-      // 선택된 ID를 직무 이름(string)으로 변환
-      const selectedJobNames = selectedJobIds.map((id) => ALL_JOBS_MAP.get(id));
+  // 직무 필터 변경
+  const handleJobChange = (newJobIds) => {
+    setSelectedJobIds(newJobIds);
+    setPage(1);
+    setDisplayList([]);
+    setHasMore(true);
+  };
 
-      filteredList = qaList.filter((item) => {
-        // item.job 배열에 선택된 직무 이름이 하나라도 포함되어 있는지 확인
-        return selectedJobNames.every((jobName) => item.job.includes(jobName));
+  // 초기 직무 데이터 로드
+  useEffect(() => {
+    if (isLogin) {
+      fetchUserMypage().then((res) => {
+        setSelectedJobIds([res?.job?.jobId]);
       });
     }
+  }, []);
 
-    // --- 2. 정렬 (필터링된 리스트 기준) ---
-    const sorted = [...filteredList];
-    switch (currentSort) {
-      case 'bookcount_asc':
-        return sorted.sort((a, b) => b.bookCount - a.bookCount);
-      case 'review_desc':
-        return sorted.sort((a, b) => b.review - a.review);
-      case 'latest_desc':
-        return sorted.sort((a, b) => {
-          const dateA = new Date(a.createAt.replace(/\./g, '-'));
-          const dateB = new Date(b.createAt.replace(/\./g, '-'));
-          return dateB - dateA;
-        });
-      default:
-        return sorted;
+  // API 호출
+  const fetchQAList = async (pageNum = 1) => {
+    const params = {
+      page: pageNum,
+      limit: ITEMS_PER_PAGE,
+      sort: currentSort,
+      jobs: selectedJobIds,
+    };
+
+    console.log(params);
+
+    scrollQaSet(params)
+      .then((response) => {
+        console.log(response);
+        const items = response?.data.content ?? [];
+
+        if (pageNum === 1) {
+          setDisplayList(items);
+        } else {
+          setDisplayList((prev) => [...prev, ...items]);
+        }
+
+        if (items.length < ITEMS_PER_PAGE) {
+          setHasMore(false);
+        } else {
+          setHasMore(true);
+        }
+      })
+      .catch();
+  };
+
+  // 페이지 변경 시 데이터 호출
+  useEffect(() => {
+    fetchQAList(page);
+  }, [page, currentSort, selectedJobIds]);
+
+  const fetchMoreData = () => {
+    if (hasMore) {
+      setPage((prev) => prev + 1);
     }
-    // 💡 3. currentSort 또는 selectedJobIds가 변경될 때마다 재계산
-  }, [currentSort, selectedJobIds]);
+  };
 
   return (
     <PageContainer header footer>
-      {' '}
       <MainContentWrapper>
-        {' '}
         <FilterAndSortBar>
-          {' '}
           <FilterSection>
-            <JobSelector value={selectedJobIds} onChange={setSelectedJobIds} />{' '}
-          </FilterSection>{' '}
+            <JobSelector value={selectedJobIds} onChange={handleJobChange} />
+          </FilterSection>
           <SortSection>
-            {' '}
             <Typography size={3} style={{ fontWeight: 500, color: 'inherit' }}>
-              정렬 방법{' '}
+              정렬 방법
             </Typography>
-            <SortSelector currentSort={currentSort} onSortChange={handleSortChange} />{' '}
-          </SortSection>{' '}
+            <SortSelector currentSort={currentSort} onSortChange={handleSortChange} />
+          </SortSection>
         </FilterAndSortBar>
-        <QASetList qaList={filteredAndSortedList} />{' '}
+
+        <InfiniteScroll
+          dataLength={displayList.length}
+          next={fetchMoreData}
+          hasMore={hasMore}
+          loader={<h4 style={{ textAlign: 'center' }}>Loading...</h4>}
+        >
+          <QASetList qaList={displayList} />
+        </InfiniteScroll>
       </MainContentWrapper>
-      <div style={{ textAlign: 'center', padding: '20px' }}></div>{' '}
     </PageContainer>
   );
 }

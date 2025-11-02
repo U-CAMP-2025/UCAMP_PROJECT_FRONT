@@ -1,5 +1,11 @@
 import { fetchJobList } from '@api/jobAPIS';
-import { fetchUserMypage } from '@api/userAPIS';
+import {
+  fetchUserMypage,
+  patchUserJob,
+  postUserDelete,
+  postUserPathPass,
+  uploadCertificateImage,
+} from '@api/userAPIS';
 import Button from '@components/common/Button';
 import ReadonlyInput from '@components/common/ReadOnlyInput';
 import SearchableSelect from '@components/common/SearchableSelect';
@@ -13,6 +19,7 @@ import { FieldCard, FieldLeft, FieldLabel, FieldValue, FieldActions } from './Fi
 import PhotoSubmitDialog from './PhotoSubmitDialog';
 
 const initialUserState = {
+  userId: 0,
   nickname: '유저 닉네임',
   email: 'user@email.com',
   jobName: '',
@@ -29,8 +36,20 @@ const MyInfo = () => {
   const [editingJob, setEditingJob] = useState(false);
   const [fileName, setFileName] = useState('');
 
-  const handlePhotoSubmit = async () => {
-    setOpenPhotoModal(false);
+  const handlePhotoSubmit = async (file) => {
+    try {
+      // 1️⃣ 이미지 업로드
+      const { fileName } = await uploadCertificateImage(file);
+
+      // 2️⃣ 합격자 신청 (JWT로 user 식별)
+      await postUserPathPass(fileName);
+
+      alert('합격자 인증이 신청되었습니다.');
+      setOpenPhotoModal(false);
+    } catch (err) {
+      console.error(err);
+      alert('신청 중 오류가 발생했습니다.');
+    }
   };
 
   useEffect(() => {
@@ -38,15 +57,17 @@ const MyInfo = () => {
       try {
         const data = await fetchUserMypage(); // 백엔드 요청
         // 백엔드 → 프론트 구조로 변환
-
         setUser({
+          userId: data.userId,
           nickname: data.nickname,
           email: data.email,
-          job: data.job,
+          jobName: data.job.jobName,
           passStatus: data.passStatus,
           status: data.status,
           userProfileImageUrl: '',
         });
+        setSelectedJobId(data.job.jobId);
+        console.log('유저 정보', user);
       } catch (err) {
         console.error('데이터 로드 실패:', err);
       }
@@ -79,6 +100,31 @@ const MyInfo = () => {
     setFileName(file.name);
   };
 
+  const handleJobUpdate = async () => {
+    try {
+      await patchUserJob(user.userId, selectedJobId); // 서버 PATCH 요청
+      setEditingJob(false); // 수정 모드 종료
+      setUser((prev) => ({ ...prev, jobId: selectedJobId })); // 로컬 상태 갱신
+      alert('관심 직무가 수정되었습니다.');
+    } catch (err) {
+      console.error('직무 수정 실패:', err);
+      alert('직무 수정 중 오류가 발생했습니다.');
+    }
+  };
+  const handleUserDelete = async () => {
+    const confirmDelete = window.confirm('정말 탈퇴하시겠어요?');
+    if (!confirmDelete) return;
+
+    try {
+      await postUserDelete(user.userId);
+      alert('회원 탈퇴가 완료되었습니다.');
+      // 필요 시 로그아웃 처리나 메인 이동
+      window.location.href = '/';
+    } catch (err) {
+      console.error('회원 탈퇴 실패:', err);
+      alert('탈퇴 중 오류가 발생했습니다.');
+    }
+  };
   return (
     <Container>
       <Typography as='h1' size={7} weight='bold'>
@@ -117,7 +163,7 @@ const MyInfo = () => {
                 />
                 <Button
                   variant='outline'
-                  onClick={() => setEditingJob(false)}
+                  onClick={handleJobUpdate}
                   style={{
                     fontSize: theme.font.size[2],
                   }}
@@ -149,11 +195,11 @@ const MyInfo = () => {
               <>
                 <FieldValue>합격자입니다</FieldValue>
                 <FieldActions>
-                  <button style={pillStyle} onClick={() => setOpenPhotoModal(true)}>
+                  {/* <button style={pillStyle} onClick={() => setOpenPhotoModal(true)}>
                     <Typography as='span' size={2} weight='semiBold'>
                       신청
                     </Typography>
-                  </button>
+                  </button> */}
                 </FieldActions>
               </>
             ) : (
@@ -177,8 +223,9 @@ const MyInfo = () => {
         </FieldCard>
       </Row>
       <Footer>
-        <Button>수정 완료</Button>
-        <Button variant='outline'>회원 탈퇴</Button>
+        <Button variant='outline' onClick={handleUserDelete}>
+          회원 탈퇴
+        </Button>
       </Footer>
       <PhotoSubmitDialog
         open={openPhotoModal}

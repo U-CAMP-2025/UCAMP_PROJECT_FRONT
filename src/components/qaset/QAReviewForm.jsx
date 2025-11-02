@@ -36,11 +36,22 @@ export default function QAReviewForm({
   const content = watch('content');
   const remain = Math.max(0, maxLength - (content?.length || 0));
 
-  const submit = (data) => {
+  const submit = async (data) => {
+    // 💡 async 키워드 추가
     if (!data?.content?.trim()) return;
-    onSubmit?.({ content: data.content.trim() });
-    // 필요 시 성공 후 reset, 외부에서 제어하고 싶으면 제거
-    // reset({ content: '' });
+
+    if (onSubmit) {
+      try {
+        // 💡 onSubmit (즉, handleCreateReview)이 완료될 때까지 await
+        await onSubmit({ content: data.content.trim() });
+        // 💡 API 호출 성공 시에만 폼을 리셋
+        reset({ content: '' });
+      } catch (error) {
+        // 💡 API 호출 실패 시 (handleCreateReview에서 throw error)
+        // 폼을 리셋하지 않고 사용자가 내용을 수정할 수 있게 둠
+        console.log('Submission failed, not resetting form.');
+      }
+    }
   };
 
   return (

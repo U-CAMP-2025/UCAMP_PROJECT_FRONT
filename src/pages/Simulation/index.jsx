@@ -13,7 +13,7 @@ import styled from 'styled-components';
 // --- [스타일 정의] ---
 
 const MainContentWrapper = styled.div`
-  width: 800px;
+  width: 80%;
   margin: 0 auto;
   padding: ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[6]};
   min-height: 80vh;
