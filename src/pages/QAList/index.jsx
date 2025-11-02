@@ -61,8 +61,7 @@ const MainContentWrapper = styled.div`
 export default function QAListPage() {
   const { isLogin } = useAuthStore();
   const [currentSort, setCurrentSort] = useState('bookcount_desc');
-  const [selectedJobIds, setSelectedJobIds] = useState([]);
-  const [jobs, setJobs] = useState([]);
+  const [selectedJobIds, setSelectedJobIds] = useState([99]);
 
   // 무한 스크롤 상태
   const [displayList, setDisplayList] = useState([]);
@@ -88,9 +87,10 @@ export default function QAListPage() {
 
   // 초기 직무 데이터 로드
   useEffect(() => {
-    fetchJobList().then((res) => setJobs(res?.data ?? []));
     if (isLogin) {
-      fetchUserMypage().then((res) => setSelectedJobIds([res?.job?.jobId]));
+      fetchUserMypage().then((res) => {
+        setSelectedJobIds([res?.job?.jobId]);
+      });
     }
   }, []);
 

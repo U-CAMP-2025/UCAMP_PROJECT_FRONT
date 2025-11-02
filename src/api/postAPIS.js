@@ -63,3 +63,13 @@ export const scrollQaSet = async (form) => {
   const { data } = await axiosInstance.post('/posts/search', form);
   return data;
 };
+
+/**
+ * POST: 질문세트 복제
+ * @param {Long} postId 데이터
+ * @returns {Promise<Object>} response
+ */
+export const copyPost = async (postId) => {
+  const { data } = await axiosInstance.post(`/posts/${postId}`);
+  return data;
+};

@@ -1,68 +1,51 @@
-import { delPost, getPost } from '@api/postAPIS';
+import { copyPost, delPost, getPost } from '@api/postAPIS';
+import { Overlay, Content, Title, Description } from '@components/common/Dialog';
 import Tag, { TagGroup } from '@components/common/Tag';
 import Typography from '@components/common/Typography';
+import { BookmarkIcon } from '@components/common/icons';
+// 🧩 다이얼로그 관련 import
+import * as Dialog from '@radix-ui/react-dialog';
 import { Pencil1Icon, TrashIcon } from '@radix-ui/react-icons';
 import theme from '@styles/theme';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
+// ✅ 너가 준 다이얼로그 파일
+
 // TODO: 유저 자신의 QA셋인 경우에만 삭제 아이콘 노출
-const sampleData = {
-  postId: 1,
-  job: ['웹개발', '프론트엔드 개발'],
-  title: '질문답변셋 제목',
-  nickname: '만든 유저 닉네임',
-  description:
-    '이 셋은 프론트엔드 신입 면접에서 자주 등장하는 질문을 모았습니다. 사전 학습 참고 링크와 답변 포인트를 함께 정리했습니다.',
-  createAt: '2025.10.30',
-  isPassed: true,
-  isPublic: false,
-  qa: [
-    {
-      qaId: 1,
-      question: '리액트의 상태 관리 방법은 무엇이 있나요?',
-      answer: 'Context, Redux, Zustand 등. 규모에 따라 선택하며, 서버 상태는 TanStack Query 권장.',
-    },
-    {
-      qaId: 2,
-      question: '브라우저 렌더링 과정에 대해 설명해주세요.',
-      answer:
-        'HTML 파싱 → DOM 생성, CSS 파싱 → CSSOM 생성, Render Tree → Layout → Paint → Composite.',
-    },
-  ],
-};
 export const QADetail = () => {
   const params = useParams();
   const qaId = params.qaId;
   const [qaData, setQaData] = useState(null);
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     getPost(qaId)
       .then((resp) => {
         setQaData(resp?.data ?? null);
-        console.log(resp);
       })
-      .catch(setQaData([]));
+      .catch(() => setQaData([]));
   }, [qaId]);
 
   const onUpdate = () => {
-    navigate('/qa/update', {
-      state: {
-        qaId: qaId,
-      },
-    });
+    navigate('/qa/update', { state: { qaId } });
   };
 
-  const onDelete = () => {
-    if (confirm('해당 질문셋을 삭제하시겠습니까?')) {
-      delPost(qaId)
-        .then((response) => {
-          navigate('/myqa');
-        })
-        .catch();
-    }
+  const onCopy = () => {
+    copyPost(qaId)
+      .then(() => navigate('/myqa'))
+      .catch();
+  };
+
+  const onDeleteConfirm = () => {
+    delPost(qaId)
+      .then(() => {
+        setOpenDeleteModal(false);
+        navigate('/myqa');
+      })
+      .catch();
   };
 
   if (!qaData) return null;
@@ -87,39 +70,17 @@ export const QADetail = () => {
             {title}
           </Typography>
           <Meta>
-            <Typography
-              size={3}
-              weight='semiBold'
-              style={{
-                color: theme.colors.gray[12],
-              }}
-            >
+            <Typography size={3} weight='semiBold' style={{ color: theme.colors.gray[12] }}>
               만든 유저{' '}
             </Typography>
-            <Typography
-              size={3}
-              style={{
-                color: theme.colors.gray[12],
-              }}
-            >
+            <Typography size={3} style={{ color: theme.colors.gray[12] }}>
               {nickname}
             </Typography>
             <Dot>•</Dot>
-            <Typography
-              size={3}
-              weight='semiBold'
-              style={{
-                color: theme.colors.gray[12],
-              }}
-            >
+            <Typography size={3} weight='semiBold' style={{ color: theme.colors.gray[12] }}>
               작성일
             </Typography>
-            <Typography
-              size={3}
-              style={{
-                color: (theme) => theme.colors.primary[11],
-              }}
-            >
+            <Typography size={3} style={{ color: theme.colors.primary[11] }}>
               {dateOnly}
             </Typography>
             {isPassed && <PassBadge>합격자</PassBadge>}
@@ -134,19 +95,46 @@ export const QADetail = () => {
             >
               가져온 글 (From: {otherWriter})
             </Typography>
-          )}{' '}
+          )}
         </div>
-        {me && (
-          <div>
-            <IconButton1 aria-label='수정' onClick={onUpdate}>
-              <Pencil1Icon width={24} height={24} fill='true' />
+
+        <div>
+          {!me && (
+            <IconButton1 aria-label='북마크' onClick={onCopy}>
+              <BookmarkIcon />
             </IconButton1>
-            <IconButton2 aria-label='삭제' onClick={onDelete}>
-              <TrashIcon width={24} height={24} fill='true' />
-            </IconButton2>
-          </div>
-        )}
+          )}
+          {me && (
+            <>
+              <IconButton1 aria-label='수정' onClick={onUpdate}>
+                <Pencil1Icon width={24} height={24} fill='true' />
+              </IconButton1>
+              <IconButton2 aria-label='삭제' onClick={() => setOpenDeleteModal(true)}>
+                <TrashIcon width={24} height={24} fill='true' />
+              </IconButton2>
+            </>
+          )}
+        </div>
       </HeaderRow>
+
+      {/* ✅ 삭제 확인 다이얼로그 */}
+      <Dialog.Root open={openDeleteModal} onOpenChange={setOpenDeleteModal}>
+        <Dialog.Portal>
+          <Overlay />
+          <Content>
+            <Title>질문셋 삭제</Title>
+            <Description>
+              정말로 이 질문셋을 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다.
+            </Description>
+            <ButtonRow>
+              <DeleteButton onClick={onDeleteConfirm}>삭제</DeleteButton>
+              <Dialog.Close asChild>
+                <CancelButton>취소</CancelButton>
+              </Dialog.Close>
+            </ButtonRow>
+          </Content>
+        </Dialog.Portal>
+      </Dialog.Root>
 
       {job.length > 0 && (
         <FieldBox>
@@ -177,6 +165,7 @@ export const QADetail = () => {
   );
 };
 
+/* ----------------------------- 스타일 ----------------------------- */
 const Wrap = styled.div`
   display: flex;
   flex-direction: column;
@@ -218,25 +207,35 @@ const IconButton1 = styled.button`
   &:active {
     transform: translateY(1px);
   }
-  margin: 0 10px;
+  margin-right: 10px;
 `;
 
-const IconButton2 = styled.button`
+const IconButton2 = styled(IconButton1)``;
+
+const ButtonRow = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: ${({ theme }) => theme.space[3]};
+`;
+
+const CancelButton = styled.button`
   all: unset;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
+  cursor: pointer;
+  background: ${({ theme }) => theme.colors.gray[4]};
+  color: ${({ theme }) => theme.colors.gray[12]};
+  font-weight: ${({ theme }) => theme.font.weight.semiBold};
   border-radius: ${({ theme }) => theme.radius.md};
-  color: ${({ theme }) => theme.colors.primary[10]};
-  background: ${({ theme }) => theme.colors.primary[3]};
+  padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[4]};
   &:hover {
-    filter: brightness(0.98);
-    cursor: pointer;
+    background: ${({ theme }) => theme.colors.gray[5]};
   }
-  &:active {
-    transform: translateY(1px);
+`;
+
+const DeleteButton = styled(CancelButton)`
+  background: ${({ theme }) => theme.colors.primary[10]};
+  color: white;
+  &:hover {
+    background: ${({ theme }) => theme.colors.primary[11]};
   }
 `;
 
