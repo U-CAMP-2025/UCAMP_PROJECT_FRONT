@@ -38,6 +38,7 @@ export default function SimulationGO() {
   const [qaState, setQaState] = useState(null);
   const [simPost, setPost] = useState(null);
   const [scriptMode, setScriptMode] = useState(false);
+  const [ttsSpeaking, setTtsSpeaking] = useState(false); // TTS true false
 
   const videoRef = useRef(null);
   const audioRef = useRef(null);
@@ -199,6 +200,7 @@ export default function SimulationGO() {
           voiceModel={VoiceModel[(parseInt(interviewerId, 10) || interviewerId) - 1]}
           currentQuestion={currentQuestion}
           enabled={isSessionStarted}
+          onSpeakingChange={setTtsSpeaking}
         />
       )}
 
@@ -210,7 +212,7 @@ export default function SimulationGO() {
         <button
           style={btnStyle}
           onClick={startAnswer}
-          disabled={!isSessionStarted || isQuestionRecording}
+          disabled={ttsSpeaking || !isSessionStarted || isQuestionRecording}
         >
           답변하기 (녹음 시작)
         </button>
