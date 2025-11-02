@@ -4,29 +4,33 @@ import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function LoginBridge() {
-  const { login } = useAuthStore();
   const { search } = useLocation();
   const navigate = useNavigate();
-
+  const { login, setAccessToken } = useAuthStore.getState();
   useEffect(() => {
-    const params = new URLSearchParams(search);
-    const at = params.get('accessToken');
-    const rt = params.get('refreshToken');
-    const nickname = params.get('nickname');
-    const profileImageUrl = params.get('profileImageUrl');
+    try {
+      const params = new URLSearchParams(search);
+      const at = params.get('accessToken');
+      const nickname = params.get('nickname');
+      const profileImageUrl = params.get('profileImageUrl');
 
-    if (at && rt) {
-      localStorage.setItem('accessToken', at);
-      localStorage.setItem('refreshToken', rt);
-      login({
-        name: nickname,
-        profileImageUrl,
-      });
-      navigate('/', { replace: true });
-    } else {
+      if (at) {
+        setAccessToken(at);
+        login({
+          user: {
+            name: nickname,
+            profileImageUrl,
+          },
+        });
+        navigate('/', { replace: true });
+      } else {
+        navigate('/signup', { replace: true });
+      }
+    } catch (e) {
+      console.error('Login Error', e);
       navigate('/signup', { replace: true });
     }
-  }, [search, navigate]);
+  }, []);
 
   return (
     <PageContainer header footer>

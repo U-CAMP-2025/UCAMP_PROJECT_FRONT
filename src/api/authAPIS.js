@@ -15,7 +15,7 @@ export const postSignUp = async (nickname, jobId) => {
  * POST: 토큰 리프레쉬
  */
 export const postTokenRefresh = async () => {
-  const { data } = await axiosInstance.post('/auth/refresh');
+  const { data } = await axiosInstance.post('/auth/refresh', {});
   return data;
 };
 
