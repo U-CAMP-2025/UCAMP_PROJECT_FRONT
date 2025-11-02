@@ -8,6 +8,7 @@ import { useParams } from 'react-router-dom';
 import TextToSpeech from './TextToSpeech';
 
 const MAX_SECONDS = 60;
+const SHOW_CONSOLE_LOGS = true; // 콘솔 로그 on/off
 
 // 1..n 배열 만들고 셔플 (표시용은 1-based를 유지)
 function makeOneBasedShuffled(n) {
@@ -38,7 +39,7 @@ export default function SimulationGO() {
   const [qaState, setQaState] = useState(null);
   const [simPost, setPost] = useState(null);
   const [scriptMode, setScriptMode] = useState(false);
-  const [ttsSpeaking, setTtsSpeaking] = useState(false); // TTS true false
+  const [ttsSpeaking, setTtsSpeaking] = useState(false); // TTS true/false
 
   const videoRef = useRef(null);
   const audioRef = useRef(null);
@@ -51,6 +52,7 @@ export default function SimulationGO() {
 
     (async () => {
       try {
+        // ✅ baseURL이 /api 이므로 슬래시 없이 호출
         const resp = await axiosInstance.get(`/simulation/${simulationId}/start`);
         const data = resp.data?.data;
         if (!data) return;
@@ -60,7 +62,7 @@ export default function SimulationGO() {
         const post = data.post ?? null;
         const qaList = Array.isArray(post?.qaList) ? post.qaList : [];
         const rand = data.simulationRandom;
-        console.log(rand);
+
         if (!cancelled) {
           setInterviewerId(_interviewerId);
           setImageUrl(_imageUrl);
@@ -74,7 +76,6 @@ export default function SimulationGO() {
           } else {
             setRandomOrder(Array.from({ length: qaList.length }, (_, i) => i + 1)); // 순차
           }
-          console.log(data.simulationRandom);
 
           setCurrentIdx(0);
           setcurrentQuestion('');
@@ -148,13 +149,27 @@ export default function SimulationGO() {
     const { url, qaId } = await audioRef.current.finish(); // ✅ qaId 반환 받음
     if (url && qaId) {
       setAudioById((prev) => ({ ...prev, [qaId]: url }));
+      // STT는 onSaved에서 처리(중복 방지)
     }
     goNextQuestionGuarded();
   };
 
-  const handleSavedAudio = (url, qaId) => {
+  // === 업로드 성공 콜백: (url, qaId, transcript)
+  const handleSavedAudio = (url, qaId, transcript) => {
     if (!qaId) return;
     setAudioById((prev) => ({ ...prev, [qaId]: url }));
+
+    if (SHOW_CONSOLE_LOGS && typeof transcript === 'string') {
+      // 화면에는 표시하지 않고 콘솔로만 출력
+      // 현재 질문 텍스트도 함께 찍어두면 디버깅 편함
+      const qText = orderedQa.find((q) => q?.qaId === qaId)?.qaQuestion || '';
+      // 길이 긴 로그는 그룹으로 보기 좋게
+      console.groupCollapsed(
+        `[STT] qaId=${qaId} | "${qText.slice(0, 40)}${qText.length > 40 ? '…' : ''}"`,
+      );
+      console.log(transcript);
+      console.groupEnd();
+    }
   };
 
   const handleTick = (left) => setTimeLeft(left);
@@ -163,6 +178,7 @@ export default function SimulationGO() {
   const handleAutoFinish = (qaId, url) => {
     if (url && qaId) {
       setAudioById((prev) => ({ ...prev, [qaId]: url }));
+      // 필요 시 자동 저장에서도 transcript 로그를 받고 싶다면 QuestionAudioRecorder 쪽에서 전달 확장
     }
     goNextQuestionGuarded();
   };
@@ -269,13 +285,13 @@ export default function SimulationGO() {
             ref={audioRef}
             maxSeconds={MAX_SECONDS}
             simulationId={simulationId}
-            onSaved={handleSavedAudio} // (url, qaId)
+            onSaved={handleSavedAudio} // (url, qaId, transcript) — transcript는 콘솔로만 출력
             onTick={handleTick}
             onRecordingChange={handleRecordingChange}
             onAutoFinish={handleAutoFinish} // (qaId, url)
           />
 
-          {/* 녹음 리스트: 랜덤 순서(orderedQa)에 맞게 표시. 다운로드 파일명은 qaId 기반 */}
+          {/* 녹음 리스트: 전사 텍스트는 화면에 표시하지 않음 */}
           <div style={{ marginTop: 12 }}>
             <h4>녹음 파일(질문별)</h4>
             <ol style={{ paddingLeft: 18, lineHeight: 1.9 }}>
@@ -315,7 +331,7 @@ export default function SimulationGO() {
           </div>
         </div>
 
-        {/* 우측 스크립트: 랜덤 순서(orderedQa) 그대로 */}
+        {/* 우측 스크립트: 전사(STT)는 더 이상 표시하지 않음 */}
         {scriptMode && (
           <div
             style={{
