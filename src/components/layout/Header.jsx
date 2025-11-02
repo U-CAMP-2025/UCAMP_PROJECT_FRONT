@@ -81,13 +81,14 @@ export const Header = () => {
   };
 
   useEffect(() => {
-    getNoti()
-      .then((response) => {
-        console.log(response);
-        setNotifications(response?.data ?? null);
-      })
-      .catch(() => setNotifications(null));
-  }, []);
+    if (isLogin) {
+      getNoti()
+        .then((response) => {
+          setNotifications(response?.data ?? null);
+        })
+        .catch(() => setNotifications(null));
+    }
+  }, [isLogin]);
 
   return (
     <HeaderContainer>

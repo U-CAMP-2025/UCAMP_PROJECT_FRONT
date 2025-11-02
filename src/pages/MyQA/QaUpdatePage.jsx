@@ -1,4 +1,4 @@
-import { createPost } from '@api/postAPIS';
+import { createPost, editPost, getPost } from '@api/postAPIS';
 import { JobSelector } from '@components/common/JobSelector';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
@@ -18,12 +18,12 @@ import {
 import * as Accordion from '@radix-ui/react-accordion';
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import { CheckIcon, PlusIcon } from '@radix-ui/react-icons';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { QACreateInput } from './QaCreateInput';
+import { QAUpdateInput } from './QaUpdateInput';
 
 // --- 페이지 스타일 정의 ---
 const FormWrapper = styled.div`
@@ -136,17 +136,38 @@ const SubmitButton = styled.button`
 `;
 // --- 스타일 정의 끝 ---
 
-export default function QACreatePage() {
+export default function QAUpdatePage() {
+  const location = useLocation();
+  const { qaId } = location.state || {};
   const navigate = useNavigate();
   const methods = useForm({
     defaultValues: {
-      jobIds: [],
+      jobIds: [1, 4, 6],
       title: '',
       summary: '',
       qaSets: [{ question: '', answer: '' }],
       status: 'Y',
     },
   });
+
+  const { reset } = methods;
+
+  useEffect(() => {
+    getPost(qaId)
+      .then((resp) => {
+        console.log(resp);
+        const data = resp?.data ?? null;
+        reset({
+          jobIds: data.jobIds,
+          title: data.title,
+          summary: data.description,
+          qaSets: [...data.qa],
+          status: data.public ? 'Y' : 'N',
+        });
+      })
+      .catch();
+  }, [qaId]);
+
   const {
     control,
     register,
@@ -163,7 +184,7 @@ export default function QACreatePage() {
 
   const selectedJobIds = watch('jobIds');
   const onSubmit = (data) => {
-    createPost(data)
+    editPost(qaId, data)
       .then((response) => {
         navigate(`/qa/${response?.data}`);
       })
@@ -205,7 +226,7 @@ export default function QACreatePage() {
         <FormWrapper>
           {' '}
           <Typography as='h1' size={7} weight='bold' style={{ marginBottom: '40px' }}>
-            새 질문답변 세트 만들기{' '}
+            질문답변 세트 수정하기{' '}
           </Typography>{' '}
           <form onSubmit={handleSubmit(onSubmit)}>
             {/* 1. 직무 선택 */}{' '}
@@ -255,7 +276,7 @@ export default function QACreatePage() {
                       {' '}
                       {fields.map((item, index) => (
                         // 💡 Draggable 대신 QACreateInput이 useSortable 훅을 사용
-                        <QACreateInput
+                        <QAUpdateInput
                           key={item.id}
                           id={item.id} // 💡 dnd-kit에 ID 전달
                           index={index}

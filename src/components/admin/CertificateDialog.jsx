@@ -103,7 +103,21 @@ export default function CertificateDialog({ open, onOpenChange, user, onConfirm 
             <Typography size={4} weight='semiBold'>
               첨부파일
             </Typography>
-            <Value>{user?.certficate?.fileName ?? '-'}</Value>
+            {user?.certficate?.certe_file_url ? (
+              <img
+                src={`http://localhost:8080${user.certficate.certe_file_url}`}
+                alt='합격 인증 이미지'
+                style={{
+                  maxWidth: '240px',
+                  maxHeight: '160px',
+                  objectFit: 'contain',
+                  border: '1px solid #ddd',
+                  borderRadius: '6px',
+                }}
+              />
+            ) : (
+              <Value>-</Value>
+            )}
           </Row>
 
           <RGRoot value={decision} onValueChange={setDecision}>

@@ -103,11 +103,11 @@ export default function QASetCard({ item }) {
     bookCount = 0,
     review = 0,
     createAt,
-    OTHER_WRITER,
+    otherWriter,
   } = item || {};
 
   // 💡 OTHER_WRITER 값이 있으면 true (북마크된 게시글)
-  const isBookmarked = !!OTHER_WRITER;
+  const isBookmarked = !!otherWriter;
 
   return (
     <Card
@@ -160,7 +160,7 @@ export default function QASetCard({ item }) {
           생성일{' '}
         </Typography>{' '}
         <Typography as='p' size={2} weight='regular' style={{ marginTop: 6 }}>
-          {createAt}{' '}
+          {createAt.split('T')[0]}{' '}
         </Typography>
         {/* 💡 북마크된 글일 경우 원작자 표시 (선택 사항) */}
         {isBookmarked && (
@@ -170,7 +170,7 @@ export default function QASetCard({ item }) {
             weight='regular'
             style={{ marginTop: 4, color: theme.colors.gray[9] }}
           >
-            가져온 글 (From: {OTHER_WRITER})
+            가져온 글 (From: {otherWriter})
           </Typography>
         )}{' '}
       </div>
