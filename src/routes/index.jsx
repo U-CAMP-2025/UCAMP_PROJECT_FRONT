@@ -4,6 +4,7 @@ import LoginBridge from '@pages/Login/Bridge';
 import MyPage from '@pages/MyPage';
 import MyQAPage from '@pages/MyQA';
 import QACreatePage from '@pages/MyQA/QaCreatePage';
+import QAUpdatePage from '@pages/MyQA/QaUpdatePage';
 import NotFoundPage from '@pages/NotFound';
 import QADetailPage from '@pages/QADetail';
 import QAListPage from '@pages/QAList';
@@ -26,6 +27,7 @@ const AppRoutes = () => {
         <Route path='/qa/:qaId' element={<QADetailPage />} />
         <Route path='/myqa' element={<MyQAPage />} />
         <Route path='/qa/create' element={<QACreatePage />} />
+        <Route path='/qa/update' element={<QAUpdatePage />} />
         <Route path='/simulation' element={<SimulationPage />} />
         <Route path='/simulation/:simulationId/start' element={<SimulationGO />} />
         <Route path='/admin/user' element={<AdminPage />} />

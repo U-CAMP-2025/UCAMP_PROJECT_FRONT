@@ -189,7 +189,7 @@ export const FormTextArea = styled.textarea`
  * @param {number} props.index - 배열 내 인덱스
  * @param {function} props.onDelete - 삭제 핸들러
  */
-export const QACreateInput = ({ id, index, onDelete }) => {
+export const QAUpdateInput = ({ id, index, onDelete }) => {
   const { register, watch } = useFormContext();
 
   const questionName = `qaSets[${index}].question`;
