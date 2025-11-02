@@ -195,11 +195,11 @@ const MyInfo = () => {
               <>
                 <FieldValue>합격자입니다</FieldValue>
                 <FieldActions>
-                  <button style={pillStyle} onClick={() => setOpenPhotoModal(true)}>
+                  {/* <button style={pillStyle} onClick={() => setOpenPhotoModal(true)}>
                     <Typography as='span' size={2} weight='semiBold'>
                       신청
                     </Typography>
-                  </button>
+                  </button> */}
                 </FieldActions>
               </>
             ) : (

@@ -32,7 +32,6 @@ export const postUserPathPass = async (fileName) => {
 export const uploadCertificateImage = async (file) => {
   const formData = new FormData();
   formData.append('file', file);
-
   const { data } = await axiosInstance.post('/files/cert', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
