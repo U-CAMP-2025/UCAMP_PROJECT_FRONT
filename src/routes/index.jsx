@@ -10,7 +10,10 @@ import QADetailPage from '@pages/QADetail';
 import QAListPage from '@pages/QAList';
 import SignupPage from '@pages/Signup';
 import SimulationPage from '@pages/Simulation';
+import SimulationEndPage from '@pages/Simulation/SimulationEnd';
 import SimulationGO from '@pages/Simulation/SimulationGo';
+import SimulationRecordPage from '@pages/Simulation/SimulationRecord';
+import SimulationResultPage from '@pages/Simulation/SimulationResult';
 import TestPage from '@pages/Test';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
 
@@ -30,6 +33,9 @@ const AppRoutes = () => {
         <Route path='/qa/update' element={<QAUpdatePage />} />
         <Route path='/simulation' element={<SimulationPage />} />
         <Route path='/simulation/:simulationId/start' element={<SimulationGO />} />
+        <Route path='/simulation/:simulationId/end' element={<SimulationEndPage />} />
+        <Route path='/simulation/record' element={<SimulationRecordPage />} />
+        <Route path='/simulation/:simulationId/result' element={<SimulationResultPage />} />
         <Route path='/admin/user' element={<AdminPage />} />
         <Route path='/admin/transcription' element={<AdminPage />} />
         <Route path='/login/bridge' element={<LoginBridge />} />
