@@ -1,10 +1,14 @@
 import { axiosInstance } from '@api/axios';
+import Typography from '@components/common/Typography';
+import { PageContainer } from '@components/layout/PageContainer';
 import QuestionAudioRecorder from '@components/simulation/QuestionAudioRecorder';
 import SessionVideoRecorder from '@components/simulation/SessionVideoRecorder';
 import VoiceModel from '@components/simulation/VoiceModel';
+import { PlayIcon, StopIcon, DiscIcon, CheckIcon } from '@radix-ui/react-icons';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
+import * as S from './SimulationGoStyle';
 import TextToSpeech from './TextToSpeech';
 
 const MAX_SECONDS = 60;
@@ -206,170 +210,167 @@ export default function SimulationGO() {
     } else {
       stopSession();
     }
-  };
+  }; // ===== 렌더링 =====
 
   return (
-    <div style={{ padding: 24, fontFamily: 'Inter, system-ui, sans-serif' }}>
-      {!!interviewerId && isSessionStarted && currentQuestion && (
-        <TextToSpeech
-          voiceModel={VoiceModel[(parseInt(interviewerId, 10) || interviewerId) - 1]}
-          currentQuestion={currentQuestion}
-          enabled={isSessionStarted}
-          onSpeakingChange={setTtsSpeaking}
-        />
-      )}
-
-      {/* 상단 컨트롤 */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 12, alignItems: 'center' }}>
-        <button style={btnStyle} onClick={isSessionStarted ? stopSession : startSession}>
-          {isSessionStarted ? '세션 종료' : '세션 시작'}
-        </button>
-        <button
-          style={btnStyle}
-          onClick={startAnswer}
-          disabled={ttsSpeaking || !isSessionStarted || isQuestionRecording}
-        >
-          답변하기 (녹음 시작)
-        </button>
-        <button
-          style={btnStyle}
-          onClick={finishAnswer}
-          disabled={!isSessionStarted || !isQuestionRecording}
-        >
-          답변 완료 (저장 후 다음)
-        </button>
-        <div style={pillStyle}>
-          <strong>{formatTime(timeLeft)}</strong>
-        </div>
-        <span style={{ marginLeft: 8 }}>
-          {Math.min(currentIdx + 1, totalQuestions)}/{totalQuestions || 0}
-        </span>
-        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginLeft: 'auto' }}>
-          <input
-            type='checkbox'
-            checked={scriptMode}
-            onChange={(e) => setScriptMode(e.target.checked)}
+    <PageContainer header footer activeMenu='면접 시뮬레이션'>
+      <S.MainContentWrapper>
+        {!!interviewerId && isSessionStarted && currentQuestion && (
+          <TextToSpeech
+            voiceModel={VoiceModel[(parseInt(interviewerId, 10) || interviewerId) - 1]}
+            currentQuestion={currentQuestion}
+            enabled={isSessionStarted}
+            onSpeakingChange={setTtsSpeaking}
           />
-          <span style={{ fontSize: 14 }}>스크립트 모드</span>
-        </label>
-        {isQuestionRecording && <span style={{ fontSize: 12 }}>녹음 중...</span>}
-      </div>
-
-      {/* 본문 */}
-      <div
-        style={{ display: 'grid', gridTemplateColumns: scriptMode ? '1fr 1fr' : '1fr', gap: 16 }}
-      >
-        <div>
-          <div style={{ marginBottom: 8 }}>
-            <span
-              style={{
-                fontSize: 12,
-                color: '#64748B',
-                marginRight: 8,
-                border: '1px solid #D4CAFE',
-                borderRadius: 8,
-                padding: '2px 6px',
-              }}
-            >
-              Q{totalQuestions === 0 ? 0 : currentIdx + 1}
-            </span>
-            <span>{currentQuestion || '준비가 완료되면 시작해 주세요!'}</span>
-          </div>
-
-          <img src={imageUrl} alt='interviewer' />
-
-          <SessionVideoRecorder ref={videoRef} />
-
-          <QuestionAudioRecorder
-            ref={audioRef}
-            maxSeconds={MAX_SECONDS}
-            simulationId={simulationId}
-            onSaved={handleSavedAudio} // (url, qaId, transcript) — transcript는 콘솔로만 출력
-            onTick={handleTick}
-            onRecordingChange={handleRecordingChange}
-            onAutoFinish={handleAutoFinish} // (qaId, url)
-          />
-
-          {/* 녹음 리스트: 랜덤 순서(orderedQa)에 맞게 표시. 다운로드 파일명은 qaId 기반 */}
-          <div style={{ marginTop: 12 }}>
-            <h4>녹음 파일(질문별)</h4>
-            <ol style={{ paddingLeft: 18, lineHeight: 1.9 }}>
-              {orderedQa.map((q, i) => {
-                const qaId = q?.qaId;
-                const url = qaId ? audioById[qaId] : null;
-                return (
-                  <li key={qaId ?? i}>
-                    Q{i + 1}.{' '}
-                    {url ? (
-                      <a href={url} download={`audio${String(qaId).padStart(2, '0')}.webm`}>
-                        다운로드
-                      </a>
-                    ) : (
-                      <span style={{ color: '#999' }}>아직 생성되지 않음</span>
-                    )}
-                    <div style={{ fontSize: 12, color: '#666' }}>{q?.qaQuestion || ''}</div>
-                  </li>
-                );
-              })}
-            </ol>
-          </div>
-
-          {/* 세션 비디오 */}
-          <div style={{ marginTop: 16 }}>
-            <h4>세션 비디오</h4>
-            {videoUrl ? (
-              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                <video src={videoUrl} controls style={{ width: 320, borderRadius: 10 }} />
-                <a href={videoUrl} download='session.webm'>
-                  비디오 다운로드
-                </a>
-              </div>
-            ) : (
-              <span style={{ color: '#999' }}>세션 비디오 없음</span>
-            )}
-          </div>
-        </div>
-
-        {/* 우측 스크립트: 랜덤 순서(orderedQa) 그대로 */}
-        {scriptMode && (
-          <div
-            style={{
-              border: '1px solid #E2E8F0',
-              borderRadius: 12,
-              padding: 16,
-              background: '#FBFBFF',
-            }}
-          >
-            <div style={{ fontSize: 12, color: '#64748B', marginBottom: 6 }}>스크립트</div>
-            <div style={{ fontWeight: 600, marginBottom: 8 }}>
-              {questions[currentIdx] || '질문이 없습니다.'}
-            </div>
-            <div
-              style={{
-                whiteSpace: 'pre-wrap',
-                lineHeight: 1.6,
-                color: answers[currentIdx] ? '#111827' : '#9CA3AF',
-              }}
-            >
-              {answers[currentIdx] || '이 질문에 대한 스크립트가 없습니다.'}
-            </div>
-          </div>
         )}
-      </div>
-    </div>
+
+        <S.SimulationLayout>
+          {/* 1.1 좌측 사이드바 */}
+          <S.Sidebar>
+            <S.SidebarButton
+              onClick={isSessionStarted ? stopSession : startSession}
+              $variant={isSessionStarted ? 'danger' : 'default'}
+            >
+              {isSessionStarted ? <StopIcon /> : <PlayIcon />}
+              {isSessionStarted ? '면접 종료' : '면접 시작'}
+            </S.SidebarButton>
+
+            <S.SidebarButton
+              onClick={startAnswer}
+              disabled={ttsSpeaking || !isSessionStarted || isQuestionRecording}
+            >
+              <DiscIcon />
+              답변하기 (녹음)
+            </S.SidebarButton>
+
+            <S.SidebarButton
+              onClick={finishAnswer}
+              disabled={!isSessionStarted || !isQuestionRecording}
+            >
+              <CheckIcon />
+              답변 완료 (다음)
+            </S.SidebarButton>
+
+            <S.SwitchToggleWrapper style={{ marginTop: '16px', padding: '8px' }}>
+              <Typography size={2} weight='medium'>
+                스크립트 ON/OFF
+              </Typography>
+              <S.StyledSwitch
+                checked={scriptMode}
+                onCheckedChange={setScriptMode}
+                style={{ marginLeft: 'auto' }}
+              >
+                <S.StyledThumb />
+              </S.StyledSwitch>
+            </S.SwitchToggleWrapper>
+          </S.Sidebar>
+
+          {/* 1.2 메인 콘텐츠 영역 */}
+          <S.MainContent>
+            {/* 상단 타이머/카운터 */}
+            <S.TopInfoBar>
+              {isSessionStarted && <S.LiveIndicator>LIVE</S.LiveIndicator>}
+              <S.TimerPill>{formatTime(timeLeft)}</S.TimerPill>
+              <S.QuestionCounter>
+                {Math.min(currentIdx + 1, totalQuestions)} / {totalQuestions || 0}
+              </S.QuestionCounter>
+            </S.TopInfoBar>
+
+            {/* 면접관 영상 */}
+            <S.InterviewerVideo>
+              {imageUrl && <img src={imageUrl} alt='면접관 이미지' />}
+            </S.InterviewerVideo>
+
+            <S.UserPipVideoWrapper $isVisible={isSessionStarted}>
+              <SessionVideoRecorder ref={videoRef} />
+            </S.UserPipVideoWrapper>
+
+            {/* 질문 텍스트 */}
+            <S.QuestionHeader>
+              <S.QuestionBadge>Q{totalQuestions === 0 ? 0 : currentIdx + 1}</S.QuestionBadge>
+              <S.QuestionText>{currentQuestion || '준비가 완료되면 시작해 주세요!'}</S.QuestionText>
+            </S.QuestionHeader>
+
+            {/* 스크립트 패널 */}
+            {scriptMode && (
+              <S.ScriptPanel>
+                <S.ScriptLabel>스크립트</S.ScriptLabel>
+                <S.ScriptQuestion>{questions[currentIdx] || '질문이 없습니다.'}</S.ScriptQuestion>
+                <S.ScriptAnswer $hasContent={!!answers[currentIdx]}>
+                  {answers[currentIdx] || '이 질문에 대한 스크립트가 없습니다.'}
+                </S.ScriptAnswer>
+              </S.ScriptPanel>
+            )}
+
+            {/* 오디오 레코더 (숨김) */}
+            <QuestionAudioRecorder
+              ref={audioRef}
+              maxSeconds={MAX_SECONDS}
+              simulationId={simulationId}
+              onSaved={handleSavedAudio}
+              onTick={handleTick}
+              onRecordingChange={handleRecordingChange}
+              onAutoFinish={handleAutoFinish}
+            />
+
+            {/* 3. 녹음/비디오 결과 (디버깅/확인용) */}
+            {/* <S.RecordingListSection>
+              <Typography as='h4' size={4} weight='semiBold'>
+                녹음 파일 (질문별)
+              </Typography>
+              <S.StyledOL>
+                {orderedQa.map((q, i) => {
+                  const qaId = q?.qaId;
+                  const url = qaId ? audioById[qaId] : null;
+                  return (
+                    <S.StyledLI key={qaId ?? i}>
+                      Q{i + 1}.{' '}
+                      {url ? (
+                        <S.DownloadLink
+                          href={url}
+                          download={`audio_${String(qaId).padStart(2, '0')}.webm`}
+                        >
+                          다운로드
+                        </S.DownloadLink>
+                      ) : (
+                        <Typography size={2} muted>
+                          아직 생성되지 않음
+                        </Typography>
+                      )}
+                      <Typography size={2} muted>
+                        {q?.qaQuestion || ''}
+                      </Typography>
+                    </S.StyledLI>
+                  );
+                })}
+              </S.StyledOL>
+            </S.RecordingListSection> */}
+
+            <S.SessionVideoSection>
+              <Typography as='h4' size={4} weight='semiBold'>
+                세션 비디오 (종료 시)
+              </Typography>
+              {videoUrl ? (
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                  <S.StyledVideo src={videoUrl} controls />
+                  <S.DownloadLink href={videoUrl} download='session.webm'>
+                    비디오 다운로드
+                  </S.DownloadLink>
+                </div>
+              ) : (
+                <Typography size={2} muted>
+                  세션 비디오 없음
+                </Typography>
+              )}
+            </S.SessionVideoSection>
+          </S.MainContent>
+        </S.SimulationLayout>
+      </S.MainContentWrapper>
+    </PageContainer>
   );
 }
 
 // ===== 스타일 & 유틸 =====
-const btnStyle = { borderRadius: 10, cursor: 'pointer' };
-const pillStyle = {
-  background: '#000',
-  color: '#fff',
-  padding: '6px 14px',
-  fontWeight: 700,
-  minWidth: 120,
-  textAlign: 'center',
-};
 function formatTime(s) {
   const mm = String(Math.floor(s / 60)).padStart(2, '0');
   const ss = String(s % 60).padStart(2, '0');
