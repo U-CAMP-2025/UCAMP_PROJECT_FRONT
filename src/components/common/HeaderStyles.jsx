@@ -14,10 +14,11 @@ export const HeaderContainer = styled.header`
 `;
 
 export const HeaderContentWrapper = styled.div`
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  width: 80%;
+  width: 90%;
+  max-width: 1200px;
 `;
 
 export const Logo = styled.button`
