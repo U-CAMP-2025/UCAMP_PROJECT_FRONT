@@ -12,7 +12,7 @@ import styled from 'styled-components';
  *  - onItemClick?: (item) => void
  *  - onMarkAllRead?: () => void1
  */
-const sse = new EventSource('http://localhost:8080/api/notifications/sse');
+const sse = new EventSource(`${import.meta.env.VITE_API_BASE_URL}/notifications/sse`);
 
 sse.addEventListener('message', (event) => {
   console.log(event);

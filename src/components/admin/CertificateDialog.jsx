@@ -105,7 +105,7 @@ export default function CertificateDialog({ open, onOpenChange, user, onConfirm 
             </Typography>
             {user?.certficate?.certe_file_url ? (
               <img
-                src={`http://localhost:8080${user.certficate.certe_file_url}`}
+                src={`${import.meta.env.VITE_API_URL}${user.certficate.certe_file_url}`}
                 alt='합격 인증 이미지'
                 style={{
                   maxWidth: '240px',
