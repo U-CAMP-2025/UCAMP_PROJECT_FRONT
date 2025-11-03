@@ -1,4 +1,4 @@
-import axiosInstance from '@api/axios';
+import { axiosInstance } from '@api/axios';
 import QuestionAudioRecorder from '@components/simulation/QuestionAudioRecorder';
 import SessionVideoRecorder from '@components/simulation/SessionVideoRecorder';
 import VoiceModel from '@components/simulation/VoiceModel';

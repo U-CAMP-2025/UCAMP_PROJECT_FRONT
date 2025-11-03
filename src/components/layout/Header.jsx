@@ -63,7 +63,7 @@ export const Header = () => {
       createdAt: '2025-10-27T06:00:00Z',
     },
   ]);
-  const unreadDerived = notifications.filter((n) => !n.read).length;
+  const unreadDerived = notifications?.filter((n) => !n.read).length;
 
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
 
@@ -77,7 +77,7 @@ export const Header = () => {
 
   const handleClickLogout = () => {
     logout();
-    navigate('/');
+    window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/logout`;
   };
 
   useEffect(() => {

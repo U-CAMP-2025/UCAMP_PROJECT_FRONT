@@ -1,4 +1,4 @@
-import axiosInstance from '@api/axios';
+import { axiosInstance } from '@api/axios';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import { CaretDownIcon, CheckIcon } from '@radix-ui/react-icons';

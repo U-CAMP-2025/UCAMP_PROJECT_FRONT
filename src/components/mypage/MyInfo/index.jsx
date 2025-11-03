@@ -10,7 +10,6 @@ import Button from '@components/common/Button';
 import ReadonlyInput from '@components/common/ReadOnlyInput';
 import SearchableSelect from '@components/common/SearchableSelect';
 import Typography from '@components/common/Typography';
-import { defaultAnimateLayoutChanges } from '@dnd-kit/sortable';
 import theme from '@styles/theme';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
