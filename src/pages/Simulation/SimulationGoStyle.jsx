@@ -157,8 +157,8 @@ export const UserPipVideoWrapper = styled.div`
   bottom: ${({ theme }) => theme.space[6]};
   right: ${({ theme }) => theme.space[6]};
 
-  width: 250px;
-  aspect-ratio: 4 / 3;
+  width: 500px;
+  aspect-ratio: 16 / 9;
   border-radius: ${({ theme }) => theme.radius.md};
   overflow: hidden;
   background-color: ${({ theme }) => theme.colors.gray[12]};
