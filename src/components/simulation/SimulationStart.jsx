@@ -1,4 +1,4 @@
-import axiosInstance from '@api/axios';
+import { axiosInstance } from '@api/axios';
 import { PageContainer } from '@components/layout/PageContainer';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';

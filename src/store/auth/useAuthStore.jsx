@@ -27,7 +27,7 @@ export const useAuthStore = create(
         try {
           await postLogout();
         } catch (e) {
-          set({ ...initialState });
+          // ignore
         } finally {
           set({ ...initialState });
         }
@@ -36,6 +36,7 @@ export const useAuthStore = create(
     {
       name: 'authStore',
       partialize: (state) => ({
+        accessToken: state.accessToken,
         isLogin: state.isLogin,
         user: state.user,
       }),

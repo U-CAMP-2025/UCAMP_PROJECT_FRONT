@@ -1,6 +1,7 @@
 import AdminPage from '@pages/Admin';
 import LandingPage from '@pages/Landing';
 import LoginBridge from '@pages/Login/Bridge';
+import LogoutComplete from '@pages/Logout';
 import MyPage from '@pages/MyPage';
 import MyQAPage from '@pages/MyQA';
 import QACreatePage from '@pages/MyQA/QaCreatePage';
@@ -39,6 +40,7 @@ const AppRoutes = () => {
         <Route path='/admin/user' element={<AdminPage />} />
         <Route path='/admin/transcription' element={<AdminPage />} />
         <Route path='/login/bridge' element={<LoginBridge />} />
+        <Route path='/logout/complete' element={<LogoutComplete />} />
       </Routes>
     </BrowserRouter>
   );

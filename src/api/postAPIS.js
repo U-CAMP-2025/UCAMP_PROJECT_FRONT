@@ -1,4 +1,4 @@
-import axiosInstance from './axios';
+import { axiosInstance } from './axios';
 
 /**
  * GET: 내 질문셋 가져오기

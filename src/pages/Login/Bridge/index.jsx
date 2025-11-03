@@ -7,30 +7,36 @@ export default function LoginBridge() {
   const { search } = useLocation();
   const navigate = useNavigate();
   const { login, setAccessToken } = useAuthStore.getState();
-  useEffect(() => {
-    try {
-      const params = new URLSearchParams(search);
-      const at = params.get('accessToken');
-      const nickname = params.get('nickname');
-      const profileImageUrl = params.get('profileImageUrl');
 
-      if (at) {
-        setAccessToken(at);
+  useEffect(() => {
+    (async () => {
+      try {
+        const params = new URLSearchParams(search);
+        const accessToken = params.get('accessToken');
+        const nickname = params.get('nickname');
+        const profileImageUrl = params.get('profileImageUrl');
+
+        if (!accessToken) {
+          console.warn('LoginBridge: No accessToken found, redirecting to signup');
+          navigate('/signup', { replace: true });
+          return;
+        }
+
+        setAccessToken(accessToken);
         login({
           user: {
             name: nickname,
             profileImageUrl,
           },
         });
+
         navigate('/', { replace: true });
-      } else {
-        navigate('/signup', { replace: true });
+      } catch (err) {
+        console.error('LoginBridge Error:', err);
+        navigate('/', { replace: true });
       }
-    } catch (e) {
-      console.error('Login Error', e);
-      navigate('/signup', { replace: true });
-    }
-  }, []);
+    })();
+  }, [search, navigate, login, setAccessToken]);
 
   return (
     <PageContainer header footer>

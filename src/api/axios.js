@@ -1,9 +1,12 @@
 import { useAuthStore } from '@store/auth/useAuthStore';
 import axios from 'axios';
 
-import { postTokenRefresh } from './authAPIS';
+export const axiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
+  withCredentials: true,
+});
 
-const axiosInstance = axios.create({
+export const axiosRefreshInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
   withCredentials: true,
 });
@@ -12,13 +15,15 @@ const axiosInstance = axios.create({
 // 로컬 스토리지에 accsssToken이 있다면 헤더에 추가
 axiosInstance.interceptors.request.use((config) => {
   const { accessToken } = useAuthStore.getState();
-  console.log('accessToken', accessToken);
   if (accessToken) config.headers.Authorization = `Bearer ${accessToken}`;
+  // remember whether this request had an access token at send time
+  config._hadAT = Boolean(accessToken);
   return config;
 });
 
-let ifRefreshing = false;
+let isRefreshing = false;
 let pending = [];
+let refreshFailed = false; // stop trying to refresh once it fails; reset on successful refresh/login
 
 // response interceptor
 axiosInstance.interceptors.response.use(
@@ -28,16 +33,28 @@ axiosInstance.interceptors.response.use(
     const original = config || {};
     const url = typeof original.url === 'string' ? original.url : '';
 
-    // 인증 관련 엔드포인트 자체에서의 401은 재시도하지 않음 (무한 루프 방지)
-    if (url.startsWith('/auth/')) {
-      throw error;
-    }
-
-    if (response?.status !== 401 || response?.status !== 403 || original?._retry) {
+    // 0) 인증 관련 엔드포인트는 재시도하지 않음 (무한 루프 방지)
+    if (typeof url === 'string' && url.includes('/auth/')) {
       return Promise.reject(error);
     }
 
-    if (ifRefreshing) {
+    // 1) 인증 에러가 아니거나 이미 재시도한 요청이면 패스
+    if (![401, 403].includes(response?.status) || original?._retry) {
+      return Promise.reject(error);
+    }
+
+    // 2) 로그아웃 상태면(=refresh 실패 후) 더 이상 refresh 시도하지 않음
+    const { isLogin } = useAuthStore.getState();
+    if (!isLogin || refreshFailed) {
+      return Promise.reject(error);
+    }
+
+    // 3) 애초에 AT 없이 보낸 요청은 refresh 시도 대상에서 제외 (선택)
+    if (!original._hadAT) {
+      return Promise.reject(error);
+    }
+
+    if (isRefreshing) {
       return new Promise((resolve, reject) => {
         pending.push((newToken) => {
           if (!newToken) return reject(error);
@@ -49,13 +66,14 @@ axiosInstance.interceptors.response.use(
     }
 
     try {
-      ifRefreshing = true;
+      isRefreshing = true;
       original._retry = true;
 
-      const response = await postTokenRefresh();
-      const newAT = response.accessToken;
+      const refreshRes = await axiosRefreshInstance.post('/auth/refresh', {});
+      const newAT = refreshRes?.data?.accessToken;
 
-      if (!newAT) useAuthStore.getState().setAccessToken(newAT);
+      if (newAT) useAuthStore.getState().setAccessToken(newAT);
+      refreshFailed = false;
 
       pending.forEach((cb) => cb(newAT));
       pending = [];
@@ -64,29 +82,14 @@ axiosInstance.interceptors.response.use(
       original.headers.Authorization = `Bearer ${newAT}`;
       return axiosInstance(original);
     } catch (e) {
+      refreshFailed = true;
       pending.forEach((cb) => cb(null));
       pending = [];
       useAuthStore.getState().logout();
+
       return Promise.reject(e);
     } finally {
-      ifRefreshing = false;
+      isRefreshing = false;
     }
   },
 );
-export async function bootstrapAccessToken() {
-  const { isLogin, setAccessToken } = useAuthStore.getState();
-  if (!isLogin) return null;
-  try {
-    const r = await axiosInstance.post('/api/auth/refresh', {});
-    const newAT = r.data?.accessToken;
-    if (newAT) {
-      setAccessToken(newAT);
-      return newAT;
-    }
-  } catch (e) {
-    // eslint-disable-next-line no-empty
-  }
-  return null;
-}
-
-export default axiosInstance;

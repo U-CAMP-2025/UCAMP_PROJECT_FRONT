@@ -23,18 +23,19 @@ export const SignupForm = () => {
     mode: 'onBlur',
   });
   const navigate = useNavigate();
-  const { login } = useAuthStore.getState();
+  const { login, setAccessToken } = useAuthStore.getState();
 
   const handleSubmitForm = (data) => {
     const { nickname, jobId } = data;
     postSignUp(nickname, jobId).then((response) => {
+      console.log('signupresponse: ', response);
       login({
         user: {
           name: response.nickname,
           profileImageUrl: response.profileImageUrl,
         },
-        accessToken: response.setAccessToken,
       });
+      setAccessToken(response.accessToken);
       navigate('/', { replace: true });
     });
   };
