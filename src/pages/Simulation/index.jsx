@@ -10,237 +10,6 @@ import { useForm, FormProvider, Controller } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-// --- [스타일 정의] ---
-
-const MainContentWrapper = styled.div`
-  width: 90%;
-  margin: 0 auto;
-  padding: ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[6]};
-  min-height: 80vh;
-`;
-
-const PresetForm = styled.form`
-  margin: 0 auto;
-`;
-
-// 1. 상단 탭
-const StyledTabsRoot = styled(Tabs.Root)`
-  width: 100%;
-  margin-bottom: ${({ theme }) => theme.space[8]};
-`;
-
-const StyledTabsList = styled(Tabs.List)`
-  display: flex;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.gray[5]};
-`;
-
-const StyledTabsTrigger = styled(Tabs.Trigger)`
-  all: unset;
-  font-family: ${({ theme }) => theme.font.family.primary};
-  font-size: ${({ theme }) => theme.font.size[6]};
-  font-weight: ${({ theme }) => theme.font.weight.bold};
-  color: ${({ theme }) => theme.colors.gray[8]};
-  padding: ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[4]};
-  cursor: pointer;
-  position: relative;
-
-  &[data-state='active'] {
-    color: ${({ theme }) => theme.colors.primary[9]};
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: -1px;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background-color: ${({ theme }) => theme.colors.primary[9]};
-    }
-  }
-`;
-
-// 2. 설정 섹션
-const ConfigSection = styled.section`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.space[8]};
-  padding: ${({ theme }) => theme.space[4]};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.gray[4]};
-`;
-
-const ConfigLabel = styled(Typography).attrs({ size: 4, weight: 'semiBold' })`
-  color: ${({ theme }) => theme.colors.gray[12]};
-  min-width: 100px;
-`;
-
-const StyledRadioGroup = styled(RadioGroup.Root)`
-  display: flex;
-  gap: ${({ theme }) => theme.space[6]};
-`;
-
-const RadioOption = styled.label`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.space[2]};
-  font-size: ${({ theme }) => theme.font.size[3]};
-  color: ${({ theme }) => theme.colors.gray[11]};
-  cursor: pointer;
-`;
-
-const StyledRadioItem = styled(RadioGroup.Item)`
-  all: unset;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 1px solid ${({ theme }) => theme.colors.gray[7]};
-  background-color: white;
-
-  &:focus {
-    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary[6]};
-  }
-
-  &[data-state='checked'] {
-    border-color: ${({ theme }) => theme.colors.primary[9]};
-    background-color: ${({ theme }) => theme.colors.primary[9]};
-    position: relative;
-    &::after {
-      content: '';
-      display: block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background-color: white;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-  }
-`;
-
-// 3. 드롭다운
-const SelectConfigSection = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.space[3]};
-  margin-top: ${({ theme }) => theme.space[8]};
-`;
-
-const StyledSelectTrigger = styled(Select.Trigger)`
-  all: unset;
-  display: inline-flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: ${({ theme }) => theme.space[4]};
-  font-size: ${({ theme }) => theme.font.size[3]};
-  color: ${({ theme }) => theme.colors.gray[12]};
-  background-color: white;
-  border: 1px solid ${({ theme }) => theme.colors.gray[5]};
-  border-radius: ${({ theme }) => theme.radius.sm};
-  box-shadow: ${({ theme }) => theme.shadow.sm};
-  min-height: 40px;
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.gray[2]};
-  }
-  &:focus {
-    border-color: ${({ theme }) => theme.colors.primary[7]};
-    box-shadow: 0 0 0 1px ${({ theme }) => theme.colors.primary[7]};
-  }
-  &[data-placeholder] {
-    color: ${({ theme }) => theme.colors.gray[9]};
-  }
-`;
-
-const StyledSelectContent = styled(Select.Content)`
-  overflow: hidden;
-  background-color: white;
-  border-radius: ${({ theme }) => theme.radius.sm};
-  box-shadow: ${({ theme }) => theme.shadow.md};
-  z-index: 101;
-  width: var(--radix-select-trigger-width);
-`;
-
-const StyledSelectViewport = styled(Select.Viewport)`
-  padding: ${({ theme }) => theme.space[1]};
-`;
-
-const StyledSelectItem = styled(Select.Item)`
-  font-size: ${({ theme }) => theme.font.size[3]};
-  color: ${({ theme }) => theme.colors.gray[12]};
-  border-radius: ${({ theme }) => theme.radius.sm};
-  display: flex;
-  align-items: center;
-  padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[4]};
-  padding-left: ${({ theme }) => theme.space[6]};
-  position: relative;
-  user-select: none;
-  cursor: pointer;
-
-  &[data-highlighted] {
-    background-color: ${({ theme }) => theme.colors.primary[4]};
-    color: ${({ theme }) => theme.colors.primary[12]};
-    outline: none;
-  }
-`;
-
-const StyledSelectItemIndicator = styled(Select.ItemIndicator)`
-  position: absolute;
-  left: ${({ theme }) => theme.space[2]};
-  width: ${({ theme }) => theme.space[4]};
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: ${({ theme }) => theme.colors.primary[9]};
-`;
-
-// 4. 시작하기 버튼
-const StartButton = styled.button`
-  all: unset;
-  width: 100%;
-  max-width: 120px;
-  display: block;
-  margin: ${({ theme }) => theme.space[10]} auto 0;
-  padding: ${({ theme }) => theme.space[5]} 0;
-  text-align: center;
-  background-color: ${({ theme }) => theme.colors.primary[9]};
-  color: white;
-  border-radius: ${({ theme }) => theme.radius.md};
-  font-size: ${({ theme }) => theme.font.size[5]};
-  font-weight: ${({ theme }) => theme.font.weight.bold};
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.primary[10]};
-  }
-  &:focus {
-    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary[6]};
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-`;
-
-// 보조 UI
-const ItemContent = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.space[4]};
-  flex-wrap: wrap;
-`;
-
-const JobChip = styled.div`
-  display: inline-flex;
-  align-items: center;
-  padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[3]};
-  background-color: ${({ theme }) => theme.colors.primary[3]};
-  color: ${({ theme }) => theme.colors.primary[12]};
-  border-radius: ${({ theme }) => theme.radius.lg};
-  font-size: ${({ theme }) => theme.font.size[2]};
-  font-weight: ${({ theme }) => theme.font.weight.semiBold};
-`;
-
 // --- [컴포넌트 로직] ---
 
 export default function SimulationPresetPage() {
@@ -508,3 +277,234 @@ export default function SimulationPresetPage() {
     </PageContainer>
   );
 }
+
+// --- [스타일 정의] ---
+
+const MainContentWrapper = styled.div`
+  width: 90%;
+  margin: 0 auto;
+  // padding: ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[6]};
+  min-height: 80vh;
+`;
+
+const PresetForm = styled.form`
+  margin: 0 auto;
+`;
+
+// 1. 상단 탭
+const StyledTabsRoot = styled(Tabs.Root)`
+  width: 100%;
+  margin-bottom: ${({ theme }) => theme.space[8]};
+`;
+
+const StyledTabsList = styled(Tabs.List)`
+  display: flex;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.gray[5]};
+`;
+
+const StyledTabsTrigger = styled(Tabs.Trigger)`
+  all: unset;
+  font-family: ${({ theme }) => theme.font.family.primary};
+  font-size: ${({ theme }) => theme.font.size[6]};
+  font-weight: ${({ theme }) => theme.font.weight.bold};
+  color: ${({ theme }) => theme.colors.gray[8]};
+  padding: ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[4]};
+  cursor: pointer;
+  position: relative;
+
+  &[data-state='active'] {
+    color: ${({ theme }) => theme.colors.primary[9]};
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background-color: ${({ theme }) => theme.colors.primary[9]};
+    }
+  }
+`;
+
+// 2. 설정 섹션
+const ConfigSection = styled.section`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[8]};
+  padding: ${({ theme }) => theme.space[4]};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.gray[4]};
+`;
+
+const ConfigLabel = styled(Typography).attrs({ size: 4, weight: 'semiBold' })`
+  color: ${({ theme }) => theme.colors.gray[12]};
+  min-width: 100px;
+`;
+
+const StyledRadioGroup = styled(RadioGroup.Root)`
+  display: flex;
+  gap: ${({ theme }) => theme.space[6]};
+`;
+
+const RadioOption = styled.label`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  font-size: ${({ theme }) => theme.font.size[3]};
+  color: ${({ theme }) => theme.colors.gray[11]};
+  cursor: pointer;
+`;
+
+const StyledRadioItem = styled(RadioGroup.Item)`
+  all: unset;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid ${({ theme }) => theme.colors.gray[7]};
+  background-color: white;
+
+  &:focus {
+    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary[6]};
+  }
+
+  &[data-state='checked'] {
+    border-color: ${({ theme }) => theme.colors.primary[9]};
+    background-color: ${({ theme }) => theme.colors.primary[9]};
+    position: relative;
+    &::after {
+      content: '';
+      display: block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: white;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  }
+`;
+
+// 3. 드롭다운
+const SelectConfigSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[3]};
+  margin-top: ${({ theme }) => theme.space[8]};
+`;
+
+const StyledSelectTrigger = styled(Select.Trigger)`
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: ${({ theme }) => theme.space[4]};
+  font-size: ${({ theme }) => theme.font.size[3]};
+  color: ${({ theme }) => theme.colors.gray[12]};
+  background-color: white;
+  border: 1px solid ${({ theme }) => theme.colors.gray[5]};
+  border-radius: ${({ theme }) => theme.radius.sm};
+  box-shadow: ${({ theme }) => theme.shadow.sm};
+  min-height: 40px;
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.gray[2]};
+  }
+  &:focus {
+    border-color: ${({ theme }) => theme.colors.primary[7]};
+    box-shadow: 0 0 0 1px ${({ theme }) => theme.colors.primary[7]};
+  }
+  &[data-placeholder] {
+    color: ${({ theme }) => theme.colors.gray[9]};
+  }
+`;
+
+const StyledSelectContent = styled(Select.Content)`
+  overflow: hidden;
+  background-color: white;
+  border-radius: ${({ theme }) => theme.radius.sm};
+  box-shadow: ${({ theme }) => theme.shadow.md};
+  z-index: 101;
+  width: var(--radix-select-trigger-width);
+`;
+
+const StyledSelectViewport = styled(Select.Viewport)`
+  padding: ${({ theme }) => theme.space[1]};
+`;
+
+const StyledSelectItem = styled(Select.Item)`
+  font-size: ${({ theme }) => theme.font.size[3]};
+  color: ${({ theme }) => theme.colors.gray[12]};
+  border-radius: ${({ theme }) => theme.radius.sm};
+  display: flex;
+  align-items: center;
+  padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[4]};
+  padding-left: ${({ theme }) => theme.space[6]};
+  position: relative;
+  user-select: none;
+  cursor: pointer;
+
+  &[data-highlighted] {
+    background-color: ${({ theme }) => theme.colors.primary[4]};
+    color: ${({ theme }) => theme.colors.primary[12]};
+    outline: none;
+  }
+`;
+
+const StyledSelectItemIndicator = styled(Select.ItemIndicator)`
+  position: absolute;
+  left: ${({ theme }) => theme.space[2]};
+  width: ${({ theme }) => theme.space[4]};
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: ${({ theme }) => theme.colors.primary[9]};
+`;
+
+// 4. 시작하기 버튼
+const StartButton = styled.button`
+  all: unset;
+  width: 100%;
+  max-width: 120px;
+  display: block;
+  margin: ${({ theme }) => theme.space[10]} auto 0;
+  padding: ${({ theme }) => theme.space[5]} 0;
+  text-align: center;
+  background-color: ${({ theme }) => theme.colors.primary[9]};
+  color: white;
+  border-radius: ${({ theme }) => theme.radius.md};
+  font-size: ${({ theme }) => theme.font.size[5]};
+  font-weight: ${({ theme }) => theme.font.weight.bold};
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.primary[10]};
+  }
+  &:focus {
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary[6]};
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
+// 보조 UI
+const ItemContent = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[4]};
+  flex-wrap: wrap;
+`;
+
+const JobChip = styled.div`
+  display: inline-flex;
+  align-items: center;
+  padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[3]};
+  background-color: ${({ theme }) => theme.colors.primary[3]};
+  color: ${({ theme }) => theme.colors.primary[12]};
+  border-radius: ${({ theme }) => theme.radius.lg};
+  font-size: ${({ theme }) => theme.font.size[2]};
+  font-weight: ${({ theme }) => theme.font.weight.semiBold};
+`;

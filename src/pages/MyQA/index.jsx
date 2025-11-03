@@ -17,7 +17,7 @@ const MainContentWrapper = styled.div`
   width: 100%;
   min-width: 700px;
   margin: 0 auto;
-  padding: ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[6]};
+  padding: 0 ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[5]};
   min-height: 80vh;
 `;
 
