@@ -1,7 +1,8 @@
+import { fetchJobList } from '@api/jobAPIS';
 import { Cross1Icon, CaretSortIcon, CheckIcon } from '@radix-ui/react-icons';
 // 💡 useTheme을 styled-components에서 직접 임포트
 import * as Select from '@radix-ui/react-select';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled, { css, keyframes, useTheme } from 'styled-components';
 
 import Typography from './Typography';
@@ -183,12 +184,6 @@ const ALL_JOBS = [
   { id: 'devops', name: 'DevOps' },
 ];
 
-// 💡 직무 ID로 이름을 찾는 헬퍼 함수
-const getJobNameById = (jobId) => {
-  const job = ALL_JOBS.find((j) => j.id === jobId);
-  return job ? job.name : '알 수 없음';
-};
-
 /**
  * 직무를 선택하고 칩 형태로 표시하는 컴포넌트
  * @param {object} props
@@ -198,6 +193,20 @@ const getJobNameById = (jobId) => {
 export const JobSelector = ({ value = [], onChange = () => {} }) => {
   // 💡 theme 객체는 useTheme()으로 가져옵니다.
   const theme = useTheme();
+
+  const [jobs, setJobs] = useState([]);
+
+  useEffect(() => {
+    fetchJobList().then((resp) => {
+      setJobs(resp);
+    });
+  }, []);
+
+  // 💡 직무 ID로 이름을 찾는 헬퍼 함수
+  const getJobNameById = (jobId) => {
+    const job = jobs.find((j) => j.jobId === jobId);
+    return job ? job.jobName : '알 수 없음';
+  };
 
   // 💡 useState() 제거. value prop을 selectedJobs로 사용합니다.
   const selectedJobs = value;
@@ -221,7 +230,7 @@ export const JobSelector = ({ value = [], onChange = () => {} }) => {
   };
 
   // 현재 선택되지 않은 직무 목록 (드롭다운에 표시될 항목)
-  const availableJobs = ALL_JOBS.filter((job) => !selectedJobs.includes(job.id));
+  const availableJobs = jobs.filter((job) => !selectedJobs.includes(job.jobId));
 
   return (
     <SelectorWrapper>
@@ -265,8 +274,8 @@ export const JobSelector = ({ value = [], onChange = () => {} }) => {
                 ) : (
                   <Select.Group>
                     {availableJobs.map((job) => (
-                      <SelectItem key={job.id} value={job.id}>
-                        <SelectItemText>{job.name}</SelectItemText>
+                      <SelectItem key={job.jobId} value={job.jobId}>
+                        <SelectItemText>{job.jobName}</SelectItemText>
                         <SelectItemIndicator>
                           <CheckIcon />
                         </SelectItemIndicator>

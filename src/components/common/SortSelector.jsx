@@ -74,12 +74,12 @@ const CaretIconStyled = styled(CaretDownIcon)`
 `;
 
 const sortOptions = [
-  { value: 'bookcount_asc', label: '가져오기 순' },
-  { value: 'review_desc', label: '리뷰 많은 순' },
+  { value: 'bookcount_desc', label: '가져오기 순' },
+  // { value: 'review_desc', label: '리뷰 많은 순' },
   { value: 'latest_desc', label: '최신순' },
 ];
 
-export const SortSelector = ({ currentSort = 'bookcount_asc', onSortChange }) => {
+export const SortSelector = ({ currentSort = 'bookcount_desc', onSortChange }) => {
   const handleSortChange = (newSort) => {
     if (onSortChange) {
       onSortChange(newSort);

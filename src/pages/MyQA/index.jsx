@@ -1,9 +1,10 @@
+import { myPostAll } from '@api/postAPIS';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import QASetList from '@components/qaset/QASetList';
-import { myQaList } from '@pages/List/MyQaList';
+// import { myQaList } from '@pages/List/MyQaList';
 import { PlusIcon } from '@radix-ui/react-icons';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { css } from 'styled-components';
 
@@ -15,9 +16,8 @@ import styled, { css } from 'styled-components';
 const MainContentWrapper = styled.div`
   width: 100%;
   min-width: 700px;
-  max-width: 1200px; /* 최대 너비 설정 */
-  margin: 0 auto; /* 중앙 정렬 */
-  padding: ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[6]}; /* 상하 32px, 좌우 24px */
+  margin: 0 auto;
+  padding: 0 ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[5]};
   min-height: 80vh;
 `;
 
@@ -94,19 +94,32 @@ const TABS = {
   BOOKMARKED: '가져온 질문답변',
 };
 
+const MAX_QASET = 10;
+
 export default function MyQAListPage() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState(TABS.ALL);
+  const [activeTab, setActiveTab] = useState();
+
+  const [myQaList, setMyQaList] = useState([]);
+
+  useEffect(() => {
+    myPostAll()
+      .then((resp) => {
+        setMyQaList(resp?.data ?? null);
+        setActiveTab(TABS.ALL);
+      })
+      .catch(setMyQaList([]));
+  }, []);
 
   // 💡 탭에 따라 목록 필터링
   const filteredList = useMemo(() => {
     switch (activeTab) {
       case TABS.MINE:
         // OTHER_WRITER가 null이거나 undefined인 경우 (내가 만든 글)
-        return myQaList.filter((item) => !item.OTHER_WRITER);
+        return myQaList.filter((item) => !item.otherWriter);
       case TABS.BOOKMARKED:
         // OTHER_WRITER 값이 있는 경우 (가져온 글)
-        return myQaList.filter((item) => !!item.OTHER_WRITER);
+        return myQaList.filter((item) => !!item.otherWriter);
       case TABS.ALL:
       default:
         return myQaList;
@@ -126,10 +139,12 @@ export default function MyQAListPage() {
           <Typography as='h1' size={7} weight='bold'>
             나의 질문답변 목록
           </Typography>
-          <AddButton onClick={handleAddClick}>
-            <PlusIcon width={20} height={20} />
-            추가하기
-          </AddButton>
+          {myQaList.length < MAX_QASET && (
+            <AddButton onClick={handleAddClick}>
+              <PlusIcon width={20} height={20} />
+              추가하기
+            </AddButton>
+          )}
         </MyPageHeader>
         {/* 2. 탭 네비게이션 */}
         <TabContainer>

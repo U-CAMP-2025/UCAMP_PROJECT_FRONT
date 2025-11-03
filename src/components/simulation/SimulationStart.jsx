@@ -1,6 +1,7 @@
-import axiosInstance from '@api/axios';
+import { axiosInstance } from '@api/axios';
 import { PageContainer } from '@components/layout/PageContainer';
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const SimulationStart = () => {
   const [mode, setMode] = useState('일대일'); // Interview Mode
@@ -10,7 +11,7 @@ const SimulationStart = () => {
   const [questionTag, setQuestionTag] = useState([]); // Question Set
   const [interviewer, setInterviewer] = useState(''); // Interview Room
   const [interviewers, setInterviewers] = useState([]); // Interview Room
-
+  const navigate = useNavigate();
   const handleModeChange = (event) => setMode(event.target.value);
   const handleOrderChange = (event) => setOrder(event.target.value);
   const handleQuestionSetChange = (event) => {
@@ -31,6 +32,7 @@ const SimulationStart = () => {
       .get('/interviewers')
       .then((resp) => {
         setInterviewers(resp.data.data);
+        console.log(resp.data.data);
       })
       .catch();
     axiosInstance
@@ -46,9 +48,10 @@ const SimulationStart = () => {
       .post('/simulation', {
         simulationRandom: order,
         post: { postId: questionSet },
-        interviewer: { interviewerId: interviewer },
+        interviewer: { interviewerId: Number(interviewer) },
       })
       .then((resp) => {
+        navigate(`/simulation/${resp.data.data.simulationId}/start`);
         console.log(resp);
       })
       .catch();

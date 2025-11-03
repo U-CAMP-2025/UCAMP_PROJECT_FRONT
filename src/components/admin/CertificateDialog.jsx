@@ -1,3 +1,4 @@
+import { axiosInstance } from '@api/axios';
 import Button from '@components/common/Button';
 import Typography from '@components/common/Typography';
 import * as Dialog from '@radix-ui/react-dialog';
@@ -5,6 +6,8 @@ import { CheckIcon } from '@radix-ui/react-icons';
 import * as RadioGroup from '@radix-ui/react-radio-group';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
+
+import CertConfirmDialog from './CertConfirmDialog';
 
 const Overlay = styled(Dialog.Overlay)`
   position: fixed;
@@ -79,64 +82,235 @@ const RGBlock = styled.label`
  */
 export default function CertificateDialog({ open, onOpenChange, user, onConfirm }) {
   const [decision, setDecision] = useState('');
+  const [verifyResult, setVerifyResult] = useState(null); // 검증 결과 저장
+  const [loading, setLoading] = useState(false); // 로딩 보여주기용
+  const [confirmOpen, setConfirmOpen] = useState(false); // '승인할래?' 모달 열기/닫기
+  const [confirmMessage, setConfirmMessage] = useState(''); // '승인할래? 메시지
+  const [previewOpen, setPreviewOpen] = useState(false); // 이미지 크게보기 모달
+  const [previewSrc, setPreviewSrc] = useState('');
 
   useEffect(() => {
+    // 모달이 열리면 OCR 검증 수행
+    if (open && user?.certficate?.certe_file_url) {
+      const fileUrl = `${import.meta.env.VITE_API_URL}${user.certficate.certe_file_url}`;
+      handleVerifying(fileUrl);
+    }
+    // 모달 닫힐 때 초기화
+    if (!open) {
+      setDecision('');
+      setVerifyResult(null);
+      setConfirmOpen(false);
+    }
     // reset decision when user or dialog changes
-    setDecision('');
+    // setDecision('');
   }, [user, open]);
 
+  // OCR 이벤트
+  const handleVerifying = async (fileUrl) => {
+    // console.log('파일경로? ', fileUrl);
+    setLoading(true);
+    try {
+      const res = await axiosInstance.post('/ocr', { imageUrl: fileUrl });
+      const data = res.data;
+      // console.log('OCR 결과:', data);
+
+      const bizStatus = data?.verfRes?.data?.[0]?.b_stt || null;
+      const taxType = data?.verfRes?.data?.[0]?.tax_type || '';
+
+      // console.log('res? ', res);
+      // console.log('검증결과: ', res.data.verfRes.data[0].b_stt); // 정상: 계속사업자, 비정상: 그외 (null)
+      // console.log('검증결과: ', res.data.verfRes.data[0].tax_type); // 비정상: 국세청에 등록되지 않은 사업자등록번호입니다.
+      // console.log('OCR 결과:', res.data);
+
+      // "계속사업자"이면서 "일반과세자"류면 성공(= 등록되지 않은~ 이 포함되어 있지 않으면)
+      const isValid = bizStatus === '계속사업자' && taxType && !taxType.includes('등록되지 않은');
+
+      setVerifyResult({
+        status: isValid ? 'success' : 'fail',
+        detail: { bizStatus, taxType, bizNum: data.bizNum },
+      });
+    } catch (e) {
+      console.error('OCR 요청 실패:', e);
+      setVerifyResult({ status: 'fail', detail: null });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 승인 클릭 로직
+  const handleConfirm = () => {
+    if (!decision) return;
+
+    if (decision === 'APPROVED') {
+      if (verifyResult?.status === 'fail') {
+        setConfirmMessage('사업자 번호가 검증되지 않았습니다. 그래도 승인하시겠습니까?');
+      } else {
+        setConfirmMessage('(검증 성공) 승인하시겠습니까?');
+      }
+      setConfirmOpen(true);
+    } else if (decision === 'REJECTED') {
+      // ✅ 거부 시에도 동일한 모달 사용
+      setConfirmMessage('반려하시겠습니까?');
+      setConfirmOpen(true);
+    }
+  };
+
+  // 승인 확인 모달
+  const handleConfirmAction = () => {
+    setConfirmOpen(false);
+    onConfirm?.(decision);
+  };
+
+  const handleImageClick = (src) => {
+    setPreviewSrc(src);
+    setPreviewOpen(true);
+  };
+
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Portal>
-        <Overlay />
-        <Content>
-          <Typography as='h3' size={5} weight='bold'>
-            합격 신청
-          </Typography>
-          <Row>
-            <Typography size={4} weight='semiBold'>
-              유저명
+    <>
+      <Dialog.Root open={open} onOpenChange={onOpenChange}>
+        <Dialog.Portal>
+          <Overlay />
+          <Content>
+            <Typography as='h3' size={5} weight='bold'>
+              합격자 등록 신청
             </Typography>
-            <Value>{user?.nickName ?? '-'}</Value>
-          </Row>
-          <Row>
-            <Typography size={4} weight='semiBold'>
-              첨부파일
-            </Typography>
-            <Value>{user?.certficate?.fileName ?? '-'}</Value>
-          </Row>
+            <Row>
+              <Typography size={4} weight='semiBold'>
+                유저명
+              </Typography>
+              <Value>{user?.nickName ?? '-'}</Value>
+            </Row>
+            <Row>
+              <Typography size={4} weight='semiBold'>
+                첨부파일
+              </Typography>
+              {user?.certficate?.certe_file_url ? (
+                <>
+                  <img
+                    src={`${import.meta.env.VITE_API_URL}${user.certficate.certe_file_url}`}
+                    alt='합격 인증 이미지'
+                    style={{
+                      maxWidth: '240px',
+                      maxHeight: '160px',
+                      objectFit: 'contain',
+                      border: '1px solid #ddd',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      transition: 'transform 0.2s ease',
+                    }}
+                    onClick={() =>
+                      handleImageClick(
+                        `${import.meta.env.VITE_API_URL}${user.certficate.certe_file_url}`,
+                      )
+                    }
+                  />
+                  {/* <button
+                  onClick={() =>
+                    handleVerifying(
+                      `${import.meta.env.VITE_API_URL}${user.certficate.certe_file_url}`,
+                    )
+                  }
+                >
+                  OCR 분석
+                </button> */}
+                </>
+              ) : (
+                <Value>-</Value>
+              )}
+            </Row>
 
-          <RGRoot value={decision} onValueChange={setDecision}>
-            <RGBlock>
-              <RGItem value='APPROVED' aria-label='승인'>
-                <RadioGroup.Indicator>
-                  <CheckIcon width={18} height={18} />
-                </RadioGroup.Indicator>
-              </RGItem>
-              <RGLabel>승인</RGLabel>
-            </RGBlock>
-            <RGBlock>
-              <RGItem value='REJECTED' aria-label='거부'>
-                <RadioGroup.Indicator>
-                  <CheckIcon width={20} height={20} />
-                </RadioGroup.Indicator>
-              </RGItem>
-              <RGLabel>거부</RGLabel>
-            </RGBlock>
-          </RGRoot>
+            {/* 검증 상태 표시 */}
+            {loading ? (
+              <Typography size={3}>사업자등록정보 검증 중...</Typography>
+            ) : verifyResult ? (
+              verifyResult.status === 'success' ? (
+                <Typography size={3} style={{ color: 'green' }}>
+                  검증 성공되었습니다.
+                </Typography>
+              ) : (
+                <Typography size={3} style={{ color: 'red' }}>
+                  사업자등록정보를 검증할 수 없습니다.
+                </Typography>
+              )
+            ) : null}
 
-          <Actions>
-            <Button
-              onClick={() => {
-                if (!decision) return;
-                onConfirm?.(decision);
+            <RGRoot value={decision} onValueChange={setDecision}>
+              <RGBlock>
+                <RGItem value='APPROVED' aria-label='승인'>
+                  <RadioGroup.Indicator>
+                    <CheckIcon width={18} height={18} />
+                  </RadioGroup.Indicator>
+                </RGItem>
+                <RGLabel>승인</RGLabel>
+              </RGBlock>
+              <RGBlock>
+                <RGItem value='REJECTED' aria-label='거부'>
+                  <RadioGroup.Indicator>
+                    <CheckIcon width={20} height={20} />
+                  </RadioGroup.Indicator>
+                </RGItem>
+                <RGLabel>거부</RGLabel>
+              </RGBlock>
+            </RGRoot>
+
+            <Actions>
+              <Button
+                // onClick={() => {
+                //   if (!decision) return;
+                //   onConfirm?.(decision);
+                // }}
+                onClick={handleConfirm}
+              >
+                확인
+              </Button>
+            </Actions>
+          </Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+      {/* ✅ 커스텀 확인 모달 */}
+      <CertConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title={decision === 'REJECTED' ? '거부 확인' : '승인 확인'}
+        message={confirmMessage}
+        onConfirm={handleConfirmAction}
+        status={
+          decision === 'REJECTED'
+            ? 'warning' // 거부 상태용 (예: 노란색)
+            : verifyResult?.status === 'success'
+              ? 'success'
+              : 'fail'
+        }
+      />
+      {/* ✅ 이미지 크게보기 모달 */}
+      <Dialog.Root open={previewOpen} onOpenChange={setPreviewOpen}>
+        <Dialog.Portal>
+          <Overlay />
+          <Dialog.Content
+            style={{
+              position: 'fixed',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              background: 'transparent',
+              border: 'none',
+              boxShadow: 'none',
+            }}
+          >
+            <img
+              src={previewSrc}
+              alt='이미지 미리보기'
+              style={{
+                maxWidth: '90vw',
+                maxHeight: '90vh',
+                borderRadius: '10px',
+                boxShadow: '0 0 20px rgba(0,0,0,0.3)',
               }}
-            >
-              확인
-            </Button>
-          </Actions>
-        </Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+            />
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+    </>
   );
 }

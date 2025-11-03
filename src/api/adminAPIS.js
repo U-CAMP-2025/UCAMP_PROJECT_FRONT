@@ -1,4 +1,4 @@
-import axiosInstance from './axios';
+import { axiosInstance } from './axios';
 
 /**
  * GET: 유저 단일 조회
@@ -28,7 +28,7 @@ export const fetchGetAllUser = async () => {
  * @returns {Promise<Object>} response
  */
 export const patchUserPass = async (payload) => {
-  const { data } = await axiosInstance.patch('/admin/pathPass', payload);
+  const { data } = await axiosInstance.put('/admin/pathPass', payload);
   return data;
 };
 
