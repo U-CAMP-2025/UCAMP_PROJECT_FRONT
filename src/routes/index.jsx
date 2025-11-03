@@ -7,6 +7,7 @@ import QACreatePage from '@pages/MyQA/QaCreatePage';
 import NotFoundPage from '@pages/NotFound';
 import QADetailPage from '@pages/QADetail';
 import QAListPage from '@pages/QAList';
+import RankPage from '@pages/Rank';
 import SignupPage from '@pages/Signup';
 import SimulationPage from '@pages/Simulation';
 import TestPage from '@pages/Test';
@@ -29,6 +30,7 @@ const AppRoutes = () => {
         <Route path='/admin/user' element={<AdminPage />} />
         <Route path='/admin/transcription' element={<AdminPage />} />
         <Route path='/login/bridge' element={<LoginBridge />} />
+        <Route path='/rank' element={<RankPage />} />
       </Routes>
     </BrowserRouter>
   );

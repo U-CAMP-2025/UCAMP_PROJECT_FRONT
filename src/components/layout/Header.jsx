@@ -111,6 +111,9 @@ export const Header = () => {
           <NavItem href='/simulation/record' $isActive={pathname === '/simulation/record'}>
             시뮬레이션 결과
           </NavItem>
+          <NavItem href='/rank' $isActive={pathname === '/rank'}>
+            랭킹정보
+          </NavItem>
         </Nav>
       </LeftSection>
 

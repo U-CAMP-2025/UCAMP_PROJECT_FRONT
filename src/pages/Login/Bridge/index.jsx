@@ -14,6 +14,7 @@ export default function LoginBridge() {
     const rt = params.get('refreshToken');
     const nickname = params.get('nickname');
     const profileImageUrl = params.get('profileImageUrl');
+    const next = params.get('next') || '/'; // next 파라미터 읽기, 없으면 메인으로 이동
 
     if (at && rt) {
       localStorage.setItem('accessToken', at);
@@ -22,7 +23,7 @@ export default function LoginBridge() {
         name: nickname,
         profileImageUrl,
       });
-      navigate('/', { replace: true });
+      navigate(next, { replace: true });
     } else {
       navigate('/signup', { replace: true });
     }
