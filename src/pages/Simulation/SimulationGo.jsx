@@ -5,7 +5,7 @@ import QuestionAudioRecorder from '@components/simulation/QuestionAudioRecorder'
 import SessionVideoRecorder from '@components/simulation/SessionVideoRecorder';
 import VoiceModel from '@components/simulation/VoiceModel';
 import { PlayIcon, StopIcon, DiscIcon, CheckIcon } from '@radix-ui/react-icons';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import * as S from './SimulationGoStyle';
@@ -26,6 +26,90 @@ function makeOneBasedShuffled(n) {
 
 export default function SimulationGO() {
   const { simulationId } = useParams();
+
+  // PIP 드래그 로직
+  const [pipPosition, setPipPosition] = useState(null); // null: CSS 기본값 사용, {x, y}: transform 사용
+  const [isDraggingPip, setIsDraggingPip] = useState(false);
+  const dragOffsetRef = useRef({ x: 0, y: 0 });
+  const pipRef = useRef(null);
+
+  // 드래그 시작
+  const handlePipMouseDown = (e) => {
+    e.preventDefault();
+    setIsDraggingPip(true);
+
+    // 현재 PIP의 위치
+    const rect = pipRef.current.getBoundingClientRect();
+    const parentRect = pipRef.current.parentElement.getBoundingClientRect(); // MainContent 기준
+
+    // 현재 state (transform) 기준 위치
+    const currentPos = pipPosition || {
+      // state가 null일 경우, CSS 기본값(bottom/right)을 기반으로 현재 x, y 계산
+      x: rect.left - parentRect.left,
+      y: rect.top - parentRect.top,
+    };
+
+    // 첫 드래그 시 state에 현재 위치 고정
+    if (!pipPosition) {
+      setPipPosition(currentPos);
+    }
+
+    // 마우스 클릭 지점과 PIP 좌상단 모서리 사이의 오프셋 계산
+    dragOffsetRef.current = {
+      x: e.clientX - currentPos.x - parentRect.left,
+      y: e.clientY - currentPos.y - parentRect.top,
+    };
+  };
+
+  // 드래그 중 (window에서 마우스 이동 시)
+  const handlePipMouseMove = useCallback(
+    (e) => {
+      if (!isDraggingPip) return;
+      e.preventDefault();
+
+      const parentRect = pipRef.current.parentElement.getBoundingClientRect();
+
+      // 부모(MainContent) 기준 새 위치 계산
+      setPipPosition({
+        x: e.clientX - parentRect.left - dragOffsetRef.current.x,
+        y: e.clientY - parentRect.top - dragOffsetRef.current.y,
+      });
+    },
+    [isDraggingPip],
+  ); // isDraggingPip 변경 시에만 함수 재생성
+
+  // 드래그 종료
+  const handlePipMouseUp = useCallback(() => {
+    setIsDraggingPip(false);
+  }, []);
+
+  // 드래그 상태일 때 window에 이벤트 리스너 등록
+  useEffect(() => {
+    if (isDraggingPip) {
+      window.addEventListener('mousemove', handlePipMouseMove);
+      window.addEventListener('mouseup', handlePipMouseUp);
+    }
+    // 클린업 함수
+    return () => {
+      window.removeEventListener('mousemove', handlePipMouseMove);
+      window.removeEventListener('mouseup', handlePipMouseUp);
+    };
+  }, [isDraggingPip, handlePipMouseMove, handlePipMouseUp]);
+
+  // pipPosition state에 따라 style 객체 계산
+  const pipStyle = useMemo(() => {
+    if (pipPosition) {
+      return {
+        // state에 위치값이 있으면 CSS 기본값(bottom/right)을 무시하고 transform 사용
+        bottom: 'unset',
+        right: 'unset',
+        transform: `translate(${pipPosition.x}px, ${pipPosition.y}px)`,
+      };
+    }
+    // state가 null이면 CSS 기본값(bottom/right) 사용 (초기 위치)
+    return {};
+  }, [pipPosition]);
+  // PIP 드래그 로직 끝
 
   const [currentIdx, setCurrentIdx] = useState(0); // 진행 중인 "랜덤 순서"의 인덱스(0-based)
   const [currentQuestion, setcurrentQuestion] = useState('');
@@ -281,7 +365,13 @@ export default function SimulationGO() {
               {imageUrl && <img src={imageUrl} alt='면접관 이미지' />}
             </S.InterviewerVideo>
 
-            <S.UserPipVideoWrapper $isVisible={isSessionStarted}>
+            <S.UserPipVideoWrapper
+              ref={pipRef}
+              style={pipStyle}
+              $isVisible={isSessionStarted}
+              data-dragging={isDraggingPip}
+              onMouseDown={handlePipMouseDown}
+            >
               <SessionVideoRecorder ref={videoRef} />
             </S.UserPipVideoWrapper>
 

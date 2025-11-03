@@ -150,14 +150,15 @@ export const InterviewerVideo = styled.div`
   }
 `;
 
-// VideoRecorderWrapper -> UserPipVideoWrapper
 export const UserPipVideoWrapper = styled.div`
-  /* PIP 스타일 */
   position: absolute;
-  bottom: ${({ theme }) => theme.space[6]}; /* 24px */
-  right: ${({ theme }) => theme.space[6]}; /* 24px */
-  width: 250px; /* PIP 너비 */
-  aspect-ratio: 4 / 3; /* 웹캠 비율 */
+
+  // 기본 위치
+  bottom: ${({ theme }) => theme.space[6]};
+  right: ${({ theme }) => theme.space[6]};
+
+  width: 250px;
+  aspect-ratio: 4 / 3;
   border-radius: ${({ theme }) => theme.radius.md};
   overflow: hidden;
   background-color: ${({ theme }) => theme.colors.gray[12]};
@@ -165,12 +166,19 @@ export const UserPipVideoWrapper = styled.div`
   box-shadow: ${({ theme }) => theme.shadow.md};
   z-index: 10;
 
-  /* 세션 시작 시에만 보이도록 투명도 조절 */
   opacity: ${({ $isVisible }) => ($isVisible ? 1 : 0)};
   transform: ${({ $isVisible }) => ($isVisible ? 'scale(1)' : 'scale(0.9)')};
-  transition: all 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 
-  /* 내부 비디오 꽉 채우기 */
+  /* 드래그 커서 추가 */
+  cursor: grab;
+  &[data-dragging='true'] {
+    cursor: grabbing;
+    transition: none;
+  }
+
   video {
     width: 100%;
     height: 100%;
