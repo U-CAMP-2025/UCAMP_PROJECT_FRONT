@@ -3,7 +3,7 @@ import styled, { css } from 'styled-components';
 
 export const HeaderContainer = styled.header`
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   width: 100%;
   height: 80px;
@@ -13,14 +13,30 @@ export const HeaderContainer = styled.header`
   white-space: nowrap;
 `;
 
+export const HeaderContentWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 80%;
+`;
+
 export const Logo = styled.button`
-  margin: 0 25px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
   background: none;
   border: none;
   padding: 0;
   &:hover {
     cursor: pointer;
   }
+`;
+
+export const LogoImage = styled.img`
+  height: 50px;
+  width: auto;
+  border-radius: 4px;
 `;
 
 export const LeftSection = styled.div`

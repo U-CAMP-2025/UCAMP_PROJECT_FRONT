@@ -23,7 +23,7 @@ const FilterAndSortBar = styled.div`
   padding: ${({ theme }) => theme.space[4]} 0;
   margin-bottom: ${({ theme }) => theme.space[6]};
   border-bottom: 1px solid ${({ theme }) => theme.colors.gray[5]};
-  background-color: ${({ theme }) => theme.colors.gray[1]};
+  // background-color: ${({ theme }) => theme.colors.gray[1]};
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -52,7 +52,7 @@ const SortSection = styled.div`
 
 // 💡 MainContentWrapper에 좌우 패딩을 추가하여 중앙 정렬된 콘텐츠 영역을 정의합니다.
 const MainContentWrapper = styled.div`
-  max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
   padding: 0 ${({ theme }) => theme.space[6]};
   min-height: 80vh;
