@@ -5,7 +5,7 @@ import RecordRTC, { RecordRTCPromisesHandler } from 'recordrtc';
 const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
   {
     maxSeconds = 60,
-    onSaved, // (url, qaId)
+    onSaved, // (url, qaId, transcript)
     onTick, // (timeLeft)
     onRecordingChange, // (isRecording)
     onAutoFinish, // (qaId, url)
@@ -41,7 +41,8 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
 
       const rec = new RecordRTCPromisesHandler(stream, {
         type: 'audio',
-        recorderType: RecordRTC.StereoAudioRecorder,
+        recorderType: RecordRTC.MediaStreamRecorder, // ★ WebM(Opus)
+        mimeType: 'audio/webm;codecs=opus', // ★ 진짜 webm
         numberOfAudioChannels: 1,
         disableLogs: true,
       });
@@ -108,6 +109,7 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
     cleanupTimers();
 
     let url = null;
+    let transcript = '';
     const qaId = qaIdRef.current;
     const qIdx = qIdxRef.current;
 
@@ -126,8 +128,18 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
               qaId != null
                 ? String(qaId).padStart(2, '0')
                 : String((qIdx ?? 0) + 1).padStart(2, '0');
-            const file = new File([blob], `audio_${prettyId}_${simulationId}.webm`, {
-              type: 'audio/webm',
+            const mime = blob.type || 'audio/webm';
+            const ext = mime.includes('wav')
+              ? 'wav'
+              : mime.includes('webm')
+                ? 'webm'
+                : mime.includes('m4a')
+                  ? 'm4a'
+                  : mime.includes('mp3')
+                    ? 'mp3'
+                    : 'webm';
+            const file = new File([blob], `audio_${prettyId}_${simulationId}.${ext}`, {
+              type: mime,
             });
 
             const form = new FormData();
@@ -135,23 +147,25 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
             if (simulationId) form.append('simulationId', simulationId);
             if (qaId != null) form.append('qaId', String(qaId)); // ✅ 서버 식별자
 
-            // ✅ 권장: 경로에 qaId 포함
+            // ✅ baseURL이 /api 이므로 슬래시 없이 호출
             const res = await axiosInstance.post(
               qaId != null && simulationId
-                ? `/simulation/${simulationId}/answers/${qaId}/audio`
-                : `/simulation/answers/audio`,
+                ? `simulation/${simulationId}/answers/${qaId}/audio`
+                : `simulation/answers/audio`,
               form,
             );
 
             const serverUrl = res?.data?.data?.url || res?.data?.url || null;
+            transcript = res?.data?.data?.transcript ?? '';
             url = serverUrl || localPreviewUrl;
 
-            onSaved?.(url, qaId ?? qIdx); // ✅ 부모는 (url, qaId)로 처리
+            // ✅ 부모로 (url, qaId, transcript)
+            onSaved?.(url, qaId ?? qIdx, transcript);
             console.log('upload result:', res.data);
           } catch (uploadErr) {
             console.error('오디오 업로드 실패:', uploadErr);
             url = localPreviewUrl;
-            onSaved?.(url, qaId ?? qIdx);
+            onSaved?.(url, qaId ?? qIdx, transcript);
           }
         }
 

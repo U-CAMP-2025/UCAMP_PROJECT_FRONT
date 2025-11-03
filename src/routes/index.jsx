@@ -10,10 +10,14 @@ import QADetailPage from '@pages/QADetail';
 import QAListPage from '@pages/QAList';
 import SignupPage from '@pages/Signup';
 import SimulationPage from '@pages/Simulation';
+<<<<<<< HEAD
+import SimulationGO from '@pages/Simulation/SimulationGo';
+=======
 import SimulationEndPage from '@pages/Simulation/SimulationEnd';
 import SimulationGO from '@pages/Simulation/SimulationGo';
 import SimulationRecordPage from '@pages/Simulation/SimulationRecord';
 import SimulationResultPage from '@pages/Simulation/SimulationResult';
+>>>>>>> 24a254e154e6fdf6ef4156f6a318e97233b7a707
 import TestPage from '@pages/Test';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
 
@@ -33,9 +37,12 @@ const AppRoutes = () => {
         <Route path='/qa/update' element={<QAUpdatePage />} />
         <Route path='/simulation' element={<SimulationPage />} />
         <Route path='/simulation/:simulationId/start' element={<SimulationGO />} />
+<<<<<<< HEAD
+=======
         <Route path='/simulation/:simulationId/end' element={<SimulationEndPage />} />
         <Route path='/simulation/record' element={<SimulationRecordPage />} />
         <Route path='/simulation/:simulationId/result' element={<SimulationResultPage />} />
+>>>>>>> 24a254e154e6fdf6ef4156f6a318e97233b7a707
         <Route path='/admin/user' element={<AdminPage />} />
         <Route path='/admin/transcription' element={<AdminPage />} />
         <Route path='/login/bridge' element={<LoginBridge />} />
