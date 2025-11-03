@@ -126,10 +126,10 @@ export default function SimulationRecordPage() {
 
 // 1. 페이지 레이아웃 (기존 페이지와 동일)
 const MainContentWrapper = styled.div`
-  width: 80%;
+  width: 90%;
   //   max-width: 1200px;
   //   margin: 0 auto;
-  padding: ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[6]};
+  // padding: ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[6]};
   min-height: 80vh;
 `;
 

@@ -3,7 +3,7 @@ import styled, { css } from 'styled-components';
 
 export const HeaderContainer = styled.header`
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   width: 100%;
   height: 80px;
@@ -13,8 +13,19 @@ export const HeaderContainer = styled.header`
   white-space: nowrap;
 `;
 
+export const HeaderContentWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 90%;
+  max-width: 1200px;
+`;
+
 export const Logo = styled.button`
-  margin: 0 25px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
   background: none;
   border: none;
   padding: 0;
@@ -23,23 +34,30 @@ export const Logo = styled.button`
   }
 `;
 
+export const LogoImage = styled.img`
+  height: 50px;
+  width: auto;
+  border-radius: 4px;
+`;
+
 export const LeftSection = styled.div`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.space[8]};
-  margin-right: 40px;
+  justify-content: flex-start;
 `;
 
 export const RightSection = styled.div`
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: ${({ theme }) => theme.space[3]};
 `;
 
 // 네비게이션
 export const Nav = styled.nav`
   display: flex;
-  gap: ${({ theme }) => theme.space[6]};
+  justify-content: center;
+  gap: ${({ theme }) => theme.space[10]};
 `;
 
 export const NavItem = styled.a`

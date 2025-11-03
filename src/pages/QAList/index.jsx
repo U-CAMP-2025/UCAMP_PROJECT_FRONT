@@ -14,50 +14,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import styled from 'styled-components';
 
-// --- 페이지 스타일 정의 ---
-
-const FilterAndSortBar = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: ${({ theme }) => theme.space[4]} 0;
-  margin-bottom: ${({ theme }) => theme.space[6]};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.gray[5]};
-  background-color: ${({ theme }) => theme.colors.gray[1]};
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: ${({ theme }) => theme.space[4]};
-  }
-`;
-
-const FilterSection = styled.div`
-  display: flex;
-  align-items: center;
-  min-width: 50%;
-`;
-
-const SortSection = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.space[4]};
-  color: ${({ theme }) => theme.colors.gray[11]};
-
-  @media (max-width: 768px) {
-    width: 100%;
-    justify-content: flex-end;
-  }
-`;
-
-// 💡 MainContentWrapper에 좌우 패딩을 추가하여 중앙 정렬된 콘텐츠 영역을 정의합니다.
-const MainContentWrapper = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 ${({ theme }) => theme.space[6]};
-  min-height: 80vh;
-`;
-
 export default function QAListPage() {
   const { isLogin } = useAuthStore();
   const [currentSort, setCurrentSort] = useState('bookcount_desc');
@@ -139,6 +95,11 @@ export default function QAListPage() {
   return (
     <PageContainer header footer>
       <MainContentWrapper>
+        <QaListHeader>
+          <Typography as='h1' size={7} weight='bold'>
+            질문답변 둘러보기
+          </Typography>
+        </QaListHeader>
         <FilterAndSortBar>
           <FilterSection>
             <JobSelector value={selectedJobIds} onChange={handleJobChange} />
@@ -163,3 +124,58 @@ export default function QAListPage() {
     </PageContainer>
   );
 }
+
+// --- 페이지 스타일 정의 ---
+
+const FilterAndSortBar = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: ${({ theme }) => theme.space[4]} 0;
+  margin-bottom: ${({ theme }) => theme.space[6]};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.gray[5]};
+  // background-color: ${({ theme }) => theme.colors.gray[1]};
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: ${({ theme }) => theme.space[4]};
+  }
+`;
+
+const FilterSection = styled.div`
+  display: flex;
+  align-items: center;
+  min-width: 50%;
+`;
+
+const SortSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[4]};
+  color: ${({ theme }) => theme.colors.gray[11]};
+
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: flex-end;
+  }
+`;
+
+// 페이지 상단 헤더
+const QaListHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ${({ theme }) => theme.space[6]}; /* 24px */
+  padding-bottom: ${({ theme }) => theme.space[4]}; /* 16px */
+  border-bottom: 2px solid ${({ theme }) => theme.colors.gray[12]};
+`;
+
+// 💡 MainContentWrapper에 좌우 패딩을 추가하여 중앙 정렬된 콘텐츠 영역을 정의합니다.
+const MainContentWrapper = styled.div`
+  width: 100%;
+  min-width: 700px;
+  margin: 0 auto;
+  padding: 0 ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[5]};
+  min-height: 80vh;
+`;
