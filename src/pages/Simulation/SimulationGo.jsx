@@ -7,6 +7,7 @@ import VoiceModel from '@components/simulation/VoiceModel';
 import { PlayIcon, StopIcon, DiscIcon, CheckIcon } from '@radix-ui/react-icons';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import * as S from './SimulationGoStyle';
 import TextToSpeech from './TextToSpeech';
@@ -26,6 +27,7 @@ function makeOneBasedShuffled(n) {
 
 export default function SimulationGO() {
   const { simulationId } = useParams();
+  const navigate = useNavigate();
 
   // PIP 드래그 로직
   const [pipPosition, setPipPosition] = useState(null); // null: CSS 기본값 사용, {x, y}: transform 사용
@@ -294,8 +296,20 @@ export default function SimulationGO() {
     } else {
       stopSession();
     }
-  }; // ===== 렌더링 =====
+  };
 
+  const handleGoToResults = () => {
+    if (videoUrl) {
+      // 비디오 URL이 생성되었을 때만 (세션이 정상 종료되었을 때)
+      navigate(`/simulation/${simulationId}/end`);
+    } else {
+      console.log('세션이 아직 완료되지 않았거나 비디오 URL이 없습니다.');
+      // 비정상 종료 시
+      alert('세션이 아직 완료되지 않았거나 비디오 URL이 없습니다.');
+    }
+  };
+
+  // ===== 렌더링 =====
   return (
     <PageContainer header footer activeMenu='면접 시뮬레이션'>
       <S.MainContentWrapper>
@@ -403,6 +417,10 @@ export default function SimulationGO() {
               onAutoFinish={handleAutoFinish}
             />
 
+            {videoUrl && (
+              <S.FinishButton onClick={handleGoToResults}>시뮬레이션 종료</S.FinishButton>
+            )}
+
             {/* 3. 녹음/비디오 결과 (디버깅/확인용) */}
             {/* <S.RecordingListSection>
               <Typography as='h4' size={4} weight='semiBold'>
@@ -460,7 +478,7 @@ export default function SimulationGO() {
   );
 }
 
-// ===== 스타일 & 유틸 =====
+// ===== 유틸 =====
 function formatTime(s) {
   const mm = String(Math.floor(s / 60)).padStart(2, '0');
   const ss = String(s % 60).padStart(2, '0');

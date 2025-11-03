@@ -14,7 +14,7 @@ export const MainContentWrapper = styled.div`
 // 1. 레이아웃 (사이드바 + 메인)
 export const SimulationLayout = styled.div`
   display: grid;
-  grid-template-columns: 2fr 7fr 2fr; /* (좌)3: (중앙)7: (우)3 비율 */
+  grid-template-columns: 2.5fr 8fr 2.5fr;
   gap: ${({ theme }) => theme.space[6]};
 
   @media (max-width: 1024px) {
@@ -331,4 +331,28 @@ export const SessionVideoSection = styled(RecordingListSection)``;
 export const StyledVideo = styled.video`
   width: 320px;
   border-radius: ${({ theme }) => theme.radius.md};
+`;
+
+export const FinishButton = styled.button`
+  all: unset;
+  width: 100%;
+  max-width: 250px;
+  display: block;
+  margin: ${({ theme }) => theme.space[10]} auto ${({ theme }) => theme.space[6]};
+  padding: ${({ theme }) => theme.space[5]} 0; /* 20px 상하 */
+  text-align: center;
+  background-color: ${({ theme }) => theme.colors.primary[9]};
+  color: white;
+  border-radius: ${({ theme }) => theme.radius.md}; /* 10px */
+  font-size: ${({ theme }) => theme.font.size[5]}; /* 20px */
+  font-weight: ${({ theme }) => theme.font.weight.bold};
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.primary[10]};
+  }
+  &:focus {
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary[6]};
+  }
 `;
