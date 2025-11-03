@@ -15,6 +15,7 @@ export default function LoginBridge() {
         const accessToken = params.get('accessToken');
         const nickname = params.get('nickname');
         const profileImageUrl = params.get('profileImageUrl');
+        const next = params.get('next') || '/'; // next 파라미터 읽기, 없으면 메인으로 이동
 
         if (!accessToken) {
           console.warn('LoginBridge: No accessToken found, redirecting to signup');
@@ -30,7 +31,7 @@ export default function LoginBridge() {
           },
         });
 
-        navigate('/', { replace: true });
+        navigate(next, { replace: true });
       } catch (err) {
         console.error('LoginBridge Error:', err);
         navigate('/', { replace: true });

@@ -39,6 +39,7 @@ const Overlay = styled(Dialog.Overlay)`
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
 `;
 
 const Content = styled(Dialog.Content)`
@@ -56,6 +57,7 @@ const Content = styled(Dialog.Content)`
   display: flex;
   flex-direction: column;
   gap: 24px;
+  z-index: 10000;
 `;
 
 const Header = styled.div`
