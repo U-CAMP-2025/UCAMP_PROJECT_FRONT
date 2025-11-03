@@ -38,7 +38,7 @@ export const Header = () => {
       notiId: 2,
       content: '알림 내용',
       type: 'TRANSCRIPTION',
-      read: false,
+      read: true,
       createdAt: '2025-10-27T06:00:00Z',
     },
     {
@@ -59,7 +59,7 @@ export const Header = () => {
       notiId: 4,
       content: '알림 내용',
       type: 'TRANSCRIPTION',
-      read: false,
+      read: true,
       createdAt: '2025-10-27T06:00:00Z',
     },
   ]);
@@ -80,6 +80,8 @@ export const Header = () => {
     window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/logout`;
   };
 
+  const [alertTrigger, setAlertTrigger] = useState();
+
   useEffect(() => {
     if (isLogin) {
       getNoti()
@@ -88,7 +90,7 @@ export const Header = () => {
         })
         .catch(() => setNotifications(null));
     }
-  }, [isLogin]);
+  }, [isLogin, alertTrigger]);
 
   return (
     <HeaderContainer>
@@ -155,6 +157,7 @@ export const Header = () => {
             </DropdownMenu.Root>
             <NotificationDrawer
               open={notifOpen}
+              trigger={setAlertTrigger}
               onOpenChange={setNotifOpen}
               items={notifications}
               onItemClick={(item) => {
