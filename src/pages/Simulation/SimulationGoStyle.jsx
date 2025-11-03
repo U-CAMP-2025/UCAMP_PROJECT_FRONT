@@ -49,15 +49,16 @@ export const SidebarButton = styled.button`
   align-items: center;
   gap: ${({ theme }) => theme.space[2]};
 
-  background-color: ${({ theme }) => theme.colors.gray[3]};
-  color: ${({ theme }) => theme.colors.gray[11]};
-  border: 1px solid ${({ theme }) => theme.colors.gray[5]};
+  background-color: ${({ theme }) => theme.colors.primary[3]};
+  color: ${({ theme }) => theme.colors.primary[11]};
+  border: 1px solid ${({ theme }) => theme.colors.primary[5]};
 
   &:hover:not(:disabled) {
-    background-color: ${({ theme }) => theme.colors.gray[4]};
+    background-color: ${({ theme }) => theme.colors.primary[4]};
+    border-color: ${({ theme }) => theme.colors.primary[6]};
   }
   &:focus:not(:disabled) {
-    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.gray[6]};
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary[6]};
   }
 
   ${({ $variant }) =>
@@ -76,8 +77,10 @@ export const SidebarButton = styled.button`
     `}
 
   &:disabled {
-    background-color: ${({ theme }) => theme.colors.gray[5]};
-    color: ${({ theme }) => theme.colors.gray[9]};
+    background-color: ${({ theme }) => theme.colors.gray[2]};
+    color: ${({ theme }) => theme.colors.gray[7]};
+    border-color: ${({ theme }) => theme.colors.gray[4]};
+    opacity: 0.7;
     cursor: not-allowed;
   }
 `;
@@ -96,24 +99,24 @@ export const TopInfoBar = styled.div`
   align-items: center;
   gap: ${({ theme }) => theme.space[3]};
   padding: ${({ theme }) => theme.space[3]};
-  background-color: ${({ theme }) => theme.colors.gray[12]};
+  background-color: ${({ theme }) => theme.colors.primary[9]};
   border-radius: ${({ theme }) => theme.radius.md};
   color: white;
 `;
 
 export const TimerPill = styled.div`
-  background: black;
-  color: white;
+  background: ${({ theme }) => theme.colors.gray[1]};
+  color: ${({ theme }) => theme.colors.primary[9]};
   padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[4]};
   border-radius: 999px;
   font-weight: 700;
   min-width: 100px;
   text-align: center;
-  font-size: ${({ theme }) => theme.font.size[4]};
+  font-size: ${({ theme }) => theme.font.size[5]}; /* 💡 4 -> 5 (20px)로 키움 */
 `;
 
 export const QuestionCounter = styled(Typography).attrs({ size: 4, weight: 'medium' })`
-  color: ${({ theme }) => theme.colors.gray[7]};
+  color: ${({ theme }) => theme.colors.gray[1]};
   margin-left: auto;
 `;
 
@@ -123,7 +126,7 @@ const spin = keyframes`
 `;
 
 export const LiveIndicator = styled(Typography).attrs({ size: 2, weight: 'bold' })`
-  color: #d93025;
+  color: ${({ theme }) => theme.colors.gray[1]};
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[1]};
@@ -131,7 +134,8 @@ export const LiveIndicator = styled(Typography).attrs({ size: 2, weight: 'bold' 
   &::before {
     content: '●';
     font-size: 10px;
-    animation: ${spin} 1.5s linear infinite; /* 임시 점멸 효과 */
+    color: #d93025;
+    animation: ${spin} 1.5s linear infinite;
   }
 `;
 

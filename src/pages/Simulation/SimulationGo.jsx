@@ -436,7 +436,7 @@ export default function SimulationGO() {
               </S.StyledOL>
             </S.RecordingListSection> */}
 
-            <S.SessionVideoSection>
+            {/* <S.SessionVideoSection>
               <Typography as='h4' size={4} weight='semiBold'>
                 세션 비디오 (종료 시)
               </Typography>
@@ -452,7 +452,7 @@ export default function SimulationGO() {
                   세션 비디오 없음
                 </Typography>
               )}
-            </S.SessionVideoSection>
+            </S.SessionVideoSection> */}
           </S.MainContent>
         </S.SimulationLayout>
       </S.MainContentWrapper>
