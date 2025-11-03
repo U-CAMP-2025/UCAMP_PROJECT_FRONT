@@ -1,48 +1,50 @@
+import { axiosInstance } from '@api/axios';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import * as Accordion from '@radix-ui/react-accordion';
 import { CaretDownIcon, PlayIcon } from '@radix-ui/react-icons';
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
-
-// Mock 데이터
-// 실제로는 Simulation ID를 기반으로 이 데이터를 불러와야 합니다.
-const mockSimulationResult = {
-  simulationId: 1,
-  videoUrl: 'https://path.to/your/video.mp4',
-  // Post 데이터
-  post: {
-    postId: 1,
-    title: '신입 프론트엔드 면접 질문 모음',
-    qaSets: [
-      {
-        qaId: 0,
-        question: '1분 자기소개 부탁드립니다.',
-        originContent: '안녕하십니까. 00회사 00직무에 지원하게 된 000입니다. ...',
-      },
-      {
-        qaId: 1,
-        question: '이 회사에 지원하게 된 동기는 어떻게 됩니까?',
-        originContent: '비전과 기술력에 깊은 감명을 받았습니다. 특히...',
-      },
-      {
-        qaId: 2,
-        question: '프로젝트 중 겪었던 가장 큰 어려움은 무엇인가요?',
-        originContent: '가장 큰 어려움은...',
-      },
-    ],
-  },
-};
 
 export default function SimulationEndPage() {
   const navigate = useNavigate();
+  const { simulationId } = useParams();
+  const location = useLocation();
 
-  // TODO: 페이지 접근 시 실제 시뮬레이션 결과 데이터(simulationResult)를
-  // URL 파라미터(simulationId)나 location state로 받아와야 합니다.
-  const simulationResult = mockSimulationResult;
+  // 세션 종료 시 전달된 비디오 URL & 포스트 데이터
+  const initialVideoUrl = location.state?.recordedVideoUrl ?? null;
+  const initialPost = location.state?.postData ?? null;
 
-  // 확인 버튼 클릭 -> 면접 연습 기록 페이지로 이동
+  const [videoUrl, setVideoUrl] = useState(initialVideoUrl);
+  const [post, setPost] = useState(initialPost);
+  const [loading, setLoading] = useState(!initialPost); // post가 없으면 fetch
+  const [error, setError] = useState(null);
+
+  // post가 없으면 백엔드에서 불러오기 (시작 페이지와 동일한 포맷의 post: { postId, postTitle, postDescription, qaList[...] })
+  useEffect(() => {
+    if (post) return; // 이미 state로 받은 경우 스킵
+    let ignore = false;
+
+    (async () => {
+      try {
+        const res = await axiosInstance.get(`/simulation/${simulationId}/start`);
+        const data = res.data?.data;
+        if (!ignore) {
+          setPost(data?.post ?? null);
+        }
+      } catch (e) {
+        if (!ignore) setError(e?.response?.data?.message ?? '연습 결과를 불러오지 못했습니다.');
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    })();
+
+    return () => {
+      ignore = true;
+    };
+  }, [simulationId, post]);
+
   const handleConfirmClick = () => {
     navigate('/simulation/record');
   };
@@ -50,47 +52,55 @@ export default function SimulationEndPage() {
   return (
     <PageContainer header footer>
       <MainContentWrapper>
-        {/* 시뮬레이션 영상 제공 섹션 */}
         <SectionTitle>면접 영상</SectionTitle>
+
         <VideoPlayerWrapper>
-          {/* <video controls src={simulationResult.videoUrl}>
-                        Your browser does not support the video tag.
-                    </video> 
-                    */}
-          {/* Placeholder Icon */}
-          <PlayIconWrapper>
-            <PlayIcon width={50} height={50} />
-          </PlayIconWrapper>
+          {videoUrl ? (
+            <video controls src={videoUrl}>
+              Your browser does not support the video tag.
+            </video>
+          ) : (
+            <PlayIconWrapper title='녹화 영상이 아직 업로드되지 않았습니다.'>
+              <PlayIcon width={50} height={50} />
+            </PlayIconWrapper>
+          )}
         </VideoPlayerWrapper>
 
-        {/* 질문/답변 목록 섹션 */}
-        <StyledAccordionRoot type='multiple' defaultValue={['q-0']}>
-          {simulationResult.post.qaSets.map((qa, index) => (
-            <StyledAccordionItem key={index} value={`q-${index}`}>
-              <StyledAccordionTrigger>
-                <Typography as='h3' size={4} weight='bold' style={{ flex: 1, textAlign: 'left' }}>
-                  Q{index + 1}. {qa.question}
-                </Typography>
-                <CaretIcon aria-hidden />
-              </StyledAccordionTrigger>
-              <StyledAccordionContent>
-                <AnswerContainer>
-                  <AnswerLabel>준비한 답변</AnswerLabel>
-                  <AnswerTextWrapper>
-                    <Typography as='p' size={3} style={{ lineHeight: '1.6' }}>
-                      {qa.originContent}
-                    </Typography>
-                  </AnswerTextWrapper>
-                </AnswerContainer>
-              </StyledAccordionContent>
-            </StyledAccordionItem>
-          ))}
-        </StyledAccordionRoot>
+        {/* 질문/답변 아코디언 */}
+        <SectionTitle as='h2'>질문 & 준비한 답변</SectionTitle>
 
-        {/* 하단 안내문구, 버튼 섹션 */}
+        {loading && <div style={{ padding: 16 }}>불러오는 중…</div>}
+        {error && <div style={{ padding: 16, color: 'crimson' }}>{error}</div>}
+
+        {!loading && !error && post && (
+          <StyledAccordionRoot type='multiple' defaultValue={['q-0']}>
+            {(post.qaList ?? []).map((qa, index) => (
+              <StyledAccordionItem key={qa.qaId ?? index} value={`q-${index}`}>
+                <StyledAccordionTrigger>
+                  <Typography as='h3' size={4} weight='bold' style={{ flex: 1, textAlign: 'left' }}>
+                    Q{index + 1}. {qa.qaQuestion}
+                  </Typography>
+                  <CaretIcon aria-hidden />
+                </StyledAccordionTrigger>
+                <StyledAccordionContent>
+                  <AnswerContainer>
+                    <AnswerLabel>준비한 답변</AnswerLabel>
+                    <AnswerTextWrapper>
+                      <Typography as='p' size={3} style={{ lineHeight: '1.6' }}>
+                        {qa.qaAnswer || '—'}
+                      </Typography>
+                    </AnswerTextWrapper>
+                  </AnswerContainer>
+                </StyledAccordionContent>
+              </StyledAccordionItem>
+            ))}
+          </StyledAccordionRoot>
+        )}
+
         <FooterMessage>
-          답변 스크립트 변환에 시간이 다소 소요되며, 완료 시 면접 연습 기록 페이지에서 확인
-          가능합니다.
+          답변(STT) 텍스트 변환은 약간의 시간이 걸릴 수 있습니다.
+          <br />
+          완료되면 <b>면접 연습 기록</b>에서 확인할 수 있어요.
         </FooterMessage>
 
         <ConfirmButton onClick={handleConfirmClick}>확인</ConfirmButton>
@@ -99,7 +109,7 @@ export default function SimulationEndPage() {
   );
 }
 
-// --- [스타일 정의] ---
+/* ---------- 스타일 ---------- */
 
 const MainContentWrapper = styled.div`
   max-width: 900px;
@@ -108,49 +118,42 @@ const MainContentWrapper = styled.div`
   min-height: 80vh;
 `;
 
-// 섹션 제목 (예: "면접 영상")
 const SectionTitle = styled(Typography).attrs({ as: 'h2', size: 6, weight: 'bold' })`
-  margin-bottom: ${({ theme }) => theme.space[5]}; /* 20px */
+  margin-bottom: ${({ theme }) => theme.space[5]};
   color: ${({ theme }) => theme.colors.gray[12]};
 `;
 
-// 면접 영상 플레이어 (Placeholder)
 const VideoPlayerWrapper = styled.div`
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
   background-color: ${({ theme }) => theme.colors.gray[3]};
-  border-radius: ${({ theme }) => theme.radius.lg}; /* 16px */
+  border-radius: ${({ theme }) => theme.radius.lg};
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: ${({ theme }) => theme.space[10]}; /* 40px */
+  margin-bottom: ${({ theme }) => theme.space[10]};
   box-shadow: ${({ theme }) => theme.shadow.sm};
   overflow: hidden;
 
-  /* 실제 영상 태그는 아래 주석처럼 삽입할 수 있습니다 */
-  /*
   video {
     width: 100%;
     height: 100%;
     border-radius: ${({ theme }) => theme.radius.lg};
   }
-  */
 `;
 
-// 플레이 아이콘 (Placeholder)
 const PlayIconWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100px;
-  height: 100px;
+  width: 96px;
+  height: 96px;
   background-color: rgba(0, 0, 0, 0.4);
   border-radius: 50%;
   color: white;
 `;
 
-// 질문/답변 아코디언
 const StyledAccordionRoot = styled(Accordion.Root)`
   width: 100%;
   display: flex;
@@ -172,15 +175,11 @@ const StyledAccordionTrigger = styled(Accordion.Trigger)`
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: ${({ theme }) => theme.space[5]} ${({ theme }) => theme.space[6]}; /* 20px 24px */
+  padding: ${({ theme }) => theme.space[5]} ${({ theme }) => theme.space[6]};
   cursor: pointer;
-  font-size: ${({ theme }) => theme.font.size[4]}; /* 18px */
+  font-size: ${({ theme }) => theme.font.size[4]};
   font-weight: ${({ theme }) => theme.font.weight.bold};
   color: ${({ theme }) => theme.colors.gray[12]};
-
-  &:focus {
-    box-shadow: inset 0 0 0 2px ${({ theme }) => theme.colors.primary[6]};
-  }
 
   &[data-state='open'] {
     border-bottom: 1px solid ${({ theme }) => theme.colors.gray[4]};
@@ -190,21 +189,23 @@ const StyledAccordionTrigger = styled(Accordion.Trigger)`
 const CaretIcon = styled(CaretDownIcon)`
   color: ${({ theme }) => theme.colors.gray[9]};
   transition: transform 300ms cubic-bezier(0.87, 0, 0.13, 1);
+
+  [data-state='open'] & {
+    transform: rotate(-180deg);
+  }
 `;
 
-// 아코디언 콘텐츠 (애니메이션)
 const slideDown = keyframes`
-    from { height: 0; opacity: 0; }
-    to { height: var(--radix-accordion-content-height); opacity: 1; }
+  from { height: 0; opacity: 0; }
+  to { height: var(--radix-accordion-content-height); opacity: 1; }
 `;
 const slideUp = keyframes`
-    from { height: var(--radix-accordion-content-height); opacity: 1; }
-    to { height: 0; opacity: 0; }
+  from { height: var(--radix-accordion-content-height); opacity: 1; }
+  to { height: 0; opacity: 0; }
 `;
 
 const StyledAccordionContent = styled(Accordion.Content)`
   overflow: hidden;
-
   &[data-state='open'] {
     animation: ${slideDown} 300ms cubic-bezier(0.87, 0, 0.13, 1);
   }
@@ -213,7 +214,6 @@ const StyledAccordionContent = styled(Accordion.Content)`
   }
 `;
 
-// 아코디언 내부 "준비한 답변" 영역
 const AnswerContainer = styled.div`
   padding: ${({ theme }) => theme.space[5]} ${({ theme }) => theme.space[6]}
     ${({ theme }) => theme.space[6]};
@@ -224,17 +224,15 @@ const AnswerLabel = styled(Typography).attrs({ as: 'h4', size: 3, weight: 'semiB
   margin-bottom: ${({ theme }) => theme.space[2]};
 `;
 
-// 와이어프레임의 스크롤 가능한 텍스트 박스
 const AnswerTextWrapper = styled.div`
   background: ${({ theme }) => theme.colors.gray[2]};
   border: 1px solid ${({ theme }) => theme.colors.gray[4]};
   border-radius: ${({ theme }) => theme.radius.md};
   padding: ${({ theme }) => theme.space[4]};
-  max-height: 200px; /* 최대 높이 지정 */
-  overflow-y: auto; /* 내용 많으면 스크롤 */
+  max-height: 200px;
+  overflow-y: auto;
 `;
 
-// 3. 하단 안내 문구 및 버튼
 const FooterMessage = styled(Typography).attrs({ as: 'p', size: 3 })`
   text-align: center;
   color: ${({ theme }) => theme.colors.gray[9]};
