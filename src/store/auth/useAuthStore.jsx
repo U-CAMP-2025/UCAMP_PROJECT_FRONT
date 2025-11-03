@@ -1,7 +1,9 @@
+import { postLogout } from '@api/authAPIS';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 const initialState = {
+  accessToken: null,
   isLogin: false,
   user: {
     name: '',
@@ -11,20 +13,33 @@ const initialState = {
 };
 export const useAuthStore = create(
   persist(
-    (set) => ({
+    (set, get) => ({
       ...initialState,
-      login: (user) => {
-        set({
-          isLogin: true,
+      setAccessToken: (token) => set({ accessToken: token }),
+      login: ({ user, accessToken }) => {
+        set((s) => ({
           user,
-        });
+          isLogin: true,
+          accessToken: accessToken ?? s.accessToken,
+        }));
       },
-      logout: () => {
-        set({ ...initialState });
+      logout: async () => {
+        try {
+          await postLogout();
+        } catch (e) {
+          // ignore
+        } finally {
+          set({ ...initialState });
+        }
       },
     }),
     {
       name: 'authStore',
+      partialize: (state) => ({
+        accessToken: state.accessToken,
+        isLogin: state.isLogin,
+        user: state.user,
+      }),
     },
   ),
 );

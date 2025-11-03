@@ -1,4 +1,4 @@
-import axiosInstance from './axios';
+import { axiosInstance } from './axios';
 
 /**
  * GET: 전체 알람 조회

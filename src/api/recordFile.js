@@ -1,4 +1,4 @@
-import axiosInstance from './axios';
+import { axiosInstance } from './axios';
 
 /**
  * POST: 녹음 파일 업로드 (STT 변환용)
