@@ -131,9 +131,9 @@ export const Header = () => {
             <DropdownMenu.Root>
               <ProfileToggle>
                 <Avatar aria-hidden>
-                  {user.profileImage && user.profileImage.startsWith('http') ? (
+                  {user.profileImageUrl && user.profileImageUrl.startsWith('http') ? (
                     <img
-                      src={user.profileImage}
+                      src={user.profileImageUrl}
                       alt=''
                       onError={(e) => (e.currentTarget.style.display = 'none')}
                     />
