@@ -1,7 +1,10 @@
 import Typography from '@components/common/Typography';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Cross2Icon } from '@radix-ui/react-icons';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+
+import { useSSE } from './useSSE';
 
 /**
  * NotificationDrawer (Right-side panel)
@@ -12,14 +15,10 @@ import styled from 'styled-components';
  *  - onItemClick?: (item) => void
  *  - onMarkAllRead?: () => void1
  */
-const sse = new EventSource(`${import.meta.env.VITE_API_BASE_URL}/notifications/sse`);
-
-sse.addEventListener('message', (event) => {
-  console.log(event);
-});
 
 export default function NotificationDrawer({
   open,
+  trigger,
   onOpenChange,
   items = [],
   onItemClick,
@@ -32,6 +31,8 @@ export default function NotificationDrawer({
     const bt = new Date(b.createdAt).getTime();
     return bt - at;
   });
+
+  useSSE(trigger);
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -80,7 +81,13 @@ export default function NotificationDrawer({
                       <Time>{formatYMD(it.createdAt)}</Time>
                     </Row>
                     <Typography as='p' size={2} style={{ whiteSpace: 'pre-wrap' }}>
-                      {it.content}
+                      {it.type === 'REVIEW' ? (
+                        <StyledLink to={`/qa/${it.content.split(':::')[1]}`}>
+                          {it.content.split(':::')[0]} 질문셋에 리뷰가 달렸습니다.
+                        </StyledLink>
+                      ) : (
+                        <Message>{it.content}</Message>
+                      )}
                     </Typography>
                   </Body>
                 </Item>
@@ -261,4 +268,20 @@ const Badge = styled.span`
 const Time = styled.span`
   color: ${({ theme }) => theme.colors.gray[10]};
   font-size: ${({ theme }) => theme.font.size[2]};
+`;
+const StyledLink = styled(Link)`
+  color: ${({ theme }) => theme.colors.text};
+  text-decoration: none;
+  font-weight: ${({ theme }) => theme.font.weight.semiBold};
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.primary[11]};
+  }
+`;
+
+const Message = styled.span`
+  color: ${({ theme }) => theme.colors.text};
+  text-decoration: none;
+  font-weight: ${({ theme }) => theme.font.weight.semiBold};
 `;
