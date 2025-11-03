@@ -299,13 +299,15 @@ export default function SimulationGO() {
   };
 
   const handleGoToResults = () => {
-    if (videoUrl) {
-      // 비디오 URL이 생성되었을 때만 (세션이 정상 종료되었을 때)
-      navigate(`/simulation/${simulationId}/end`);
+    if (videoUrl && simPost) {
+      navigate(`/simulation/${simulationId}/end`, {
+        state: {
+          recordedVideoUrl: videoUrl,
+          postData: simPost,
+        },
+      });
     } else {
-      console.log('세션이 아직 완료되지 않았거나 비디오 URL이 없습니다.');
-      // 비정상 종료 시
-      alert('세션이 아직 완료되지 않았거나 비디오 URL이 없습니다.');
+      console.log('세션이 아직 완료되지 않았거나 비디오 URL/Post 데이터가 없습니다.');
     }
   };
 
