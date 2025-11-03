@@ -13,7 +13,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 
 import {
   HeaderContainer,
+  HeaderContentWrapper,
   Logo,
+  LogoImage,
   LeftSection,
   RightSection,
   Nav,
@@ -38,7 +40,7 @@ export const Header = () => {
       notiId: 2,
       content: '알림 내용',
       type: 'TRANSCRIPTION',
-      read: false,
+      read: true,
       createdAt: '2025-10-27T06:00:00Z',
     },
     {
@@ -59,7 +61,7 @@ export const Header = () => {
       notiId: 4,
       content: '알림 내용',
       type: 'TRANSCRIPTION',
-      read: false,
+      read: true,
       createdAt: '2025-10-27T06:00:00Z',
     },
   ]);
@@ -80,6 +82,8 @@ export const Header = () => {
     window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/logout`;
   };
 
+  const [alertTrigger, setAlertTrigger] = useState();
+
   useEffect(() => {
     if (isLogin) {
       getNoti()
@@ -88,17 +92,19 @@ export const Header = () => {
         })
         .catch(() => setNotifications(null));
     }
-  }, [isLogin]);
+  }, [isLogin, alertTrigger]);
 
   return (
     <HeaderContainer>
-      <LeftSection>
-        <Logo onClick={handleClickLogoButton}>
-          <Typography size={5} weight='bold' style={{ color: theme.colors.primary[9] }}>
-            면접톡
-          </Typography>
-        </Logo>
-
+      <HeaderContentWrapper>
+        <LeftSection>
+          <Logo onClick={handleClickLogoButton}>
+            <LogoImage src='/images/logo2.png' alt='면접톡 로고' />
+            <Typography size={5} weight='bold' style={{ color: theme.colors.primary[9] }}>
+              면접톡
+            </Typography>
+          </Logo>
+        </LeftSection>
         <Nav>
           <NavItem href='/qalist' $isActive={pathname === '/qalist'}>
             질문답변 둘러보기
@@ -113,94 +119,95 @@ export const Header = () => {
             시뮬레이션 결과
           </NavItem>
         </Nav>
-      </LeftSection>
 
-      <RightSection>
-        {isLogin ? (
-          <>
-            <NotifWrap type='button' aria-label='알림' onClick={() => setNotifOpen(true)}>
-              <BellIcon width={20} height={20} color={theme.colors.gray[11]} />
-              {unreadDerived > 0 && (
-                <Badge aria-label={`읽지 않은 알림 ${unreadDerived}건`}>
-                  {unreadDerived > 99 ? '99+' : unreadDerived}
-                </Badge>
-              )}
-            </NotifWrap>
-            <DropdownMenu.Root>
-              <ProfileToggle>
-                <Avatar aria-hidden>
-                  {user.profileImage && user.profileImage.startsWith('http') ? (
-                    <img
-                      src={user.profileImage}
-                      alt=''
-                      onError={(e) => (e.currentTarget.style.display = 'none')}
-                    />
-                  ) : (
-                    <PersonIcon width={20} height={20} color={theme.colors.primary[10]} />
-                  )}
-                </Avatar>
-                <Typography size={2} weight='semiBold' color='gray.12'>
-                  {user.name}
-                </Typography>
-                <ChevronDownIcon width={16} height={16} color={theme.colors.gray[11]} />
-              </ProfileToggle>
+        <RightSection>
+          {isLogin ? (
+            <>
+              <NotifWrap type='button' aria-label='알림' onClick={() => setNotifOpen(true)}>
+                <BellIcon width={20} height={20} color={theme.colors.gray[11]} />
+                {unreadDerived > 0 && (
+                  <Badge aria-label={`읽지 않은 알림 ${unreadDerived}건`}>
+                    {unreadDerived > 99 ? '99+' : unreadDerived}
+                  </Badge>
+                )}
+              </NotifWrap>
+              <DropdownMenu.Root>
+                <ProfileToggle>
+                  <Avatar aria-hidden>
+                    {user.profileImageUrl && user.profileImageUrl.startsWith('http') ? (
+                      <img
+                        src={user.profileImageUrl}
+                        alt=''
+                        onError={(e) => (e.currentTarget.style.display = 'none')}
+                      />
+                    ) : (
+                      <PersonIcon width={20} height={20} color={theme.colors.primary[10]} />
+                    )}
+                  </Avatar>
+                  <Typography size={2} weight='semiBold' color='gray.12'>
+                    {user.name}
+                  </Typography>
+                  <ChevronDownIcon width={16} height={16} color={theme.colors.gray[11]} />
+                </ProfileToggle>
 
-              <DropdownMenu.Portal>
-                <DropdownContent sideOffset={5} align='end'>
-                  <DropdownItem onSelect={() => navigate('/mypage')}>마이페이지</DropdownItem>
-                  <DropdownSeparator />
-                  <DropdownItem onSelect={handleClickLogout}>로그아웃</DropdownItem>
-                </DropdownContent>
-              </DropdownMenu.Portal>
-            </DropdownMenu.Root>
-            <NotificationDrawer
-              open={notifOpen}
-              onOpenChange={setNotifOpen}
-              items={notifications}
-              onItemClick={(item) => {
-                // 예시: 클릭 시 읽음 처리
-                if (!item.read) {
-                  notiRead(item.notiId)
-                    .then((response) => {
-                      setNotifications((prev) =>
-                        prev.map((n) => (n.notiId === item.notiId ? { ...n, read: true } : n)),
-                      );
-                    })
-                    .catch(() => setNotifications(null));
-                } else {
-                  notiDel(item.notiId)
-                    .then((response) => {
-                      setNotifications((prev) => prev.filter((n) => n.notiId !== item.notiId));
-                    })
-                    .catch(() => setNotifications(null));
-                }
-              }}
-              onMarkAllRead={() => {
-                if (unreadDerived !== 0) {
-                  notiReadAll()
-                    .then((response) => {
-                      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-                    })
-                    .catch(() => setNotifications(null));
-                } else {
-                  notiDelAll()
-                    .then((response) => {
-                      setNotifications([]);
-                    })
-                    .catch(() => setNotifications(null));
-                }
-              }}
-            />
-          </>
-        ) : (
-          <>
-            <Button size='sm' onClick={handleClickLoginButton}>
-              로그인
-            </Button>
-            <KakaoLoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
-          </>
-        )}
-      </RightSection>
+                <DropdownMenu.Portal>
+                  <DropdownContent sideOffset={5} align='end'>
+                    <DropdownItem onSelect={() => navigate('/mypage')}>마이페이지</DropdownItem>
+                    <DropdownSeparator />
+                    <DropdownItem onSelect={handleClickLogout}>로그아웃</DropdownItem>
+                  </DropdownContent>
+                </DropdownMenu.Portal>
+              </DropdownMenu.Root>
+              <NotificationDrawer
+                open={notifOpen}
+                trigger={setAlertTrigger}
+                onOpenChange={setNotifOpen}
+                items={notifications}
+                onItemClick={(item) => {
+                  // 예시: 클릭 시 읽음 처리
+                  if (!item.read) {
+                    notiRead(item.notiId)
+                      .then((response) => {
+                        setNotifications((prev) =>
+                          prev.map((n) => (n.notiId === item.notiId ? { ...n, read: true } : n)),
+                        );
+                      })
+                      .catch(() => setNotifications(null));
+                  } else {
+                    notiDel(item.notiId)
+                      .then((response) => {
+                        setNotifications((prev) => prev.filter((n) => n.notiId !== item.notiId));
+                      })
+                      .catch(() => setNotifications(null));
+                  }
+                }}
+                onMarkAllRead={() => {
+                  if (unreadDerived !== 0) {
+                    notiReadAll()
+                      .then((response) => {
+                        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+                      })
+                      .catch(() => setNotifications(null));
+                  } else {
+                    notiDelAll()
+                      .then((response) => {
+                        setNotifications([]);
+                      })
+                      .catch(() => setNotifications(null));
+                  }
+                }}
+              />
+            </>
+          ) : (
+            <>
+              <Button size='sm' onClick={handleClickLoginButton}>
+                로그인
+              </Button>
+              <KakaoLoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
+            </>
+          )}
+        </RightSection>
+      </HeaderContentWrapper>
     </HeaderContainer>
   );
 };

@@ -16,9 +16,8 @@ import styled, { css } from 'styled-components';
 const MainContentWrapper = styled.div`
   width: 100%;
   min-width: 700px;
-  max-width: 1200px; /* 최대 너비 설정 */
-  margin: 0 auto; /* 중앙 정렬 */
-  padding: ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[6]}; /* 상하 32px, 좌우 24px */
+  margin: 0 auto;
+  padding: 0 ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[5]};
   min-height: 80vh;
 `;
 
