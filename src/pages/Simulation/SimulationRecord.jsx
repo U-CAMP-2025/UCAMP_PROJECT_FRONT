@@ -97,8 +97,10 @@ export default function SimulationRecordPage() {
 
 /* 스타일 그대로 */
 const MainContentWrapper = styled.div`
-  width: 80%;
-  padding: ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[6]};
+  width: 90%;
+  //   max-width: 1200px;
+  //   margin: 0 auto;
+  // padding: ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[6]};
   min-height: 80vh;
 `;
 const StyledTabsRoot = styled(Tabs.Root)`
