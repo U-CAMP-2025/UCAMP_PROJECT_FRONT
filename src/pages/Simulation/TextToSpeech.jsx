@@ -8,16 +8,17 @@ const TextToSpeech = ({ voiceModel, currentQuestion, enabled = false, onSpeaking
 
   useEffect(() => {
     if (!enabled || !currentQuestion || !voiceModel) return;
-
     const fetchAudio = async () => {
       try {
         onSpeakingChange?.(true);
+        console.log(voiceModel.apiKey);
         const response = await fetch(
           `https://api.elevenlabs.io/v1/text-to-speech/${voiceModel.voiceId}/stream?output_format=mp3_44100_128`,
           {
             method: 'POST',
             headers: {
-              'xi-api-key': import.meta.env.VITE_ELEVENLABS_API_KEY,
+              'xi-api-key': voiceModel.apiKey.model,
+
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
@@ -28,7 +29,8 @@ const TextToSpeech = ({ voiceModel, currentQuestion, enabled = false, onSpeaking
           },
         );
 
-        if (!response.ok) throw new Error(`TTS 요청 실패: ${response.status}`);
+        if (!response.ok)
+          throw new Error(`TTS 요청 실패: ${response.status}, ${voiceModel.apiKey}`);
 
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
