@@ -5,6 +5,108 @@ import { BookmarkFilledIcon } from '@radix-ui/react-icons';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
+export default function QASetCard({ item }) {
+  const navigate = useNavigate();
+  const theme = useTheme(); // 테마 객체 가져오기
+
+  // OTHER_WRITER prop 추가
+  const {
+    postId,
+    job = [],
+    title,
+    description,
+    bookCount = 0,
+    review = 0,
+    createAt,
+    otherWriter,
+  } = item || {};
+
+  // OTHER_WRITER 값이 있으면 true (북마크된 게시글)
+  const isBookmarked = !!otherWriter;
+
+  return (
+    <Card
+      onClick={() => navigate(`/qa/${postId}`)}
+      role='button'
+      aria-label={`${title} 상세로 이동`}
+    >
+      {/* 북마크 아이콘 추가 */}
+      <CardContentWrapper>
+        {isBookmarked && (
+          <BookmarkRibbon>
+            <BookmarkFilledIcon />
+          </BookmarkRibbon>
+        )}
+        {/* 태그 + 상태 배지 */}
+        <TopRow>
+          {job.length > 0 && (
+            <TagGroup>
+              {job.map((jobName) => (
+                <Tag key={jobName}>{jobName}</Tag>
+              ))}
+            </TagGroup>
+          )}
+          {/* {isMe && <Badge>내 질문</Badge>}{isPass && <Badge>합격자</Badge>} */}
+        </TopRow>
+        <Divider />
+        {/* 제목 + 설명 */}
+        <Typography as='h3' size={3} weight='semiBold'>
+          제목
+        </Typography>
+        <Typography as='p' size={3} weight='bold' style={{ marginTop: 8 }}>
+          {title}
+        </Typography>
+        <>
+          <Typography as='h4' size={3} weight='bold' style={{ marginTop: 16 }}>
+            설명
+          </Typography>
+          <Typography as='p' size={3} weight='regular' style={{ marginTop: 6 }}>
+            <DescriptionText as='p' size={3} weight='regular'>
+              {description || '설명 없음'}
+            </DescriptionText>
+          </Typography>
+        </>
+        {/* 생성일 + 작성자 */}
+        <div style={{ marginTop: 16, flexGrow: 1 }}>
+          <Typography as='h4' size={3} weight='bold'>
+            생성일
+          </Typography>
+          <Typography as='p' size={2} weight='regular' style={{ marginTop: 6 }}>
+            {createAt.split('T')[0]}
+          </Typography>
+          {/* 북마크된 글일 경우 원작자 표시 (선택 사항)
+          {isBookmarked && (
+            <Typography
+              as='p'
+              size={1}
+              weight='regular'
+              style={{ marginTop: 4, color: theme.colors.gray[9] }}
+            >
+              가져온 글 (From: {otherWriter})
+            </Typography>
+          )} */}
+        </div>
+      </CardContentWrapper>
+      <Divider />
+      {/* 푸터(아이콘/숫자 표시) */}
+      <Footer>
+        <IconStat aria-label='북마크 수'>
+          <BookmarkIcon />
+          <Typography as='span' size={3}>
+            {bookCount}
+          </Typography>
+        </IconStat>
+        <IconStat aria-label='리뷰 수'>
+          <CommentIcon />
+          <Typography as='span' size={3}>
+            {review}
+          </Typography>
+        </IconStat>
+      </Footer>
+    </Card>
+  );
+}
+
 const Card = styled.article`
   border: 1px solid ${({ theme }) => theme.colors.gray[7]};
   border-radius: ${({ theme }) => theme.radius.xl};
@@ -16,7 +118,12 @@ const Card = styled.article`
     transform 0.02s ease,
     border-color 0.2s ease;
   cursor: pointer;
-  position: relative; /* 💡 북마크 아이콘의 기준점이 되도록 추가 */
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  min-height: 400px;
+
   &:hover {
     box-shadow: ${({ theme }) => theme.shadow.md};
     border-color: ${({ theme }) => theme.colors.gray[8]};
@@ -26,11 +133,18 @@ const Card = styled.article`
   }
 `;
 
+const CardContentWrapper = styled.div`
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+`;
+
 const TopRow = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[3]};
   flex-wrap: wrap;
+  min-height: 68px;
 `;
 
 const Badge = styled.span`
@@ -45,7 +159,7 @@ const Badge = styled.span`
   color: ${({ theme }) => theme.colors.gray[11]};
 `;
 
-// 💡 [신규] 북마크 리본 아이콘 스타일
+// 북마크 리본 아이콘 스타일
 const BookmarkRibbon = styled.div`
   position: absolute;
   top: -10px;
@@ -58,6 +172,16 @@ const BookmarkRibbon = styled.div`
     width: 50px;
     height: 50px;
   }
+`;
+
+const DescriptionText = styled(Typography)`
+  margin-top: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  min-height: 40px;
 `;
 
 const Divider = styled.hr`
@@ -89,108 +213,3 @@ const ArrowWrap = styled.div`
   width: 28px;
   height: 28px;
 `;
-
-export default function QASetCard({ item }) {
-  const navigate = useNavigate();
-  const theme = useTheme(); // 💡 테마 객체 가져오기
-
-  // 💡 OTHER_WRITER prop 추가
-  const {
-    postId,
-    job = [],
-    title,
-    description,
-    bookCount = 0,
-    review = 0,
-    createAt,
-    otherWriter,
-  } = item || {};
-
-  // 💡 OTHER_WRITER 값이 있으면 true (북마크된 게시글)
-  const isBookmarked = !!otherWriter;
-
-  return (
-    <Card
-      onClick={() => navigate(`/qa/${postId}`)}
-      role='button'
-      aria-label={`${title} 상세로 이동`}
-    >
-      {/* 💡 북마크 아이콘 추가 */}
-      {isBookmarked && (
-        <BookmarkRibbon>
-          <BookmarkFilledIcon />
-        </BookmarkRibbon>
-      )}
-      {/* 태그 + 상태 배지 */}{' '}
-      <TopRow>
-        {' '}
-        {job.length > 0 && (
-          <TagGroup>
-            {' '}
-            {job.map((jobName) => (
-              <Tag key={jobName}>{jobName}</Tag>
-            ))}{' '}
-          </TagGroup>
-        )}{' '}
-        {/* {isMe && <Badge>내 질문</Badge>}{isPass && <Badge>합격자</Badge>} */}
-      </TopRow>
-      <Divider />
-      {/* 제목 + 설명 */}{' '}
-      <Typography as='h3' size={3} weight='semiBold'>
-        제목{' '}
-      </Typography>{' '}
-      <Typography as='p' size={3} weight='bold' style={{ marginTop: 8 }}>
-        {title}{' '}
-      </Typography>{' '}
-      {description && (
-        <>
-          {' '}
-          <Typography as='h4' size={3} weight='bold' style={{ marginTop: 16 }}>
-            설명{' '}
-          </Typography>{' '}
-          <Typography as='p' size={3} weight='regular' style={{ marginTop: 6 }}>
-            {description}{' '}
-          </Typography>{' '}
-        </>
-      )}
-      {/* 생성일 + 작성자 */}{' '}
-      <div style={{ marginTop: 16 }}>
-        {' '}
-        <Typography as='h4' size={3} weight='bold'>
-          생성일{' '}
-        </Typography>{' '}
-        <Typography as='p' size={2} weight='regular' style={{ marginTop: 6 }}>
-          {createAt.split('T')[0]}{' '}
-        </Typography>
-        {/* 💡 북마크된 글일 경우 원작자 표시 (선택 사항) */}
-        {isBookmarked && (
-          <Typography
-            as='p'
-            size={1}
-            weight='regular'
-            style={{ marginTop: 4, color: theme.colors.gray[9] }}
-          >
-            가져온 글 (From: {otherWriter})
-          </Typography>
-        )}{' '}
-      </div>
-      <Divider />
-      {/* 푸터(정적 아이콘/숫자 표시) */}{' '}
-      <Footer>
-        {' '}
-        <IconStat aria-label='북마크 수'>
-          <BookmarkIcon />{' '}
-          <Typography as='span' size={3}>
-            {bookCount}{' '}
-          </Typography>{' '}
-        </IconStat>
-        <IconStat aria-label='리뷰 수'>
-          <CommentIcon />
-          <Typography as='span' size={3}>
-            {review}
-          </Typography>
-        </IconStat>
-      </Footer>
-    </Card>
-  );
-}
