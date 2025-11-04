@@ -52,6 +52,8 @@ const AddButton = styled.button`
 
 // 탭 네비게이션
 const TabContainer = styled.div`
+  width: 95%;
+  margin: 0 auto;
   display: flex;
   gap: ${({ theme }) => theme.space[5]}; /* 20px */
   margin-bottom: ${({ theme }) => theme.space[6]}; /* 24px */

@@ -109,8 +109,8 @@ export default function SimulationPresetPage() {
         {/* 상단 탭 */}
         <StyledTabsRoot defaultValue='/simulation' onValueChange={(value) => navigate(value)}>
           <StyledTabsList>
-            <StyledTabsTrigger value='/simulation'>면접 시뮬레이션</StyledTabsTrigger>
-            <StyledTabsTrigger value='/simulation/record'>면접 연습기록</StyledTabsTrigger>
+            <StyledTabsTrigger value='/simulation'>면접 시뮬레이션 시작</StyledTabsTrigger>
+            <StyledTabsTrigger value='/simulation/record'>면접 연습 기록</StyledTabsTrigger>
           </StyledTabsList>
         </StyledTabsRoot>
 
@@ -118,159 +118,161 @@ export default function SimulationPresetPage() {
         <FormProvider {...methods}>
           <PresetForm onSubmit={handleSubmit(onSubmit)}>
             {/* 면접 모드 (UI만) */}
-            <Controller
-              name='interviewMode'
-              control={control}
-              render={({ field }) => (
-                <ConfigSection>
-                  <ConfigLabel>면접 모드</ConfigLabel>
-                  <StyledRadioGroup value={field.value} onValueChange={field.onChange}>
-                    <RadioOption>
-                      <StyledRadioItem value='one-on-one' id='r1' />
-                      일대일
-                    </RadioOption>
-                    <RadioOption>
-                      <StyledRadioItem value='multi' id='r2' />
-                      다대다 (준비중)
-                    </RadioOption>
-                  </StyledRadioGroup>
-                </ConfigSection>
-              )}
-            />
-
-            {/* 질문 순서 */}
-            <Controller
-              name='questionOrder'
-              control={control}
-              render={({ field }) => (
-                <ConfigSection>
-                  <ConfigLabel>질문 순서</ConfigLabel>
-                  <StyledRadioGroup value={field.value} onValueChange={field.onChange}>
-                    <RadioOption>
-                      <StyledRadioItem value='sequential' id='r3' />
-                      순차적으로
-                    </RadioOption>
-                    <RadioOption>
-                      <StyledRadioItem value='random' id='r4' />
-                      랜덤
-                    </RadioOption>
-                  </StyledRadioGroup>
-                </ConfigSection>
-              )}
-            />
-
-            {/* 질문답변 세트 */}
-            <SelectConfigSection>
-              <ConfigLabel>질문답변 세트 선택</ConfigLabel>
+            <SettingsBox>
               <Controller
-                name='selectedSetId'
+                name='interviewMode'
                 control={control}
                 render={({ field }) => (
-                  <Select.Root
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled={loading}
-                  >
-                    <StyledSelectTrigger>
-                      {selectedSet ? (
-                        <ItemContent>
-                          <Typography size={3} weight='semiBold'>
-                            {selectedSet.title}
-                          </Typography>
-                          {Array.isArray(selectedSet.job) ? (
-                            selectedSet.job.map((j) => <JobChip key={j}>{j}</JobChip>)
-                          ) : selectedSet.job ? (
-                            <JobChip>{selectedSet.job}</JobChip>
-                          ) : null}
-                        </ItemContent>
-                      ) : (
+                  <ConfigSection>
+                    <ConfigLabel>면접 모드</ConfigLabel>
+                    <StyledRadioGroup value={field.value} onValueChange={field.onChange}>
+                      <RadioOption>
+                        <StyledRadioItem value='one-on-one' id='r1' />
+                        일대일
+                      </RadioOption>
+                      <RadioOption>
+                        <StyledRadioItem value='multi' id='r2' />
+                        다대다 (준비중)
+                      </RadioOption>
+                    </StyledRadioGroup>
+                  </ConfigSection>
+                )}
+              />
+
+              {/* 질문 순서 */}
+              <Controller
+                name='questionOrder'
+                control={control}
+                render={({ field }) => (
+                  <ConfigSection>
+                    <ConfigLabel>질문 순서</ConfigLabel>
+                    <StyledRadioGroup value={field.value} onValueChange={field.onChange}>
+                      <RadioOption>
+                        <StyledRadioItem value='sequential' id='r3' />
+                        순차적으로
+                      </RadioOption>
+                      <RadioOption>
+                        <StyledRadioItem value='random' id='r4' />
+                        랜덤
+                      </RadioOption>
+                    </StyledRadioGroup>
+                  </ConfigSection>
+                )}
+              />
+
+              {/* 질문답변 세트 */}
+              <SelectConfigSection>
+                <ConfigLabel>질문답변 세트 선택</ConfigLabel>
+                <Controller
+                  name='selectedSetId'
+                  control={control}
+                  render={({ field }) => (
+                    <Select.Root
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={loading}
+                    >
+                      <StyledSelectTrigger>
+                        {selectedSet ? (
+                          <ItemContent>
+                            <Typography size={3} weight='semiBold'>
+                              {selectedSet.title}
+                            </Typography>
+                            {Array.isArray(selectedSet.job) ? (
+                              selectedSet.job.map((j) => <JobChip key={j}>{j}</JobChip>)
+                            ) : selectedSet.job ? (
+                              <JobChip>{selectedSet.job}</JobChip>
+                            ) : null}
+                          </ItemContent>
+                        ) : (
+                          <Select.Value
+                            placeholder={loading ? '불러오는 중…' : '질문 세트를 선택하세요'}
+                          />
+                        )}
+                        <Select.Icon asChild>
+                          <CaretDownIcon style={{ marginLeft: 'auto' }} />
+                        </Select.Icon>
+                      </StyledSelectTrigger>
+                      <Select.Portal>
+                        <StyledSelectContent position='popper'>
+                          <StyledSelectViewport>
+                            {questionSets.map((set) => {
+                              const value = String(set.postId);
+                              return (
+                                <StyledSelectItem key={value} value={value}>
+                                  <StyledSelectItemIndicator>
+                                    <CheckIcon />
+                                  </StyledSelectItemIndicator>
+                                  <Select.ItemText>
+                                    <ItemContent>
+                                      <Typography size={3} weight='semiBold'>
+                                        {set.title}
+                                      </Typography>
+                                      {Array.isArray(set.job) ? (
+                                        set.job.map((j) => <JobChip key={j}>{j}</JobChip>)
+                                      ) : set.job ? (
+                                        <JobChip>{set.job}</JobChip>
+                                      ) : null}
+                                    </ItemContent>
+                                  </Select.ItemText>
+                                </StyledSelectItem>
+                              );
+                            })}
+                          </StyledSelectViewport>
+                        </StyledSelectContent>
+                      </Select.Portal>
+                    </Select.Root>
+                  )}
+                />
+              </SelectConfigSection>
+
+              {/* 면접관 선택 */}
+              <SelectConfigSection>
+                <ConfigLabel>면접관 선택</ConfigLabel>
+                <Controller
+                  name='selectedInterviewerId'
+                  control={control}
+                  render={({ field }) => (
+                    <Select.Root
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={loading}
+                    >
+                      <StyledSelectTrigger>
                         <Select.Value
-                          placeholder={loading ? '불러오는 중…' : '질문 세트를 선택하세요'}
+                          placeholder={loading ? '불러오는 중…' : '면접관을 선택하세요'}
                         />
-                      )}
-                      <Select.Icon asChild>
-                        <CaretDownIcon style={{ marginLeft: 'auto' }} />
-                      </Select.Icon>
-                    </StyledSelectTrigger>
-                    <Select.Portal>
-                      <StyledSelectContent position='popper'>
-                        <StyledSelectViewport>
-                          {questionSets.map((set) => {
-                            const value = String(set.postId);
-                            return (
-                              <StyledSelectItem key={value} value={value}>
-                                <StyledSelectItemIndicator>
-                                  <CheckIcon />
-                                </StyledSelectItemIndicator>
-                                <Select.ItemText>
-                                  <ItemContent>
-                                    <Typography size={3} weight='semiBold'>
-                                      {set.title}
-                                    </Typography>
-                                    {Array.isArray(set.job) ? (
-                                      set.job.map((j) => <JobChip key={j}>{j}</JobChip>)
-                                    ) : set.job ? (
-                                      <JobChip>{set.job}</JobChip>
-                                    ) : null}
-                                  </ItemContent>
-                                </Select.ItemText>
-                              </StyledSelectItem>
-                            );
-                          })}
-                        </StyledSelectViewport>
-                      </StyledSelectContent>
-                    </Select.Portal>
-                  </Select.Root>
-                )}
-              />
-            </SelectConfigSection>
+                        <Select.Icon asChild>
+                          <CaretDownIcon />
+                        </Select.Icon>
+                      </StyledSelectTrigger>
+                      <Select.Portal>
+                        <StyledSelectContent position='popper'>
+                          <StyledSelectViewport>
+                            {interviewers.map((v) => {
+                              const value = String(v.interviewerId);
+                              return (
+                                <StyledSelectItem key={value} value={value}>
+                                  <StyledSelectItemIndicator>
+                                    <CheckIcon />
+                                  </StyledSelectItemIndicator>
+                                  <Select.ItemText>{v.interviewerCharacterDesc}</Select.ItemText>
+                                </StyledSelectItem>
+                              );
+                            })}
+                          </StyledSelectViewport>
+                        </StyledSelectContent>
+                      </Select.Portal>
+                    </Select.Root>
+                  )}
+                />
+              </SelectConfigSection>
 
-            {/* 면접관 선택 */}
-            <SelectConfigSection>
-              <ConfigLabel>면접관 선택</ConfigLabel>
-              <Controller
-                name='selectedInterviewerId'
-                control={control}
-                render={({ field }) => (
-                  <Select.Root
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled={loading}
-                  >
-                    <StyledSelectTrigger>
-                      <Select.Value
-                        placeholder={loading ? '불러오는 중…' : '면접관을 선택하세요'}
-                      />
-                      <Select.Icon asChild>
-                        <CaretDownIcon />
-                      </Select.Icon>
-                    </StyledSelectTrigger>
-                    <Select.Portal>
-                      <StyledSelectContent position='popper'>
-                        <StyledSelectViewport>
-                          {interviewers.map((v) => {
-                            const value = String(v.interviewerId);
-                            return (
-                              <StyledSelectItem key={value} value={value}>
-                                <StyledSelectItemIndicator>
-                                  <CheckIcon />
-                                </StyledSelectItemIndicator>
-                                <Select.ItemText>{v.interviewerCharacterDesc}</Select.ItemText>
-                              </StyledSelectItem>
-                            );
-                          })}
-                        </StyledSelectViewport>
-                      </StyledSelectContent>
-                    </Select.Portal>
-                  </Select.Root>
-                )}
-              />
-            </SelectConfigSection>
-
-            {/* 시작하기 */}
-            <StartButton type='submit' disabled={loading || submitting}>
-              {submitting ? '시작 중…' : '시작하기'}
-            </StartButton>
+              {/* 시작하기 */}
+              <StartButton type='submit' disabled={loading || submitting}>
+                {submitting ? '시작 중…' : '시작하기'}
+              </StartButton>
+            </SettingsBox>
           </PresetForm>
         </FormProvider>
       </MainContentWrapper>
@@ -289,6 +291,25 @@ const MainContentWrapper = styled.div`
 
 const PresetForm = styled.form`
   margin: 0 auto;
+`;
+
+const SettingsBox = styled.div`
+  width: 90%;
+  margin: 0 auto;
+  background-color: ${({ theme }) => theme.colors.gray[2]}; -
+  border: 1px solid ${({ theme }) => theme.colors.gray[4]};
+  border-radius: ${({ theme }) => theme.radius.md};
+  padding: ${({ theme }) => theme.space[6]} ${({ theme }) => theme.space[8]}; 
+  margin-top: ${({ theme }) => theme.space[8]};
+  box-shadow: ${({ theme }) => theme.shadow.sm};
+
+  /* 박스 내부의 섹션 간 간격 */
+  & > * {
+    margin-bottom: ${({ theme }) => theme.space[6]};
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
 `;
 
 // 1. 상단 탭
@@ -328,6 +349,8 @@ const StyledTabsTrigger = styled(Tabs.Trigger)`
 
 // 2. 설정 섹션
 const ConfigSection = styled.section`
+  width: 90%;
+  margin: 0 auto;
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[8]};
@@ -387,6 +410,8 @@ const StyledRadioItem = styled(RadioGroup.Item)`
 
 // 3. 드롭다운
 const SelectConfigSection = styled.div`
+  width: 90%;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.space[3]};
@@ -407,7 +432,7 @@ const StyledSelectTrigger = styled(Select.Trigger)`
   box-shadow: ${({ theme }) => theme.shadow.sm};
   min-height: 40px;
   &:hover {
-    background-color: ${({ theme }) => theme.colors.gray[2]};
+    cursor: pointer;
   }
   &:focus {
     border-color: ${({ theme }) => theme.colors.primary[7]};
@@ -465,10 +490,11 @@ const StartButton = styled.button`
   all: unset;
   width: 100%;
   max-width: 120px;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin: ${({ theme }) => theme.space[10]} auto 0;
-  padding: ${({ theme }) => theme.space[5]} 0;
-  text-align: center;
+  padding: ${({ theme }) => theme.space[3]} 0;
   background-color: ${({ theme }) => theme.colors.primary[9]};
   color: white;
   border-radius: ${({ theme }) => theme.radius.md};

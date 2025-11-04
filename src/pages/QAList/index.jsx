@@ -128,6 +128,8 @@ export default function QAListPage() {
 // --- 페이지 스타일 정의 ---
 
 const FilterAndSortBar = styled.div`
+  width: 95%;
+  margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
