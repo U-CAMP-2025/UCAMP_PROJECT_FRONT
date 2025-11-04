@@ -1,7 +1,7 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://ucamp-server.duckdns.org/$1" },
+    { "source": "/api/(.*)", "destination": "https://ucamp-server.duckdns.org/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
