@@ -2,7 +2,7 @@ import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } f
 import { RecordRTCPromisesHandler } from 'recordrtc';
 
 const SessionVideoRecorder = forwardRef(function SessionVideoRecorder(
-  { width = 520, height = 320 },
+  { width = 416, height = 256 },
   ref,
 ) {
   const videoElRef = useRef(null);
