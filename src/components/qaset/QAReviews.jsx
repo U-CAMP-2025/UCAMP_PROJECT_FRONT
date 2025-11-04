@@ -1,7 +1,7 @@
 import { deleteReview, fetchReviewList, postReview } from '@api/reviewAPIS';
 import Button from '@components/common/Button';
 import Typography from '@components/common/Typography';
-import { PersonIcon } from '@radix-ui/react-icons';
+import { PersonIcon, TrashIcon } from '@radix-ui/react-icons';
 import { useAuthStore } from '@store/auth/useAuthStore';
 import { useEffect, useState, useContext } from 'react';
 import { useParams } from 'react-router-dom';
@@ -139,10 +139,11 @@ export const QAReviews = () => {
                 {r.content}
               </Typography>
             </Body>
-
-            <Button variant='ghost' onClick={() => handleDeleteReview(r.reviewId)}>
-              삭제하기
-            </Button>
+            {isLogin && authUser.name === r.nickname && (
+              <IconButton1 onClick={() => handleDeleteReview(r.reviewId)}>
+                <TrashIcon></TrashIcon>
+              </IconButton1>
+            )}
           </Item>
         ))}
       </List>
@@ -224,4 +225,25 @@ const Meta = styled.div`
 
 const Dot = styled.span`
   color: ${({ theme }) => theme.colors.gray[9]};
+`;
+
+const IconButton1 = styled.button`
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: ${({ theme }) => theme.radius.md};
+  color: ${({ theme }) => theme.colors.primary[10]};
+  background: ${({ theme }) => theme.colors.primary[3]};
+  &:hover {
+    filter: brightness(0.95);
+    cursor: pointer;
+  }
+  &:active {
+    transform: translateY(1px);
+  }
+  margin-right: 10px;
 `;
