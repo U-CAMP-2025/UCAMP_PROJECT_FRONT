@@ -1,28 +1,30 @@
-// SimulationResultPage.tsx
+// SimulationResultPage.jsx
 import { axiosInstance } from '@api/axios';
-import { Content, Description, Overlay, Title } from '@components/common/Dialog';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import * as Accordion from '@radix-ui/react-accordion';
-import * as Dialog from '@radix-ui/react-dialog';
 import { CaretDownIcon } from '@radix-ui/react-icons';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 
 export default function SimulationResultPage() {
   const navigate = useNavigate();
   const { simulationId } = useParams();
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [data, setData] = useState(null);
+  const [qaList, setQaList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [dirty, setDirty] = useState(false);
 
   useEffect(() => {
     (async () => {
       try {
         const res = await axiosInstance.get(`/simulation/${simulationId}/result`);
-        setData(res.data?.data ?? null);
+        const payload = res.data?.data ?? null;
+        setData(payload);
+        setQaList(payload?.post?.qaList ?? []);
       } catch (e) {
         setError(e?.response?.data?.message ?? '결과를 불러오지 못했습니다.');
       } finally {
@@ -31,17 +33,37 @@ export default function SimulationResultPage() {
     })();
   }, [simulationId]);
 
-  const handleSaveModalClick = async () => {
+  const handleTransContentChange = (index, value) => {
+    setQaList((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], transContent: value };
+      return next;
+    });
+    setDirty(true);
+  };
+
+  const handleSaveClick = async () => {
     try {
-      await axiosInstance.put(`/simulation/${simulationId}/finalize`);
-      setIsModalOpen(false);
-      navigate('/myqa'); // 저장 후 이동 위치
+      setSaving(true);
+      await axiosInstance.put(`/simulation/${simulationId}/finalize`, {
+        qaList: qaList.map((q) => ({
+          qaId: q.qaId,
+          transContent: (q.transContent ?? '').trim(),
+        })),
+      });
+      setDirty(false);
+      alert('저장되었습니다.');
+      navigate('/myqa'); // 저장 후 이동 경로 (필요 시 변경)
     } catch (e) {
       alert(e?.response?.data?.message ?? '저장에 실패했습니다.');
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleCancelClick = () => navigate('/simulation/record');
+
+  const openKeys = useMemo(() => (qaList.length ? ['q-0'] : []), [qaList.length]);
 
   return (
     <PageContainer header footer>
@@ -53,8 +75,8 @@ export default function SimulationResultPage() {
 
         {!loading && !error && data && (
           <>
-            <StyledAccordionRoot type='multiple' defaultValue={['q-0']}>
-              {data.post.qaList.map((qa, index) => (
+            <StyledAccordionRoot type='multiple' defaultValue={openKeys}>
+              {qaList.map((qa, index) => (
                 <StyledAccordionItem key={qa.qaId || index} value={`q-${index}`}>
                   <StyledAccordionTrigger>
                     <Typography
@@ -71,17 +93,26 @@ export default function SimulationResultPage() {
                     <AnswerContainer>
                       <AnswerLabel>준비한 답변</AnswerLabel>
                       <AnswerTextWrapper>
-                        <Typography as='p' size={3} style={{ lineHeight: '1.6' }}>
+                        <Typography
+                          as='p'
+                          size={3}
+                          style={{ lineHeight: '1.6', whiteSpace: 'pre-wrap' }}
+                        >
                           {qa.qaAnswer || '—'}
                         </Typography>
                       </AnswerTextWrapper>
 
-                      <AnswerLabel>나의 답변</AnswerLabel>
-                      <AnswerTextWrapper>
-                        <Typography as='p' size={3} style={{ lineHeight: '1.6' }}>
-                          {qa.transContent || '—'}
-                        </Typography>
-                      </AnswerTextWrapper>
+                      <AnswerLabel>
+                        나의 답변 <SmallHint>(최대 300자)</SmallHint>
+                      </AnswerLabel>
+                      <EditableTextArea
+                        value={qa.transContent ?? ''}
+                        placeholder='STT로 인식된 답변을 필요에 맞게 수정하세요.'
+                        onChange={(e) => handleTransContentChange(index, e.target.value)}
+                        rows={6}
+                        maxLength={300}
+                      />
+                      <CharCount>{(qa.transContent?.length ?? 0).toLocaleString()}/300자</CharCount>
                     </AnswerContainer>
                   </StyledAccordionContent>
                 </StyledAccordionItem>
@@ -90,24 +121,9 @@ export default function SimulationResultPage() {
 
             <ButtonGroup>
               <CancelButton onClick={handleCancelClick}>취소</CancelButton>
-              <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
-                <Dialog.Trigger asChild>
-                  <SaveButton>결과 저장</SaveButton>
-                </Dialog.Trigger>
-                <Dialog.Portal>
-                  <Overlay />
-                  <Content>
-                    <Title>확정하시겠어요?</Title>
-                    <Description>기존 답변이 대체되며, 저장 시 되돌릴 수 없습니다.</Description>
-                    <ModalButtonGroup>
-                      <Dialog.Close asChild>
-                        <CancelButton>취소</CancelButton>
-                      </Dialog.Close>
-                      <SaveButton onClick={handleSaveModalClick}>확인</SaveButton>
-                    </ModalButtonGroup>
-                  </Content>
-                </Dialog.Portal>
-              </Dialog.Root>
+              <SaveButton onClick={handleSaveClick} disabled={saving}>
+                {saving ? '저장 중…' : '저장'}
+              </SaveButton>
             </ButtonGroup>
           </>
         )}
@@ -116,7 +132,7 @@ export default function SimulationResultPage() {
   );
 }
 
-/* 스타일: 네 기존 코드 그대로 */
+/* ---------- styled-components ---------- */
 const MainContentWrapper = styled.div`
   width: 80%;
   padding: ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[6]};
@@ -161,8 +177,14 @@ const CaretIcon = styled(CaretDownIcon)`
     transform: rotate(-180deg);
   }
 `;
-const slideDown = keyframes` from { height: 0; opacity: 0; } to { height: var(--radix-accordion-content-height); opacity: 1; }`;
-const slideUp = keyframes` from { height: var(--radix-accordion-content-height); opacity: 1; } to { height: 0; opacity: 0; }`;
+const slideDown = keyframes`
+  from { height: 0; opacity: 0; }
+  to { height: var(--radix-accordion-content-height); opacity: 1; }
+`;
+const slideUp = keyframes`
+  from { height: var(--radix-accordion-content-height); opacity: 1; }
+  to { height: 0; opacity: 0; }
+`;
 const StyledAccordionContent = styled(Accordion.Content)`
   overflow: hidden;
   &[data-state='open'] {
@@ -183,6 +205,12 @@ const AnswerLabel = styled(Typography).attrs({ as: 'h4', size: 3, weight: 'semiB
   color: ${({ theme }) => theme.colors.gray[10]};
   margin-bottom: ${({ theme }) => theme.space[2]};
 `;
+const SmallHint = styled.span`
+  font-weight: normal;
+  font-size: ${({ theme }) => theme.font.size[2]};
+  color: ${({ theme }) => theme.colors.gray[9]};
+  margin-left: ${({ theme }) => theme.space[2]};
+`;
 const AnswerTextWrapper = styled.div`
   background: ${({ theme }) => theme.colors.gray[2]};
   border: 1px solid ${({ theme }) => theme.colors.gray[4]};
@@ -190,6 +218,27 @@ const AnswerTextWrapper = styled.div`
   padding: ${({ theme }) => theme.space[4]};
   max-height: 200px;
   overflow-y: auto;
+`;
+const EditableTextArea = styled.textarea`
+  width: 100%;
+  background: ${({ theme }) => theme.colors.gray[2]};
+  border: 1px solid ${({ theme }) => theme.colors.gray[4]};
+  border-radius: ${({ theme }) => theme.radius.md};
+  padding: ${({ theme }) => theme.space[4]};
+  font-size: ${({ theme }) => theme.font.size[3]};
+  line-height: 1.6;
+  resize: vertical;
+  min-height: 120px;
+  outline: none;
+  &:focus {
+    background: ${({ theme }) => theme.colors.gray[1]};
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary[5]}40;
+  }
+`;
+const CharCount = styled.div`
+  align-self: flex-end;
+  color: ${({ theme }) => theme.colors.gray[9]};
+  font-size: ${({ theme }) => theme.font.size[2]};
 `;
 const ButtonGroup = styled.div`
   display: flex;
@@ -215,8 +264,9 @@ const SaveButton = styled(BaseButton)`
   &:hover {
     background-color: ${({ theme }) => theme.colors.primary[10]};
   }
-  &:focus {
-    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary[6]};
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
   }
 `;
 const CancelButton = styled(BaseButton)`
@@ -229,10 +279,4 @@ const CancelButton = styled(BaseButton)`
   &:focus {
     box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.gray[6]};
   }
-`;
-const ModalButtonGroup = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: ${({ theme }) => theme.space[3]};
-  margin-top: ${({ theme }) => theme.space[6]};
 `;
