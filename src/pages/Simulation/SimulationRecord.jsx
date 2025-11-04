@@ -70,8 +70,8 @@ export default function SimulationRecordPage() {
           onValueChange={(value) => navigate(value)}
         >
           <StyledTabsList>
-            <StyledTabsTrigger value='/simulation'>면접 시뮬레이션</StyledTabsTrigger>
-            <StyledTabsTrigger value='/simulation/record'>면접 연습기록</StyledTabsTrigger>
+            <StyledTabsTrigger value='/simulation'>면접 시뮬레이션 시작</StyledTabsTrigger>
+            <StyledTabsTrigger value='/simulation/record'>면접 연습 기록</StyledTabsTrigger>
           </StyledTabsList>
         </StyledTabsRoot>
 
@@ -134,6 +134,8 @@ const StyledTabsTrigger = styled(Tabs.Trigger)`
   }
 `;
 const RecordListContainer = styled.div`
+  width: 90%;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
 `;
