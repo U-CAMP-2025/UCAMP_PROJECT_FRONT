@@ -43,7 +43,7 @@ const JobChip = styled.div`
   align-items: center;
   gap: ${({ theme }) => theme.space[2]};
   padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[3]};
-  background-color: ${({ theme }) => theme.colors.primary[3]};
+  background-color: ${({ theme }) => theme.colors.primary[5]};
   color: ${({ theme }) => theme.colors.primary[12]};
   border-radius: ${({ theme }) => theme.radius.lg};
   font-size: ${({ theme }) => theme.font.size[3]};
