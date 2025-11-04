@@ -30,16 +30,16 @@ const HeroContainer = styled.section`
   position: relative;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 600px;
-  padding: 80px 40px;
+  padding: 80px 0px 80px 70px;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 90%;
   border-radius: 40px;
   width: 100%;
   max-width: 1200px; /* 너무 넓어지는 것 방지 */
   margin: 0 auto;
+  margin-bottom: 30px;
 
   @media (max-width: 968px) {
     flex-direction: column;
@@ -230,19 +230,19 @@ const Card = styled.div`
   }
 `;
 const Card1 = styled(Card)`
-  top: 70px;
-  right: 180px;
+  top: 110px;
+  right: 140px;
   z-index: 2;
 `;
 const Card2 = styled(Card)`
-  top: 50px;
-  left: 250px;
+  top: 10px;
+  left: 280px;
   transform: translateX(-50%);
   z-index: 1;
 `;
 const Card3 = styled(Card)`
-  bottom: 30px;
-  right: 350px;
+  bottom: 10px;
+  right: 360px;
   z-index: 3;
 `;
 
@@ -329,7 +329,7 @@ const Title2 = styled.h1`
   font-size: 2.2rem;
   font-weight: 700;
   color: #1a1a1a;
-  margin-bottom: 12px;
+  margin-bottom: 40px;
 
   @media (max-width: 768px) {
     font-size: 1.8rem;
@@ -692,6 +692,8 @@ const Pedestal = styled.div`
 // `;
 
 const CTASection = styled.div`
+  width: 80%;
+  margin: 0 auto;
   background: linear-gradient(135deg, #4a90e2 0%, #50c9c3 50%, #3b8b7a 100%);
   border-radius: 24px;
   padding: 80px 60px;
@@ -940,25 +942,25 @@ const cards = [
     id: 1,
     bgColor: '#d4f4e7',
     avatar: '👩🏻',
-    title: '제가 했던 행동이나 참여했던 프로젝트가 기억이 안 나요.',
+    title: '혼자 연습하려니까 번거롭고 힘들어요.',
     description:
-      '이전에 참여했던 활동의 구체적인 내용이 잘 기억나지 않아 면접 질문에 당황할까 봐 걱정돼요.',
+      '질문을 일일이 정리하고 답변을 관리하는 것도 벅찬데, 실전처럼 환경을 갖추는 것도 어려워요. 이렇게 준비하는 게 맞는지 모르겠어요.',
   },
   {
     id: 2,
     bgColor: '#e8e5f5',
     avatar: '👨🏻',
-    title: '면접에서 어떤 활동을 들어볼지 감도 안 와요.',
+    title: '효율적으로 면접 준비하는 방법을 모르겠어요.',
     description:
-      '어떤 경험과 활동을 면접에서 중요하게 생각할지 알기가 어려워요. 준비해야 할 질문이 너무 많아 보여서 어떻게 해야 할지 모르겠어요.',
+      '이번이 첫 면접인데, 무엇부터 준비해야 할지 막막해요. 다른 사람들은 어떻게 준비하는지 궁금해요.',
   },
   {
     id: 3,
     bgColor: '#ffd4d4',
     avatar: '👨🏻‍🦱',
-    title: '면접관 앞에만 서면 긴장해서 말을 잘 못해요.',
+    title: '제 답변, 이대로 괜찮은 걸까요?',
     description:
-      '아무리 연습해도 실제 상황에서는 긴장감으로 실력을 발휘하지 못해요. 실전과 비슷한 환경에서 먼저 연습할 기회가 부족해요.',
+      '저 혼자 준비한 답변이 면접관 입장에서 어떻게 들릴지, 다른 사람들에게 피드백을 받고 싶어요.',
   },
 ];
 const mockData = {
@@ -1021,13 +1023,10 @@ export default function LandingPage() {
               합격은 면접톡이 <br />
               책임진다
             </SubHeading>
-            <Description>함께 쓰면 시너지! 면접&모범 답변 루틴</Description>
+            <Description>면접 시뮬레이션&피드백 루틴을 경험해보세요!</Description>
             <ButtonGroup>
               <PrimaryButton onClick={handleClickLoginButton}>지금 시작하기</PrimaryButton>
               <KakaoLoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
-              <SecondaryButton as='a' href='/myqa' $isActive={pathname === '/myqa'}>
-                더 알아보기
-              </SecondaryButton>
             </ButtonGroup>
           </ContentWrapper>
 
@@ -1035,26 +1034,25 @@ export default function LandingPage() {
             <Card as={Card1}>
               <CardIcon>📝</CardIcon>
               <CardTitle>AI 면접 분석</CardTitle>
-              <CardDescription>실시간으로 답변을 분석하고 개선점을 알려드립니다</CardDescription>
+              <CardDescription>시뮬레이션 후 답변을 분석하고 개선점을 알려드립니다</CardDescription>
             </Card>
             <Card as={Card2}>
               <CardIcon>💼</CardIcon>
               <CardTitle>합격 전략</CardTitle>
-              <CardDescription>합격자들의 노하우를 바탕으로 한 전략을 배웁니다</CardDescription>
+              <CardDescription>
+                합격자들의 노하우를 바탕으로 한 합격 전략을 배웁니다
+              </CardDescription>
             </Card>
             <Card as={Card3}>
-              <CardIcon>💼</CardIcon>
-              <CardTitle>합격 전략</CardTitle>
-              <CardDescription>합격자들의 노하우를 바탕으로 한 전략을 배웁니다</CardDescription>
+              <CardIcon>🧑‍⚖️</CardIcon>
+              <CardTitle>실전 환경</CardTitle>
+              <CardDescription>AI 면접관으로 더 실감나게 연습해보세요</CardDescription>
             </Card>
           </CardsWrapper>
         </HeroContainer>
         {/* Course Section */}
         <Container>
           <Title2>면접 준비, 혼자 하려니 막막하지 않나요?</Title2>
-          <Subtitle2>
-            면접 준비에서 자기 경험을 효과적으로 표현하는 방법을 몰라 어려움을 겪고 있어요.
-          </Subtitle2>
           <CardsWrapper2>
             {cards.map((card) => (
               <Cardd key={card.id} bgColor={card.bgColor}>
@@ -1067,8 +1065,7 @@ export default function LandingPage() {
         </Container>
         {/* Testimonial Section */}
         <Container>
-          <Title2>이젠 사람들과 협력하며 도움왕이 되어보세요!</Title2>
-          <Subtitle2>다른 사람들은 어떻게 준비하는지 궁금해요.</Subtitle2>
+          <Title2>이젠 다른 사람들과 협력해보세요!</Title2>
           {/* Ranking */}
           <ContainerR>
             <HeaderR>
@@ -1147,11 +1144,11 @@ export default function LandingPage() {
         <Container2>
           <CTASection>
             <Content>
-              <SubText>무료로 시작하세요. 가입 후 신원인증으로 즉시 사용가능합니다.</SubText>
-              <MainText>면접톡을 시작할 준비가 되셨나요?</MainText>
+              <SubText>면접 준비, 지금부터 시작해보세요.</SubText>
+              <MainText>면접톡과 함께 시작할 준비가 되셨나요?</MainText>
               <ButtonGroup2>
                 <PrimaryButton2 onClick={handleClickLoginButton}>
-                  무료로 시작하기
+                  시작하기
                   <ArrowIcon>
                     <svg viewBox='0 0 24 24' fill='none'>
                       <path
@@ -1163,18 +1160,6 @@ export default function LandingPage() {
                   </ArrowIcon>
                 </PrimaryButton2>
                 <KakaoLoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
-                <SecondaryButton2>
-                  상담하기
-                  <ArrowIconSecondary>
-                    <svg viewBox='0 0 24 24' fill='none'>
-                      <path
-                        d='M5 12h14M12 5l7 7-7 7'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                      />
-                    </svg>
-                  </ArrowIconSecondary>
-                </SecondaryButton2>
               </ButtonGroup2>
             </Content>
           </CTASection>
