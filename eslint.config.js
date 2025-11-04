@@ -34,7 +34,9 @@ export default defineConfig([
       ...reactHooks.configs.recommended.rules,
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
-      'no-unused-vars': ['warn'],
+      'no-undef': 'error',
+      'no-unused-vars': 'warn',
+      'react/jsx-no-undef': ['error', { allowGlobals: true }],
     },
     settings: {
       react: { version: 'detect' },

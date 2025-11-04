@@ -1,3 +1,12 @@
+---
+name: issue template
+about: issue template
+title: 'Feat: '
+labels: ''
+assignees: ''
+
+---
+
 ### 이슈 타입
 
 - `[Feat]` : 새로운 기능이 필요한 경우
