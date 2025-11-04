@@ -52,7 +52,11 @@ export default function SimulationEndPage() {
   return (
     <PageContainer header footer>
       <MainContentWrapper>
-        <SectionTitle>면접 영상</SectionTitle>
+        <SimEndHeader>
+          <Typography as='h1' size={7} weight='bold'>
+            시뮬레이션 돌아보기
+          </Typography>
+        </SimEndHeader>
 
         <VideoPlayerWrapper>
           {videoUrl ? (
@@ -112,29 +116,40 @@ export default function SimulationEndPage() {
 /* ---------- 스타일 ---------- */
 
 const MainContentWrapper = styled.div`
-  max-width: 900px;
+  width: 80%;
   margin: 0 auto;
   padding: ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[6]};
   min-height: 80vh;
 `;
 
+const SimEndHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ${({ theme }) => theme.space[6]}; /* 24px */
+  padding-bottom: ${({ theme }) => theme.space[4]}; /* 16px */
+  border-bottom: 2px solid ${({ theme }) => theme.colors.gray[12]};
+`;
+
 const SectionTitle = styled(Typography).attrs({ as: 'h2', size: 6, weight: 'bold' })`
+  width: 80%;
+  margin: 0 auto;
   margin-bottom: ${({ theme }) => theme.space[5]};
   color: ${({ theme }) => theme.colors.gray[12]};
 `;
 
 const VideoPlayerWrapper = styled.div`
   position: relative;
-  width: 100%;
+  width: 80%;
   aspect-ratio: 16 / 9;
   background-color: ${({ theme }) => theme.colors.gray[3]};
   border-radius: ${({ theme }) => theme.radius.lg};
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: ${({ theme }) => theme.space[10]};
   box-shadow: ${({ theme }) => theme.shadow.sm};
   overflow: hidden;
+  margin: ${({ theme }) => theme.space[10]} auto ${({ theme }) => theme.space[10]};
 
   video {
     width: 100%;
@@ -155,7 +170,8 @@ const PlayIconWrapper = styled.div`
 `;
 
 const StyledAccordionRoot = styled(Accordion.Root)`
-  width: 100%;
+  width: 80%;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.space[4]};
@@ -242,7 +258,7 @@ const FooterMessage = styled(Typography).attrs({ as: 'p', size: 3 })`
 const ConfirmButton = styled.button`
   all: unset;
   width: 100%;
-  max-width: 400px;
+  max-width: 300px;
   display: block;
   margin: ${({ theme }) => theme.space[6]} auto 0;
   padding: ${({ theme }) => theme.space[5]} 0;
