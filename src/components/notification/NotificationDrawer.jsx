@@ -101,9 +101,9 @@ export default function NotificationDrawer({
 }
 
 function labelOf(type) {
-  if (type === 'TRANSCRIPTION') return '답변 변환';
+  if (type === 'TRANSCRIPT') return '답변 변환';
   if (type === 'REVIEW') return '리뷰';
-  if (type === 'CERTIFICATE') return '합격자 인증';
+  if (type === 'CERT') return '합격자 인증';
   return type || '알림';
 }
 
@@ -256,9 +256,9 @@ const Badge = styled.span`
   font-weight: ${({ theme }) => theme.font.weight.semiBold};
   ${({ $type, theme }) => {
     const map = {
-      TRANSCRIPTION: { bg: theme.colors.primary[3], fg: theme.colors.primary[11] },
+      TRANSCRIPT: { bg: theme.colors.primary[3], fg: theme.colors.primary[11] },
       REVIEW: { bg: '#E7F8ED', fg: '#18794E' },
-      CERTIFICATE: { bg: '#ffedd5', fg: '#fb923c' },
+      CERT: { bg: '#ffedd5', fg: '#fb923c' },
     };
     const v = map[$type] || { bg: theme.colors.gray[3], fg: theme.colors.gray[11] };
     return `background:${v.bg}; color:${v.fg};`;
