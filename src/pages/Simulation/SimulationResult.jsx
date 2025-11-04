@@ -69,8 +69,11 @@ export default function SimulationResultPage() {
   return (
     <PageContainer header footer>
       <MainContentWrapper>
-        <SectionTitle>변환 결과</SectionTitle>
-
+        <SimResHeader>
+          <Typography as='h1' size={7} weight='bold'>
+            답변 변환 결과
+          </Typography>
+        </SimResHeader>
         {loading && <div style={{ padding: 24 }}>불러오는 중…</div>}
         {error && <div style={{ padding: 24, color: 'crimson' }}>{error}</div>}
 
@@ -135,16 +138,25 @@ export default function SimulationResultPage() {
 
 /* ---------- styled-components ---------- */
 const MainContentWrapper = styled.div`
-  width: 80%;
+  width: 90%;
   padding: ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[6]};
   min-height: 80vh;
+`;
+const SimResHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ${({ theme }) => theme.space[6]};
+  padding-bottom: ${({ theme }) => theme.space[4]};
+  border-bottom: 2px solid ${({ theme }) => theme.colors.gray[12]};
 `;
 const SectionTitle = styled(Typography).attrs({ as: 'h2', size: 6, weight: 'bold' })`
   margin-bottom: ${({ theme }) => theme.space[8]};
   color: ${({ theme }) => theme.colors.gray[12]};
 `;
 const StyledAccordionRoot = styled(Accordion.Root)`
-  width: 100%;
+  width: 90%;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.space[4]};
