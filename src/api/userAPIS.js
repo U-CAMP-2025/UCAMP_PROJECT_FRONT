@@ -59,3 +59,12 @@ export const fetchUserLogout = async () => {
   const { data } = await axiosInstance.get('/users/logout');
   return data;
 };
+
+/**
+ * GET: 유저 role 조회
+ * @returns {Promise<Object>} response
+ */
+export const fetchUserRole = async () => {
+  const { data } = await axiosInstance.get('/users/role');
+  return data;
+};
