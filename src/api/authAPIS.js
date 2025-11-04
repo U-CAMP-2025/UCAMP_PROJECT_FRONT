@@ -38,3 +38,11 @@ export const getCheckNickname = async (nickname, excludeUserId) => {
   const { data } = await axiosInstance.get(`/auth/nickname/check?${params.toString()}`);
   return data;
 };
+
+/**
+ * DELETE: 회원탈퇴
+ */
+export const deleteUser = async () => {
+  const { data } = await axiosInstance.delete('/auth/withdraw');
+  return data;
+};
