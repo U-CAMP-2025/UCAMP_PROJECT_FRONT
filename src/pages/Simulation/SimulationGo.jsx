@@ -99,6 +99,7 @@ export default function SimulationGO() {
   const [audioById, setAudioById] = useState({});
   const [videoUrl, setVideoUrl] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
+  const [videoBlob, setVideoBlob] = useState(null);
 
   const [questionList, setQaList] = useState([]);
   const [randomOrder, setRandomOrder] = useState([]);
@@ -192,10 +193,22 @@ export default function SimulationGO() {
     // 오디오 녹음 중이면 정지
     if (audioRef.current?.cancel) await audioRef.current.cancel();
 
-    // 비디오 정지 → ObjectURL 획득
-    let url = null;
-    if (videoRef.current?.stop) url = await videoRef.current.stop();
-    if (url) setVideoUrl(url);
+    // 비디오 정지 → Blob 획득
+    let blob = null;
+    if (videoRef.current?.stopAsBlob) {
+      blob = await videoRef.current.stopAsBlob();
+    } else if (videoRef.current?.stop) {
+      // fallback: stop()이 URL을 리턴하는 구버전
+      const maybeUrl = await videoRef.current.stop();
+      if (maybeUrl) {
+        try {
+          blob = await fetch(maybeUrl).then((r) => r.blob());
+        } catch (e) {
+          console.error('blob 변환 실패:', e);
+        }
+      }
+    }
+    if (blob) setVideoBlob(blob);
 
     // 화면 상태 리셋
     setIsSessionStarted(false);
@@ -203,12 +216,12 @@ export default function SimulationGO() {
     moveNextGuardRef.current = false;
     setCurrentIdx(0);
 
-    // ★ 라우터 state로 결과 전달 (영상 URL + 시뮬 정보 + STT 텍스트)
+    // 라우터 state로 전달
     navigate(`/simulation/${simulationId}/end`, {
       state: {
-        recordedVideoUrl: url || null,
+        recordedBlob: blob || null,
         postData: simPost || null,
-        sttByQaId, // ★
+        sttByQaId,
       },
     });
   };

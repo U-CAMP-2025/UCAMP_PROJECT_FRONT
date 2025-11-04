@@ -12,16 +12,32 @@ export default function SimulationEndPage() {
   const { simulationId } = useParams();
   const location = useLocation();
 
-  // 세션 종료 시 전달된 비디오 URL & 포스트 데이터
-  const initialVideoUrl = location.state?.recordedVideoUrl ?? null;
+  // ★ GO 페이지에서 Blob으로 전달받음
+  const initialBlob = location.state?.recordedBlob ?? null;
   const initialPost = location.state?.postData ?? null;
 
-  const [videoUrl, setVideoUrl] = useState(initialVideoUrl);
+  const [videoUrl, setVideoUrl] = useState(null);
   const [post, setPost] = useState(initialPost);
   const [loading, setLoading] = useState(!initialPost); // post가 없으면 fetch
   const [error, setError] = useState(null);
 
-  // post가 없으면 백엔드에서 불러오기 (시작 페이지와 동일한 포맷의 post: { postId, postTitle, postDescription, qaList[...] })
+  // ★ Blob → objectURL 생성 (cleanup 시 revoke)
+  useEffect(() => {
+    if (!initialBlob) {
+      setVideoUrl(null);
+      return;
+    }
+
+    let objectUrl = null;
+    objectUrl = URL.createObjectURL(initialBlob);
+    setVideoUrl(objectUrl);
+
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [initialBlob]);
+
+  // post가 없으면 백엔드에서 불러오기
   useEffect(() => {
     if (post) return; // 이미 state로 받은 경우 스킵
     let ignore = false;
@@ -199,6 +215,7 @@ const slideDown = keyframes`
   from { height: 0; opacity: 0; }
   to { height: var(--radix-accordion-content-height); opacity: 1; }
 `;
+
 const slideUp = keyframes`
   from { height: var(--radix-accordion-content-height); opacity: 1; }
   to { height: 0; opacity: 0; }
@@ -258,6 +275,7 @@ const ConfirmButton = styled.button`
   &:hover {
     background-color: ${({ theme }) => theme.colors.primary[10]};
   }
+
   &:focus {
     box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary[6]};
   }
