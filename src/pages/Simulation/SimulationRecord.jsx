@@ -2,6 +2,7 @@
 import { axiosInstance } from '@api/axios';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
+import { CheckCircledIcon, CaretRightIcon } from '@radix-ui/react-icons';
 import * as Tabs from '@radix-ui/react-tabs';
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
@@ -44,6 +45,12 @@ export default function SimulationRecordPage() {
             {title}
           </Typography>
         </RecordItemLeft>
+        <RecordItemRight>
+          <ViewResultText>
+            <CheckCircledIcon width={16} height={16} />
+            확인하기 <CaretRightIcon width={16} height={16} />
+          </ViewResultText>
+        </RecordItemRight>
       </RecordItemLink>
     );
   };
@@ -120,6 +127,12 @@ const StyledTabsTrigger = styled(Tabs.Trigger)`
   }
 `;
 
+const RecordItemRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+`;
+
 const RecordListContainer = styled.div`
   width: 90%;
   margin: 0 auto;
@@ -168,4 +181,11 @@ const JobChip = styled.div`
 const EmptyState = styled.div`
   padding: 48px;
   text-align: center;
+`;
+
+const ViewResultText = styled(Typography).attrs({ size: 3, weight: 'semiBold' })`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  color: ${({ theme }) => theme.colors.primary[9]};
 `;

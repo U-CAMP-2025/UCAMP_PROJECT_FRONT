@@ -4,6 +4,7 @@ import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import * as Accordion from '@radix-ui/react-accordion';
 import { CaretDownIcon } from '@radix-ui/react-icons';
+import { CheckCircledIcon, CaretRightIcon } from '@radix-ui/react-icons';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
@@ -177,6 +178,14 @@ const CaretIcon = styled(CaretDownIcon)`
     transform: rotate(-180deg);
   }
 `;
+
+const ViewResultText = styled(Typography).attrs({ size: 3, weight: 'semiBold' })`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  color: ${({ theme }) => theme.colors.primary[9]};
+`;
+
 const slideDown = keyframes`
   from { height: 0; opacity: 0; }
   to { height: var(--radix-accordion-content-height); opacity: 1; }

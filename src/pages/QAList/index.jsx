@@ -7,8 +7,6 @@ import { SortSelector } from '@components/common/SortSelector';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import QASetList from '@components/qaset/QASetList';
-import { ALL_JOBS_MAP } from '@pages/List/AllJobsMap';
-import { qaList } from '@pages/List/qaList';
 import { useAuthStore } from '@store/auth/useAuthStore';
 import React, { useEffect, useMemo, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
