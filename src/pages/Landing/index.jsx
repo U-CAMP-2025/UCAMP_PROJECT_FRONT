@@ -1015,14 +1015,13 @@ export default function LandingPage() {
           <ContentWrapper>
             <MainHeading>
               면접 강화 툴<br />
-              리닉!
+              면접톡!
             </MainHeading>
             <SubHeading>
-              합격은 리보가 <br />
+              합격은 면접톡이 <br />
               책임진다
             </SubHeading>
             <Description>함께 쓰면 시너지! 면접&모범 답변 루틴</Description>
-            <CtaText>2월 한달 구입으로 만나보세요.</CtaText>
             <ButtonGroup>
               <PrimaryButton onClick={handleClickLoginButton}>지금 시작하기</PrimaryButton>
               <KakaoLoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
