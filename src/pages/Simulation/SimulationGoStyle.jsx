@@ -5,7 +5,7 @@ import styled, { css, keyframes } from 'styled-components';
 // --- [스타일 정의] ---
 
 export const MainContentWrapper = styled.div`
-  max-width: 100%;
+  width: 100%;
   margin: 0 auto;
   padding: ${({ theme }) => theme.space[6]} ${({ theme }) => theme.space[6]};
   min-height: 80vh;
@@ -14,7 +14,7 @@ export const MainContentWrapper = styled.div`
 // 1. 레이아웃 (사이드바 + 메인)
 export const SimulationLayout = styled.div`
   display: grid;
-  grid-template-columns: 2.5fr 8fr 2.5fr;
+  grid-template-columns: 2.8fr 10fr 2.8fr;
   gap: ${({ theme }) => theme.space[6]};
 
   @media (max-width: 1024px) {
