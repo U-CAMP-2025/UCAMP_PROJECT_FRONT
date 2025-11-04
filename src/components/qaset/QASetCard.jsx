@@ -60,11 +60,10 @@ export default function QASetCard({ item }) {
           <Typography as='h4' size={3} weight='bold' style={{ marginTop: 16 }}>
             설명
           </Typography>
-          <Typography as='p' size={3} weight='regular' style={{ marginTop: 6 }}>
-            <DescriptionText as='p' size={3} weight='regular'>
-              {description || '설명 없음'}
-            </DescriptionText>
-          </Typography>
+
+          <DescriptionText as='p' size={3} weight='regular'>
+            {description || '설명 없음'}
+          </DescriptionText>
         </>
         {/* 생성일 + 작성자 */}
         <div style={{ marginTop: 16, flexGrow: 1 }}>

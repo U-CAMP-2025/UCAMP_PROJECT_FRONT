@@ -103,7 +103,7 @@ export const JobSelector = ({ value = [], onChange = () => {} }) => {
                   placeholder='직무 검색...'
                   value={searchTerm}
                   onChange={handleSearchChange}
-                  // 💡 드롭다운이 닫히지 않도록 이벤트 전파 중단
+                  // 드롭다운이 닫히지 않도록 이벤트 전파 중단
                   onMouseDown={(e) => e.stopPropagation()}
                 />
               </SearchBarWrapper>
