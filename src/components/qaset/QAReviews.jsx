@@ -98,7 +98,7 @@ export const QAReviews = () => {
           리뷰
         </Typography>
         <Typography size={2} weight='bold' color='primary.10'>
-          리뷰 {count}
+          {count}개
         </Typography>
       </Header>
 
@@ -171,8 +171,9 @@ const Wrap = styled.section`
 
 const Header = styled.div`
   display: flex;
-  justify-content: space-between;
+
   align-items: flex-end;
+  gap: 0.5rem;
 `;
 
 const List = styled.ul`

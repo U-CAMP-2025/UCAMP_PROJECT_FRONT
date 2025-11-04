@@ -100,7 +100,11 @@ export const QADetail = () => {
 
         <div>
           {!me && (
-            <IconButton1 aria-label='북마크' onClick={onCopy}>
+            <IconButton1
+              aria-label='북마크'
+              onClick={onCopy}
+              title='현재 질문답변 세트를 나의 세트로 스크랩합니다.'
+            >
               <BookmarkIcon />
             </IconButton1>
           )}
@@ -201,7 +205,7 @@ const IconButton1 = styled.button`
   color: ${({ theme }) => theme.colors.primary[10]};
   background: ${({ theme }) => theme.colors.primary[3]};
   &:hover {
-    filter: brightness(0.9);
+    filter: brightness(0.95);
     cursor: pointer;
   }
   &:active {
