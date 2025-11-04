@@ -1,6 +1,7 @@
 import { fetchGetAllUser, patchUserPass } from '@api/adminAPIS';
 import CertificateDialog from '@components/admin/CertificateDialog';
 import DataTable, { Pill } from '@components/common/DataTable';
+import ErrorDialog from '@components/common/ErrorDialog';
 import Typography from '@components/common/Typography';
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import { useEffect, useState } from 'react';
@@ -27,10 +28,40 @@ const SegmentItem = styled(ToggleGroup.Item)`
     color: ${({ theme }) => theme.colors.primary[11]};
   }
 `;
+// Pagination Bar
+const PaginationBar = styled.div`
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+
+  button {
+    border: 1px solid ${({ theme }) => theme.colors.gray[6]};
+    background: #fff;
+    border-radius: ${({ theme }) => theme.radius.md};
+    padding: 6px 10px;
+    cursor: pointer;
+  }
+  span {
+    color: ${({ theme }) => theme.colors.gray[11]};
+  }
+`;
 
 // TODO: 합격 상태 변경 시 API 호출
 export const UserManageTable = () => {
+  const [errorOpen, setErrorOpen] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
   const [rows, setRows] = useState([]);
+
+  const [page, setPage] = useState(0);
+  const [size, setSize] = useState(20);
+  const [sort] = useState('createdAt,desc');
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  const [number, setNumber] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const [open, setOpen] = useState(false);
   const [target, setTarget] = useState(null);
@@ -46,18 +77,17 @@ export const UserManageTable = () => {
   // 1️⃣ 데이터 요청
   useEffect(() => {
     const loadData = async () => {
+      setLoading(true);
       try {
-        const data = await fetchGetAllUser();
-        console.log(data);
-        // 2️⃣ 데이터 매핑
-        const mapped = data.map((user, index) => ({
-          id: user.userId,
-          userId: user.userId, // PATCH에 쓸 진짜 아이디
+        const data = await fetchGetAllUser({ page, size, sort });
+        const mapped = (data.content ?? []).map((user, index) => ({
+          id: `p${data.number}-${index}`,
+          userId: user.userId,
           nickName: user.nickname,
           email: user.email,
           job: user.jobName,
           passStatus: user.passStatus === 'Y' ? '합격자' : '구직자',
-          status: '활성', // 백엔드에 없다면 기본값 지정
+          status: '활성',
           createdAt: user.createdAt?.slice(0, 10) || '-',
           role: user.role === 'ADMIN' ? 'Admin' : 'User',
           simulationStatus:
@@ -75,17 +105,20 @@ export const UserManageTable = () => {
             certe_req_date: user.certReqDate?.slice(0, 10) || '-',
             certe_trmt_date: user.certTrmtDate?.slice(0, 10) || '-',
             certe_file_url: user.certFileUrl,
-            certe_status: user.certStatus || null, // PENDING / APPROVED / REJECTED 등
+            certe_status: user.certStatus || null,
           },
         }));
 
         setRows(mapped);
+        setTotalPages(data.totalPages ?? 0);
+        setTotalElements(data.totalElements ?? 0);
+        setNumber(data.number ?? 0);
       } catch (e) {
         console.error('유저 데이터 로드 실패:', e);
       }
     };
     loadData();
-  }, []);
+  }, [page, size, sort]);
 
   const renderCertStatus = (certe_status, row) => {
     if (!certe_status) return '-';
@@ -208,12 +241,39 @@ export const UserManageTable = () => {
             setTarget(null);
           } catch (e) {
             console.error('합격 상태 변경 실패:', e);
-            alert('합격 상태 변경 중 오류가 발생했습니다.');
+            setErrorMsg('합격 상태 변경 중 오류가 발생했습니다.');
+            setErrorOpen(true);
           }
         }}
       />
 
       <DataTable columns={columns} rows={filteredRows} rowKey={(r) => r.id} />
+      <PaginationBar>
+        <span>{`Total: ${totalElements}`}</span>
+        <button disabled={number <= 0 || loading} onClick={() => setPage(0)}>
+          ≪ First
+        </button>
+        <button
+          disabled={number <= 0 || loading}
+          onClick={() => setPage((p) => Math.max(0, p - 1))}
+        >
+          ‹ Prev
+        </button>
+        <span>{`${number + 1} / ${Math.max(totalPages, 1)}`}</span>
+        <button
+          disabled={number >= totalPages - 1 || loading}
+          onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+        >
+          Next ›
+        </button>
+        <button
+          disabled={number >= totalPages - 1 || loading}
+          onClick={() => setPage(totalPages - 1)}
+        >
+          Last ≫
+        </button>
+      </PaginationBar>
+      <ErrorDialog open={errorOpen} onOpenChange={setErrorOpen} message={errorMsg} />
     </div>
   );
 };
