@@ -13,7 +13,7 @@ const initialState = {
 };
 export const useAuthStore = create(
   persist(
-    (set, get) => ({
+    (set) => ({
       ...initialState,
       setAccessToken: (token) => set({ accessToken: token }),
       login: ({ user, accessToken }) => {
@@ -31,6 +31,11 @@ export const useAuthStore = create(
         } finally {
           set({ ...initialState });
         }
+      },
+      withdraw: () => {
+        set({
+          ...initialState,
+        });
       },
     }),
     {
