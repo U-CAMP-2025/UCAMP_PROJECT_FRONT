@@ -71,7 +71,7 @@ export const QADetail = () => {
           </Typography>
           <Meta>
             <Typography size={3} weight='semiBold' style={{ color: theme.colors.gray[12] }}>
-              만든 유저{' '}
+              만든 유저
             </Typography>
             <Typography size={3} style={{ color: theme.colors.gray[12] }}>
               {nickname}
@@ -93,7 +93,7 @@ export const QADetail = () => {
               weight='regular'
               style={{ marginTop: 4, color: theme.colors.gray[9] }}
             >
-              가져온 글 (From: {otherWriter})
+              스크랩한 글 (From: {otherWriter})
             </Typography>
           )}
         </div>
@@ -201,7 +201,7 @@ const IconButton1 = styled.button`
   color: ${({ theme }) => theme.colors.primary[10]};
   background: ${({ theme }) => theme.colors.primary[3]};
   &:hover {
-    filter: brightness(0.98);
+    filter: brightness(0.9);
     cursor: pointer;
   }
   &:active {

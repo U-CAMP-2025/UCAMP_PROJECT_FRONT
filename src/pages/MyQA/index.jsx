@@ -93,7 +93,7 @@ const TabButton = styled.button`
 const TABS = {
   ALL: '전체',
   MINE: '내가 만든 질문답변',
-  BOOKMARKED: '가져온 질문답변',
+  BOOKMARKED: '스크랩한 질문답변',
 };
 
 const MAX_QASET = 10;
