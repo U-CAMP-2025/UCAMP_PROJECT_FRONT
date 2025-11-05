@@ -317,7 +317,7 @@ const Placeholder = styled(Typography).attrs({
   weight: 'semiBold',
 })`
   background-color: ${({ theme }) => theme.colors.gray[3]};
-  padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[2]};
+  padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
   border-radius: ${({ theme }) => theme.radius.sm};
 
   display: inline-block;
