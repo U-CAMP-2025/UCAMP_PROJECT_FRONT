@@ -60,9 +60,6 @@ export default function QAReviewForm({
         <Typography size={3} weight='semiBold'>
           {user?.nickname || '로그인 사용자'}
         </Typography>
-        <Typography size={1} color='gray.10'>
-          리뷰를 작성해주세요
-        </Typography>
       </Header>
 
       <TextArea

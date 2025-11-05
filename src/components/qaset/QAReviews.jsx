@@ -223,17 +223,24 @@ const List = styled.ul`
   padding: 0;
   display: grid;
   gap: ${({ theme }) => theme.space[4]};
-`;
-
-const Item = styled.li`
   border: 1px solid ${({ theme }) => theme.colors.gray[6]};
   border-radius: ${({ theme }) => theme.radius.md};
   background: #fff;
+  overflow: hidden;
+`;
+
+const Item = styled.li`
   padding: ${({ theme }) => theme.space[5]};
   display: grid;
   grid-template-columns: 48px 1fr auto;
   gap: ${({ theme }) => theme.space[2]};
   align-items: flex-start;
+
+  border-bottom: 1px solid ${({ theme }) => theme.colors.gray[6]};
+
+  &:last-child {
+    border-bottom: none;
+  }
 `;
 
 const Avatar = styled.div`
