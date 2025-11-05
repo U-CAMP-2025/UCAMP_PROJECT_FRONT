@@ -12,7 +12,11 @@ const SimulationStart = () => {
   const [interviewer, setInterviewer] = useState(''); // Interview Room
   const [interviewers, setInterviewers] = useState([]); // Interview Room
   const navigate = useNavigate();
-  const handleModeChange = (event) => setMode(event.target.value);
+  const handleModeChange = (e) => {
+    const selected = e.target.value;
+    if (selected === '다대다') return; // ✅ 다대다는 무시
+    setMode(selected);
+  };
   const handleOrderChange = (event) => setOrder(event.target.value);
   const handleQuestionSetChange = (event) => {
     setQuestionSet(event.target.value);
@@ -76,7 +80,7 @@ const SimulationStart = () => {
               value='다대다'
               checked={mode === '다대다'}
               onChange={handleModeChange}
-              disabled
+              disabled={true}
             />
             다대다
           </label>

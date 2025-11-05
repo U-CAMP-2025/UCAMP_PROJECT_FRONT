@@ -2,7 +2,6 @@ import { fetchJobList } from '@api/jobAPIS';
 import {
   fetchUserMypage,
   patchUserJob,
-  postUserDelete,
   postUserPathPass,
   uploadCertificateImage,
 } from '@api/userAPIS';
@@ -19,16 +18,8 @@ import styled from 'styled-components';
 
 import { FieldCard, FieldLeft, FieldLabel, FieldValue, FieldActions } from './FieldRow';
 import PhotoSubmitDialog from './PhotoSubmitDialog';
+import { WithdrawlDialog } from './WithdrawlDialog';
 
-const initialUserState = {
-  userId: 0,
-  nickname: '유저 닉네임',
-  email: 'user@email.com',
-  jobName: '',
-  passStatus: false,
-  status: '',
-  userProfileImageUrl: '',
-};
 const MyInfo = () => {
   // 요청 확인/성공/실패 모달
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -45,12 +36,14 @@ const MyInfo = () => {
   const [editingJob, setEditingJob] = useState(false);
   const [fileName, setFileName] = useState('');
 
+  const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
+
   const handlePhotoSubmit = async (file) => {
     try {
-      // 1️⃣ 이미지 업로드
+      // 이미지 업로드
       const { fileName } = await uploadCertificateImage(file);
 
-      // 2️⃣ 합격자 신청 (JWT로 user 식별)
+      // 합격자 신청 (JWT로 user 식별)
       await postUserPathPass(fileName);
       // alert('합격자 인증이 신청되었습니다.');
       setSuccessMsg('합격자 인증이 신청되었습니다.');
@@ -67,8 +60,7 @@ const MyInfo = () => {
   useEffect(() => {
     const loadInfo = async () => {
       try {
-        const data = await fetchUserMypage(); // 백엔드 요청
-        // 백엔드 → 프론트 구조로 변환
+        const data = await fetchUserMypage();
         setUser({
           userId: data.userId,
           nickname: data.nickname,
@@ -89,7 +81,7 @@ const MyInfo = () => {
       try {
         const data = await fetchJobList(); // 백엔드 요청
         // 백엔드 → 프론트 구조로 변환
-        const mapped = data.map((item, index) => ({
+        const mapped = data.map((item) => ({
           jobId: item.jobId,
           name: item.jobName,
         }));
@@ -142,6 +134,10 @@ const MyInfo = () => {
       setErrorMsg('탈퇴 중 오류가 발생했습니다.');
       setErrorOpen(true);
     }
+
+  // 회원탈퇴 클릭
+  const handleUserDelete = () => {
+    setWithdrawDialogOpen(true);
   };
 
   return (
@@ -262,6 +258,24 @@ const MyInfo = () => {
         title='회원 탈퇴'
         message='정말 탈퇴하시겠습니까?'
         onConfirm={confirmUserDelete}
+                  </button>
+                </FieldActions>
+              </>
+            )}
+          </FieldLeft>
+        </FieldCard>
+      </Row>
+      <Footer>
+        <Button variant='outline' onClick={handleUserDelete}>
+          회원 탈퇴
+        </Button>
+        <WithdrawlDialog open={withdrawDialogOpen} onOpenChange={setWithdrawDialogOpen} />
+      </Footer>
+      <PhotoSubmitDialog
+        open={openPhotoModal}
+        onOpenChange={setOpenPhotoModal}
+        onSubmit={handlePhotoSubmit}
+        onFilePick={handleFilePick}
       />
     </>
   );

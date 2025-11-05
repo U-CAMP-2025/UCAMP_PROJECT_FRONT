@@ -19,6 +19,8 @@ import SimulationResultPage from '@pages/Simulation/SimulationResult';
 import TestPage from '@pages/Test';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
 
+import { RequireAdmin } from './RequireAdmin';
+
 const AppRoutes = () => {
   return (
     <BrowserRouter>
@@ -38,8 +40,22 @@ const AppRoutes = () => {
         <Route path='/simulation/:simulationId/end' element={<SimulationEndPage />} />
         <Route path='/simulation/record' element={<SimulationRecordPage />} />
         <Route path='/simulation/:simulationId/result' element={<SimulationResultPage />} />
-        <Route path='/admin/user' element={<AdminPage />} />
-        <Route path='/admin/transcription' element={<AdminPage />} />
+        <Route
+          path='/admin/user'
+          element={
+            <RequireAdmin>
+              <AdminPage />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path='/admin/transcription'
+          element={
+            <RequireAdmin>
+              <AdminPage />
+            </RequireAdmin>
+          }
+        />
         <Route path='/login/bridge' element={<LoginBridge />} />
         <Route path='/rank' element={<RankPage />} />
         <Route path='/logout/complete' element={<LogoutComplete />} />

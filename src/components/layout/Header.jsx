@@ -1,4 +1,5 @@
 import { getNoti, notiDel, notiDelAll, notiRead, notiReadAll } from '@api/notificationsAPIS';
+import { fetchUserRole } from '@api/userAPIS';
 import Button from '@components/common/Button';
 import Typography from '@components/common/Typography';
 import NotificationDrawer from '@components/notification/NotificationDrawer';
@@ -35,39 +36,12 @@ export const Header = () => {
   const navigate = useNavigate();
 
   const [notifOpen, setNotifOpen] = useState(false);
-  const [notifications, setNotifications] = useState([
-    {
-      notiId: 2,
-      content: '알림 내용',
-      type: 'TRANSCRIPTION',
-      read: true,
-      createdAt: '2025-10-27T06:00:00Z',
-    },
-    {
-      notiId: 1,
-      content: '알림 내용',
-      type: 'REVIEW',
-      read: true,
-      createdAt: '2025-10-27T06:00:00Z',
-    },
-    {
-      notiId: 3,
-      content: '알림 내용',
-      type: 'CERTIFICATE',
-      read: true,
-      createdAt: '2025-10-27T06:00:00Z',
-    },
-    {
-      notiId: 4,
-      content: '알림 내용',
-      type: 'TRANSCRIPTION',
-      read: true,
-      createdAt: '2025-10-27T06:00:00Z',
-    },
-  ]);
+  const [notifications, setNotifications] = useState([]);
   const unreadDerived = notifications?.filter((n) => !n.read).length;
 
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+
+  const [userRole, setUserRole] = useState('USER');
 
   const handleClickLogoButton = () => {
     navigate('/');
@@ -82,6 +56,10 @@ export const Header = () => {
     window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/logout`;
   };
 
+  const handleClickAdminPage = () => {
+    navigate('/admin/user');
+  };
+
   const [alertTrigger, setAlertTrigger] = useState();
 
   useEffect(() => {
@@ -93,6 +71,16 @@ export const Header = () => {
         .catch(() => setNotifications(null));
     }
   }, [isLogin, alertTrigger]);
+
+  useEffect(() => {
+    fetchUserRole().then((response) => {
+      if (response?.role === 'ADMIN') {
+        setUserRole('ADMIN');
+      } else {
+        setUserRole('USER');
+      }
+    });
+  }, [isLogin]);
 
   return (
     <HeaderContainer>
@@ -158,6 +146,12 @@ export const Header = () => {
                     <DropdownItem onSelect={() => navigate('/mypage')}>마이페이지</DropdownItem>
                     <DropdownSeparator />
                     <DropdownItem onSelect={handleClickLogout}>로그아웃</DropdownItem>
+                    {userRole === 'ADMIN' && (
+                      <>
+                        <DropdownSeparator />
+                        <DropdownItem onSelect={handleClickAdminPage}>관리자 페이지</DropdownItem>
+                      </>
+                    )}
                   </DropdownContent>
                 </DropdownMenu.Portal>
               </DropdownMenu.Root>
