@@ -278,7 +278,7 @@ const MyInfo = () => {
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  width: 500px;
+  width: 70%;
 `;
 
 const Row = styled.div`
