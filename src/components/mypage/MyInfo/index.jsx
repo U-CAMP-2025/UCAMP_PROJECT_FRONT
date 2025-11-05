@@ -112,7 +112,14 @@ const MyInfo = () => {
         <FieldCard>
           <FieldLeft>
             <FieldLabel htmlFor='nick'>닉네임</FieldLabel>
-            <ReadonlyInput id='nick' style={{ width: '85%' }}>
+            <ReadonlyInput
+              id='nick'
+              style={{
+                width: '300px',
+                marginLeft: 'auto',
+                justifyContent: 'flex-start',
+              }}
+            >
               {user?.nickname}
             </ReadonlyInput>
           </FieldLeft>
@@ -121,7 +128,14 @@ const MyInfo = () => {
         <FieldCard>
           <FieldLeft>
             <FieldLabel htmlFor='email'>이메일</FieldLabel>
-            <ReadonlyInput id='email' style={{ width: '85%' }}>
+            <ReadonlyInput
+              id='nick'
+              style={{
+                width: '300px',
+                marginLeft: 'auto',
+                justifyContent: 'flex-start',
+              }}
+            >
               {user?.email}
             </ReadonlyInput>
           </FieldLeft>
@@ -131,7 +145,15 @@ const MyInfo = () => {
           <FieldLeft>
             <FieldLabel>관심직무</FieldLabel>
             {editingJob ? (
-              <div style={{ display: 'flex', gap: 12, alignItems: 'left' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 12,
+                  alignItems: 'center',
+                  flex: 1,
+                  justifyContent: 'flex-end',
+                }}
+              >
                 <SearchableSelect
                   value={selectedJobId}
                   onChange={(id) => setSelectedJobId(id)}
@@ -170,7 +192,7 @@ const MyInfo = () => {
             <FieldLabel>합격 여부</FieldLabel>
             {user?.passStatus ? (
               <>
-                <FieldValue>합격자입니다</FieldValue>
+                <FieldValue style={{ flex: 1, textAlign: 'right' }}>합격자입니다</FieldValue>
                 <FieldActions>
                   <button style={pillStyle} onClick={() => setOpenPhotoModal(true)}>
                     <Typography as='span' size={2} weight='semiBold'>
@@ -181,7 +203,7 @@ const MyInfo = () => {
               </>
             ) : (
               <>
-                <FieldValue />
+                <FieldValue style={{ flex: 1, textAlign: 'right' }} />
                 <FieldActions>
                   {fileName && (
                     <Typography as='div' size={3}>
