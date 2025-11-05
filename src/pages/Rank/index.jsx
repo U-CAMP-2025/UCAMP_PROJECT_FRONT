@@ -2,6 +2,7 @@ import { bookmark, practice } from '@api/rankAPIS';
 import Typography from '@components/common/Typography';
 import { Header } from '@components/layout/Header';
 import RankingTable from '@components/rank/RankList';
+import { date } from '@elevenlabs/elevenlabs-js/core/schemas';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
 
@@ -86,27 +87,32 @@ const TABS = {
 const MonthlyRanking = () => {
   // ✅ 기본값을 "연습횟수"로 설정
   const [activeTab, setActiveTab] = useState(TABS.PRACTICE);
-  const [myQaList, setMyQaList] = useState([]);
+  const [dateRange, setDateRange] = useState('thisweek');
+  const [RankList, setRankList] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 🛑 수정 완료: 함수 이름만 참조로 할당합니다.
-        const apiFunction = activeTab === TABS.BOOKMARKS ? bookmark : practice; // 이제 apiFunction은 함수이므로, await apiFunction()으로 실행할 수 있습니다.
-        const resp = await apiFunction(); // 데이터 추출 로직도 이전 답변에서 안내한 안전한 방식으로 유지합니다.
+        let resp;
+        if (activeTab === TABS.PRACTICE) {
+          resp = await practice({ period: dateRange });
+        } else {
+          resp = await bookmark();
+        }
         let rankingData = [];
         if (Array.isArray(resp)) {
           rankingData = resp;
         } else if (resp && Array.isArray(resp.data)) {
           rankingData = resp.data;
         }
-        setMyQaList(rankingData);
+        // API 응답 데이터를 상위 10개만 잘라서 상태에 저장합니다.
+        setRankList(rankingData.slice(0, 10));
       } catch (e) {
         console.error('API 호출 에러:', e);
-        setMyQaList([]);
+        setRankList([]);
       }
     };
     fetchData();
-  }, [activeTab]);
+  }, [activeTab, dateRange]);
 
   return (
     <>
@@ -115,13 +121,17 @@ const MonthlyRanking = () => {
         <Header1>
           <Title>주간 랭킹</Title>
           <SubHeader>
-            <Typography size={3} style={{ fontWeight: 500 }}>
-              정렬 방법
-            </Typography>
-            <DateSelector defaultValue='thisweek'>
-              <option value='thisweek'>이번주</option>
-              <option value='lastweek'>저번주</option>
-            </DateSelector>
+            {activeTab === TABS.PRACTICE && (
+              <>
+                <Typography size={3} style={{ fontWeight: 500 }}>
+                  정렬 방법
+                </Typography>
+                <DateSelector value={dateRange} onChange={(e) => setDateRange(e.target.value)}>
+                  <option value='thisweek'>이번주</option>
+                  <option value='lastweek'>저번주</option>
+                </DateSelector>
+              </>
+            )}
           </SubHeader>
         </Header1>
 
@@ -139,8 +149,8 @@ const MonthlyRanking = () => {
         </TabContainer>
 
         {/* 탭별 테이블 표시 */}
-        {activeTab === TABS.PRACTICE && <RankingTable data={myQaList} type='practice' />}
-        {activeTab === TABS.BOOKMARKS && <RankingTable data={myQaList} type='bookmark' />}
+        {activeTab === TABS.PRACTICE && <RankingTable data={RankList} type='practice' />}
+        {activeTab === TABS.BOOKMARKS && <RankingTable data={RankList} type='bookmark' />}
       </Container>
     </>
   );

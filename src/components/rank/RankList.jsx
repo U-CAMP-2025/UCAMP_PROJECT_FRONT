@@ -114,7 +114,7 @@ const PlusCss = styled.span`
   margin-left: 6px;
 `;
 
-const RankingTable = ({ data = [], type }) => {
+const RankingTable = ({ data, type }) => {
   const getMedalColor = (position) => {
     switch (position) {
       case 1:

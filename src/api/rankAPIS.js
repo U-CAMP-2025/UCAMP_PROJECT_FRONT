@@ -5,7 +5,7 @@ export const bookmark = async () => {
   return data;
 };
 
-export const practice = async () => {
-  const { data } = await axiosInstance.get('/rank/practice');
+export const practice = async (params) => {
+  const { data } = await axiosInstance.get('/rank/practice', { params });
   return data;
 };
