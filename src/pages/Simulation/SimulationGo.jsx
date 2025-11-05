@@ -256,7 +256,6 @@ export default function SimulationGO() {
       console.groupCollapsed(
         `[STT] qaId=${qaId} | "${qText.slice(0, 40)}${qText.length > 40 ? '…' : ''}"`,
       );
-      console.log(transcript);
       console.groupEnd();
     }
   };
