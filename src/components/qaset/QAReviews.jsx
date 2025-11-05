@@ -1,9 +1,11 @@
 import { deleteReview, fetchReviewList, postReview } from '@api/reviewAPIS';
 import CertConfirmDialog from '@components/admin/CertConfirmDialog';
 import Button from '@components/common/Button';
+import { Content, Description, Overlay, Title } from '@components/common/Dialog';
 import ErrorDialog from '@components/common/ErrorDialog';
 import SuccessDialog from '@components/common/SuccessDialog';
 import Typography from '@components/common/Typography';
+import * as Dialog from '@radix-ui/react-dialog';
 import { PersonIcon, TrashIcon } from '@radix-ui/react-icons';
 import { useAuthStore } from '@store/auth/useAuthStore';
 import { useEffect, useState, useContext } from 'react';
@@ -38,6 +40,7 @@ export const QAReviews = () => {
   const [successMsg, setSuccessMsg] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingReviewId, setPendingReviewId] = useState(null);
+  const [isReviewDelModalOpen, setIsReviewDelModalOpen] = useState(false);
 
   const { qaId: postId } = useParams();
   const [reviews, setReviews] = useState([]);
@@ -128,7 +131,7 @@ export const QAReviews = () => {
             리뷰
           </Typography>
           <Typography size={2} weight='bold' color='primary.10'>
-            리뷰 {count}
+            {count}개
           </Typography>
         </Header>
 
@@ -140,43 +143,45 @@ export const QAReviews = () => {
           />
         )}
 
-        <List>
-          {reviews.map((r) => (
-            <Item key={r.reviewId}>
-              <Avatar aria-hidden>
-                {r.profileImage && r.profileImage.startsWith('http') ? (
-                  <img
-                    src={r.profileImage}
-                    alt=''
-                    onError={(e) => (e.currentTarget.style.display = 'none')}
-                  />
-                ) : (
-                  <PersonIcon width={20} height={20} color={theme.colors.primary[10]} />
-                )}
-              </Avatar>
+        {count > 0 && (
+          <List>
+            {reviews.map((r) => (
+              <Item key={r.reviewId}>
+                <Avatar aria-hidden>
+                  {r.profileImage && r.profileImage.startsWith('http') ? (
+                    <img
+                      src={r.profileImage}
+                      alt=''
+                      onError={(e) => (e.currentTarget.style.display = 'none')}
+                    />
+                  ) : (
+                    <PersonIcon width={20} height={20} color={theme.colors.primary[10]} />
+                  )}
+                </Avatar>
 
-              <Body>
-                <Meta>
-                  <Typography size={2} weight='semiBold'>
-                    {r.nickname}
+                <Body>
+                  <Meta>
+                    <Typography size={2} weight='semiBold'>
+                      {r.nickname}
+                    </Typography>
+                    <Dot>•</Dot>
+                    <Typography size={2} color='gray.10'>
+                      {formatDate(r.createdAt)}
+                    </Typography>
+                  </Meta>
+                  <Typography as='p' size={3} style={{ whiteSpace: 'pre-wrap' }}>
+                    {r.content}
                   </Typography>
-                  <Dot>•</Dot>
-                  <Typography size={2} color='gray.10'>
-                    {formatDate(r.createdAt)}
-                  </Typography>
-                </Meta>
-                <Typography as='p' size={2} style={{ whiteSpace: 'pre-wrap' }}>
-                  {r.content}
-                </Typography>
-              </Body>
-              {isLogin && authUser.name === r.nickname && (
-                <Button variant='ghost' onClick={() => handleDeleteReview(r.reviewId)}>
-                  삭제하기
-                </Button>
-              )}
-            </Item>
-          ))}
-        </List>
+                </Body>
+                {isLogin && authUser.name === r.nickname && (
+                  <IconButton1 onClick={() => handleDeleteReview(r.reviewId)}>
+                    <TrashIcon></TrashIcon>
+                  </IconButton1>
+                )}
+              </Item>
+            ))}
+          </List>
+        )}
       </Wrap>
       <ErrorDialog open={errorOpen} onOpenChange={setErrorOpen} message={errorMsg} />
       <SuccessDialog open={successOpen} onOpenChange={setSuccessOpen} message={successMsg} />
@@ -222,18 +227,24 @@ const List = styled.ul`
   margin: 0;
   padding: 0;
   display: grid;
-  gap: ${({ theme }) => theme.space[4]};
-`;
-
-const Item = styled.li`
   border: 1px solid ${({ theme }) => theme.colors.gray[6]};
   border-radius: ${({ theme }) => theme.radius.md};
   background: #fff;
+  overflow: hidden;
+`;
+
+const Item = styled.li`
   padding: ${({ theme }) => theme.space[5]};
   display: grid;
   grid-template-columns: 48px 1fr auto;
   gap: ${({ theme }) => theme.space[2]};
   align-items: flex-start;
+
+  border-bottom: 1px solid ${({ theme }) => theme.colors.gray[6]};
+
+  &:last-child {
+    border-bottom: none;
+  }
 `;
 
 const Avatar = styled.div`

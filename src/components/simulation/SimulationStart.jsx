@@ -98,7 +98,7 @@ const SimulationStart = () => {
         </div>
 
         <div>
-          <h4>질문답변 세트 선택</h4>
+          <h4>면접 노트 선택</h4>
           <select value={questionSet} onChange={handleQuestionSetChange}>
             {questionSets.map((qSet, inx) => {
               return (
