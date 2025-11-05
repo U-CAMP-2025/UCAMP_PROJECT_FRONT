@@ -152,10 +152,10 @@ export default function CertificateDialog({ open, onOpenChange, user, onConfirm 
       if (verifyResult?.status === 'fail') {
         setConfirmMessage('사업자 번호가 검증되지 않았습니다. 그래도 승인하시겠습니까?');
       } else {
-        setConfirmMessage('(검증 성공) 승인하시겠습니까?');
+        setConfirmMessage('(검증 성공) 합격자 신청을 승인하시겠습니까?');
       }
     } else if (type === 'REJECTED') {
-      setConfirmMessage('반려하시겠습니까?');
+      setConfirmMessage('합격자 신청을 반려하시겠습니까?');
     }
 
     setConfirmOpen(true);

@@ -6,18 +6,25 @@ import {
   uploadCertificateImage,
 } from '@api/userAPIS';
 import Button from '@components/common/Button';
+import ErrorDialog from '@components/common/ErrorDialog';
 import ReadonlyInput from '@components/common/ReadOnlyInput';
 import SearchableSelect from '@components/common/SearchableSelect';
+import SuccessDialog from '@components/common/SuccessDialog';
 import Typography from '@components/common/Typography';
 import theme from '@styles/theme';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { FieldCard, FieldLeft, FieldLabel, FieldValue, FieldActions } from './FieldRow';
+import { FieldCard, FieldLeft, FieldLabel, FieldValue, FieldActions, FieldRight } from './FieldRow';
 import PhotoSubmitDialog from './PhotoSubmitDialog';
 import { WithdrawlDialog } from './WithdrawlDialog';
 
 const MyInfo = () => {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [errorOpen, setErrorOpen] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
   const [user, setUser] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [selectedJobId, setSelectedJobId] = useState(1);
@@ -36,11 +43,15 @@ const MyInfo = () => {
       // 합격자 신청 (JWT로 user 식별)
       await postUserPathPass(fileName);
 
-      alert('합격자 인증이 신청되었습니다.');
+      // alert('합격자 인증이 신청되었습니다.');
+      setSuccessMsg('합격자 인증이 신청되었습니다.');
+      setSuccessOpen(true);
       setOpenPhotoModal(false);
     } catch (err) {
       console.error(err);
-      alert('신청 중 오류가 발생했습니다.');
+      // alert('신청 중 오류가 발생했습니다.');
+      setErrorMsg('합격자 인증 신청 중 오류가 발생했습니다.');
+      setErrorOpen(true);
     }
   };
 
@@ -90,10 +101,14 @@ const MyInfo = () => {
       await patchUserJob(user.userId, selectedJobId); // 서버 PATCH 요청
       setEditingJob(false); // 수정 모드 종료
       setUser((prev) => ({ ...prev, jobId: selectedJobId })); // 로컬 상태 갱신
-      alert('관심 직무가 수정되었습니다.');
+      // alert('관심 직무가 수정되었습니다.');
+      setSuccessMsg('관심 직무가 수정되었습니다.');
+      setSuccessOpen(true);
     } catch (err) {
       console.error('직무 수정 실패:', err);
-      alert('직무 수정 중 오류가 발생했습니다.');
+      // alert('직무 수정 중 오류가 발생했습니다.');
+      setErrorMsg('직무 수정 중 오류가 발생했습니다.');
+      setErrorOpen(true);
     }
   };
 
@@ -101,7 +116,6 @@ const MyInfo = () => {
   const handleUserDelete = () => {
     setWithdrawDialogOpen(true);
   };
-
   return (
     <Container>
       <MyPageHeader>
@@ -142,6 +156,7 @@ const MyInfo = () => {
             </ReadonlyInput>
           </FieldLeft>
         </FieldCard>
+
         {/* 관심 직무 */}
         <FieldCard>
           <FieldLeft>
@@ -192,12 +207,29 @@ const MyInfo = () => {
         <FieldCard>
           <FieldLeft>
             <FieldLabel>합격 여부</FieldLabel>
-            {user?.passStatus ? (
+            {user?.passStatus === 'Y' ? (
               <>
                 <FieldValue style={{ flex: 1, textAlign: 'right' }}>합격자입니다</FieldValue>
                 <FieldActions>
-                  <button style={pillStyle} onClick={() => setOpenPhotoModal(true)}>
-                    <Typography as='span' size={2} weight='semiBold'>
+                  {/* {fileName && (
+                    <Typography as='div' size={3}>
+                      {fileName}
+                    </Typography>
+                  )} */}
+                  <button
+                    // disabled
+                    style={{
+                      ...pillStyle,
+                      background: theme.colors.primary[4],
+                    }}
+                    onClick={() => setOpenPhotoModal(true)}
+                  >
+                    <Typography
+                      as='span'
+                      size={2}
+                      weight='semiBold'
+                      color={theme.colors.primary[7]}
+                    >
                       신청
                     </Typography>
                   </button>
@@ -205,13 +237,15 @@ const MyInfo = () => {
               </>
             ) : (
               <>
-                <FieldValue style={{ flex: 1, textAlign: 'right' }} />
+                <FieldValue style={{ flex: '1', textAlign: 'right' }}>
+                  일반 사용자입니다.
+                </FieldValue>
                 <FieldActions>
-                  {fileName && (
+                  {/* {fileName && (
                     <Typography as='div' size={3}>
                       {fileName}
                     </Typography>
-                  )}
+                  )} */}
                   <button style={pillStyle} onClick={() => setOpenPhotoModal(true)}>
                     <Typography as='span' size={2} weight='semiBold'>
                       신청
@@ -235,6 +269,8 @@ const MyInfo = () => {
         onSubmit={handlePhotoSubmit}
         onFilePick={handleFilePick}
       />
+      <ErrorDialog open={errorOpen} onOpenChange={setErrorOpen} message={errorMsg} />
+      <SuccessDialog open={successOpen} onOpenChange={setSuccessOpen} message={successMsg} />
     </Container>
   );
 };
@@ -242,7 +278,7 @@ const MyInfo = () => {
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  width: 700px;
+  width: 500px;
 `;
 
 const Row = styled.div`

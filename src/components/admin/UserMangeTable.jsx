@@ -149,7 +149,7 @@ export const UserManageTable = () => {
     { header: '닉네임', key: 'nickName', width: '140px' },
     { header: '직무', key: 'job', width: '120px' },
     {
-      header: '시뮬레이션 상태',
+      header: '연습 상태',
       render: (row) => <Typography size={2}>{row.simulationStatus || '-'}</Typography>,
       width: '140px',
       align: 'center',

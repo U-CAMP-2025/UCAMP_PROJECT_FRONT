@@ -1,4 +1,5 @@
 import { axiosInstance } from '@api/axios';
+import ConfirmDialog from '@components/common/ConfirmDialog';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import QuestionAudioRecorder from '@components/simulation/QuestionAudioRecorder';
@@ -17,6 +18,7 @@ const SHOW_CONSOLE_LOGS = true;
 // 1..n 배열 만들고 셔플
 function makeOneBasedShuffled(n) {
   const arr = Array.from({ length: n }, (_, i) => i + 1);
+
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
@@ -27,6 +29,7 @@ function makeOneBasedShuffled(n) {
 export default function SimulationGO() {
   const { simulationId } = useParams();
   const navigate = useNavigate();
+  const [endConfirmOpen, setEndConfirmOpen] = useState(false);
 
   // ===== PIP 드래그 =====
   const [pipPosition, setPipPosition] = useState(null); // pipPosition 상태 관리
@@ -330,7 +333,15 @@ export default function SimulationGO() {
           {/* 사이드바 */}
           <S.Sidebar>
             <S.SidebarButton
-              onClick={isSessionStarted ? stopSession : startSession}
+              onClick={
+                isSessionStarted
+                  ? () => {
+                      // 아직 남은 질문이 있으면 경고 모달
+                      if (currentIdx < totalQuestions - 1) setEndConfirmOpen(true);
+                      else stopSession();
+                    }
+                  : startSession
+              }
               $variant={isSessionStarted ? 'danger' : 'default'}
             >
               {isSessionStarted ? <StopIcon /> : <PlayIcon />}
@@ -419,6 +430,16 @@ export default function SimulationGO() {
           </S.MainContent>
         </S.SimulationLayout>
       </S.MainContentWrapper>
+      <ConfirmDialog
+        open={endConfirmOpen}
+        onOpenChange={setEndConfirmOpen}
+        title='면접 종료'
+        message='면접 질문이 남아있는 상태에서 종료하면, 답변을 완료하지 않은 질문의 면접 결과는 저장되지 않습니다. 종료하시겠어요?'
+        onConfirm={async () => {
+          await stopSession(); // 확인 → 진짜 종료
+          // stopSession 안에서 라우팅하므로 setEndConfirmOpen(false)는 생략 가능
+        }}
+      />
     </PageContainer>
   );
 }
