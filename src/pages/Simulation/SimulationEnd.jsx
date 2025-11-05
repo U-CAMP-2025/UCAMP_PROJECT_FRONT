@@ -23,47 +23,17 @@ export default function SimulationEndPage() {
 
   // ★ Blob → objectURL 생성 (cleanup 시 revoke)
   useEffect(() => {
-    if (!initialBlob) {
-      setVideoUrl(null);
-      return;
-    }
-
-    let objectUrl = null;
-    objectUrl = URL.createObjectURL(initialBlob);
-    setVideoUrl(objectUrl);
-
-    return () => {
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
-  }, [initialBlob]);
-
-  // post가 없으면 백엔드에서 불러오기
-  useEffect(() => {
-    if (post) return; // 이미 state로 받은 경우 스킵
-    let ignore = false;
-
-    (async () => {
-      try {
-        const res = await axiosInstance.get(`/simulation/${simulationId}/start`);
-        const data = res.data?.data;
-        if (!ignore) {
-          setPost(data?.post ?? null);
-        }
-      } catch (e) {
-        if (!ignore) setError(e?.response?.data?.message ?? '연습 결과를 불러오지 못했습니다.');
-      } finally {
-        if (!ignore) setLoading(false);
-      }
-    })();
-
-    return () => {
-      ignore = true;
-    };
-  }, [simulationId, post]);
-
-  const handleConfirmClick = () => {
-    navigate('/simulation/record');
-  };
+    let timer = setTimeout(() => {
+      console.log(initialBlob);
+      navigate(`/simulation/${simulationId}/result`, {
+        state: {
+          initialBlob,
+        },
+        replace: true,
+      });
+    }, 10000); // 살짝의 로딩 연출
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <PageContainer header footer>
@@ -73,18 +43,6 @@ export default function SimulationEndPage() {
             시뮬레이션 돌아보기
           </Typography>
         </SimEndHeader>
-
-        <VideoPlayerWrapper>
-          {videoUrl ? (
-            <video controls src={videoUrl}>
-              Your browser does not support the video tag.
-            </video>
-          ) : (
-            <PlayIconWrapper title='녹화 영상이 아직 업로드되지 않았습니다.'>
-              <PlayIcon width={50} height={50} />
-            </PlayIconWrapper>
-          )}
-        </VideoPlayerWrapper>
 
         {/* 질문/답변 아코디언 */}
         <SectionTitle as='h2'>질문 & 준비한 답변</SectionTitle>
@@ -122,8 +80,6 @@ export default function SimulationEndPage() {
           <br />
           완료되면 <b>면접 연습 기록</b>에서 확인할 수 있어요.
         </FooterMessage>
-
-        <ConfirmButton onClick={handleConfirmClick}>확인</ConfirmButton>
       </MainContentWrapper>
     </PageContainer>
   );
