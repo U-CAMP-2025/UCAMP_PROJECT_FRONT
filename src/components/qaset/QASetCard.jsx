@@ -42,14 +42,11 @@ export default function QASetCard({ item }) {
     <>
       <KakaoLoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
       <Card onClick={handleCardClick} role='button' aria-label={`${title} 상세로 이동`}>
-        {/* 북마크 아이콘 추가 */}
-        <CardContentWrapper>
-          {isBookmarked && (
-            <BookmarkRibbon>
-              <BookmarkFilledIcon />
-            </BookmarkRibbon>
-          )}
-          {/* 태그 + 상태 배지 */}
+        {/* 북마크 인덱스 탭 */}
+        {isBookmarked && <BookmarkRibbon></BookmarkRibbon>}
+
+        {/* 보라색 헤더 띠 (태그 포함) */}
+        <HeaderBar>
           <TopRow>
             {job.length > 0 && (
               <TagGroup>
@@ -58,10 +55,11 @@ export default function QASetCard({ item }) {
                 ))}
               </TagGroup>
             )}
-            {/* {isMe && <Badge>내 질문</Badge>}{isPass && <Badge>합격자</Badge>} */}
           </TopRow>
-          <Divider />
-          {/* 제목 + 설명 */}
+        </HeaderBar>
+
+        {/* 메인 콘텐츠 */}
+        <CardContentWrapper>
           <Typography as='h3' size={3} weight='semiBold'>
             제목
           </Typography>
@@ -77,7 +75,6 @@ export default function QASetCard({ item }) {
               {description || '설명 없음'}
             </DescriptionText>
           </>
-          {/* 생성일 + 작성자 */}
           <div style={{ marginTop: 16, flexGrow: 1 }}>
             <Typography as='h4' size={3} weight='bold'>
               생성일
@@ -85,21 +82,11 @@ export default function QASetCard({ item }) {
             <Typography as='p' size={2} weight='regular' style={{ marginTop: 6 }}>
               {createAt.split('T')[0]}
             </Typography>
-            {/* 북마크된 글일 경우 원작자 표시 (선택 사항)
-          {isBookmarked && (
-            <Typography
-              as='p'
-              size={1}
-              weight='regular'
-              style={{ marginTop: 4, color: theme.colors.gray[9] }}
-            >
-              가져온 글 (From: {otherWriter})
-            </Typography>
-          )} */}
           </div>
         </CardContentWrapper>
+
         <Divider />
-        {/* 푸터(아이콘/숫자 표시) */}
+
         <Footer>
           <IconStat aria-label='북마크 수'>
             <BookmarkIcon />
@@ -120,14 +107,13 @@ export default function QASetCard({ item }) {
 }
 
 const Card = styled.article`
-  border: 1px solid ${({ theme }) => theme.colors.gray[7]};
+  border: 1px solid #e8e5d9;
   border-radius: ${({ theme }) => theme.radius.xl};
-  background: #fff;
-  padding: ${({ theme }) => theme.space[5]};
-  box-shadow: ${({ theme }) => theme.shadow.sm};
+  background: #fdfdf8;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
   transition:
     box-shadow 0.2s ease,
-    transform 0.02s ease,
+    transform 0.2s ease,
     border-color 0.2s ease;
   cursor: pointer;
   position: relative;
@@ -137,53 +123,79 @@ const Card = styled.article`
   min-height: 400px;
 
   &:hover {
-    box-shadow: ${({ theme }) => theme.shadow.md};
-    border-color: ${({ theme }) => theme.colors.gray[8]};
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-4px);
+    border-color: #e8e5d9;
   }
   &:active {
     transform: translateY(1px);
   }
 `;
 
-const CardContentWrapper = styled.div`
-  flex-grow: 1;
+const HeaderBar = styled.div`
+  background: ${({ theme }) => theme.colors.primary[9]};
+  border-radius: ${({ theme }) => theme.radius.xl} ${({ theme }) => theme.radius.xl} 0 0;
+  padding: ${({ theme }) => theme.space[4]} ${({ theme }) => theme.space[5]};
+
+  height: 90px;
+
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 1;
 `;
 
 const TopRow = styled.div`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.space[3]};
+  gap: ${({ theme }) => theme.space[2]};
   flex-wrap: wrap;
-  min-height: 68px;
+  width: 100%;
+  overflow: hidden;
+
+  & ${Tag} {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    font-weight: ${({ theme }) => theme.font.weight.regular};
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  }
 `;
 
-const Badge = styled.span`
-  display: inline-flex;
-  align-items: center;
-  height: 24px;
-  padding: 0 10px;
-  border-radius: 999px;
-  font-size: ${({ theme }) => theme.font.size[1]};
-  font-weight: ${({ theme }) => theme.font.weight.semiBold};
-  background: ${({ theme }) => theme.colors.gray[3]};
-  color: ${({ theme }) => theme.colors.gray[11]};
-`;
-
-// 북마크 리본 아이콘 스타일
 const BookmarkRibbon = styled.div`
   position: absolute;
-  top: -10px;
-  right: 20px;
+  right: 10px;
+  width: 50px;
+  z-index: 2;
 
-  color: ${({ theme }) => theme.colors.primary[9]};
-  z-index: 2; /* 태그(TopRow)보다 위에 보이도록 설정 */
+  height: 60px;
+  top: -20px;
 
-  svg {
-    width: 50px;
-    height: 50px;
-  }
+  background: linear-gradient(
+    to bottom,
+    ${({ theme }) => theme.colors.primary[7]} 0%,
+    ${({ theme }) => theme.colors.primary[7]} 45%,
+    #fdfdf8 33.33%,
+    #fdfdf8 100%
+  );
+
+  border-radius: 4px;
+
+  border: 1px solid #e8e5d9;
+  border-bottom: none;
+
+  box-shadow: 0 -1px 6px rgba(0, 0, 0, 0.1);
+`;
+
+const CardContentWrapper = styled.div`
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding: ${({ theme }) => theme.space[5]};
+  background: #fdfdf8;
 `;
 
 const DescriptionText = styled(Typography)`
@@ -194,12 +206,14 @@ const DescriptionText = styled(Typography)`
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   min-height: 40px;
+  color: #6a675e;
 `;
 
 const Divider = styled.hr`
   border: 0;
   border-top: 1px solid ${({ theme }) => theme.colors.gray[7]};
-  margin: ${({ theme }) => theme.space[5]} 0;
+  margin: 0 ${({ theme }) => theme.space[5]};
+  background: #fdfdf8;
 `;
 
 const Footer = styled.div`
@@ -207,6 +221,9 @@ const Footer = styled.div`
   align-items: center;
   justify-content: flex-end;
   gap: ${({ theme }) => theme.space[6]};
+  padding: ${({ theme }) => theme.space[6]};
+  background: #fdfdf8;
+  border-radius: 0 0 ${({ theme }) => theme.radius.xl} ${({ theme }) => theme.radius.xl};
 `;
 
 const IconStat = styled.div`
@@ -215,13 +232,4 @@ const IconStat = styled.div`
   gap: ${({ theme }) => theme.space[2]};
   color: ${({ theme }) => theme.colors.gray[11]};
   user-select: none;
-`;
-
-const ArrowWrap = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: ${({ theme }) => theme.colors.gray[11]};
-  width: 28px;
-  height: 28px;
 `;
