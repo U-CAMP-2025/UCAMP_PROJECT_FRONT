@@ -49,8 +49,6 @@ export default function SimulationGO() {
       y: window.innerHeight - rect.height - 32, // 아래 여백 16px
     };
 
-    console.log('PIP 드래그 시작, 현재 위치:', currentPos);
-
     if (!pipPosition) setPipPosition(currentPos);
 
     // 드래그 시작 시 오프셋 계산
@@ -278,7 +276,6 @@ export default function SimulationGO() {
       console.groupCollapsed(
         `[STT] qaId=${qaId} | "${qText.slice(0, 40)}${qText.length > 40 ? '…' : ''}"`,
       );
-      console.log(transcript);
       console.groupEnd();
     }
   };
