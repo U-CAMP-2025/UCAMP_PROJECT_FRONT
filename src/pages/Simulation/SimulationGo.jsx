@@ -11,7 +11,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import * as S from './SimulationGoStyle';
 import TextToSpeech from './TextToSpeech';
 
-const MAX_SECONDS = 60;
+const MAX_SECONDS = 120;
 const SHOW_CONSOLE_LOGS = true;
 
 // 1..n 배열 만들고 셔플
@@ -29,42 +29,57 @@ export default function SimulationGO() {
   const navigate = useNavigate();
 
   // ===== PIP 드래그 =====
-  const [pipPosition, setPipPosition] = useState(null);
-  const [isDraggingPip, setIsDraggingPip] = useState(false);
-  const dragOffsetRef = useRef({ x: 0, y: 0 });
-  const pipRef = useRef(null);
+  const [pipPosition, setPipPosition] = useState(null); // pipPosition 상태 관리
+  const [isDraggingPip, setIsDraggingPip] = useState(false); // 드래그 상태
+  const dragOffsetRef = useRef({ x: 0, y: 0 }); // 마우스 클릭 위치와 요소 위치 차이
+  const pipRef = useRef(null); // pip 요소의 참조
 
+  // 드래그 시작 시 실행
   const handlePipMouseDown = (e) => {
     e.preventDefault();
     setIsDraggingPip(true);
+
+    // pip 요소의 현재 위치와 부모 요소의 위치 계산
     const rect = pipRef.current.getBoundingClientRect();
     const parentRect = pipRef.current.parentElement.getBoundingClientRect();
+
+    // pipPosition 초기화 (첫 번째 드래그 시작 시 한 번만)
     const currentPos = pipPosition || {
-      x: rect.left - parentRect.left,
-      y: rect.top - parentRect.top,
+      x: window.innerWidth - rect.width - 32, // 오른쪽 여백 16px
+      y: window.innerHeight - rect.height - 32, // 아래 여백 16px
     };
+
+    console.log('PIP 드래그 시작, 현재 위치:', currentPos);
+
     if (!pipPosition) setPipPosition(currentPos);
+
+    // 드래그 시작 시 오프셋 계산
     dragOffsetRef.current = {
       x: e.clientX - currentPos.x - parentRect.left,
       y: e.clientY - currentPos.y - parentRect.top,
     };
   };
 
+  // 마우스 움직일 때마다 실행
   const handlePipMouseMove = useCallback(
     (e) => {
       if (!isDraggingPip) return;
       e.preventDefault();
       const parentRect = pipRef.current.parentElement.getBoundingClientRect();
+
+      // pip 요소의 새로운 위치 계산 (드래그 오프셋 반영)
       setPipPosition({
         x: e.clientX - parentRect.left - dragOffsetRef.current.x,
         y: e.clientY - parentRect.top - dragOffsetRef.current.y,
       });
     },
-    [isDraggingPip],
+    [isDraggingPip], // isDraggingPip 상태에 따라 마우스 이동 이벤트 리스너가 변경됨
   );
 
+  // 마우스 업 시 드래그 종료
   const handlePipMouseUp = useCallback(() => setIsDraggingPip(false), []);
 
+  // 마우스 이동과 마우스 업 이벤트 리스너 추가 및 제거
   useEffect(() => {
     if (isDraggingPip) {
       window.addEventListener('mousemove', handlePipMouseMove);
@@ -76,15 +91,20 @@ export default function SimulationGO() {
     };
   }, [isDraggingPip, handlePipMouseMove, handlePipMouseUp]);
 
+  // pip 스타일 업데이트
   const pipStyle = useMemo(
     () =>
       pipPosition
         ? {
-            bottom: 'unset',
-            right: 'unset',
-            transform: `translate(${pipPosition.x}px, ${pipPosition.y}px)`,
+            position: 'fixed', // 브라우저 전체 기준
+            top: `${pipPosition.y}px`, // pipPosition.y 위치로 설정
+            left: `${pipPosition.x}px`, // pipPosition.x 위치로 설정
           }
-        : {},
+        : {
+            position: 'fixed',
+            bottom: '0px', // 브라우저 오른쪽 아래 16px
+            right: '0px',
+          },
     [pipPosition],
   );
 
@@ -215,6 +235,8 @@ export default function SimulationGO() {
     setcurrentQuestion('');
     moveNextGuardRef.current = false;
     setCurrentIdx(0);
+
+    axiosInstance.patch(`/simulation/${simulationId}/${currentIdx + 1}`);
 
     // 라우터 state로 전달
     navigate(`/simulation/${simulationId}/end`, {
