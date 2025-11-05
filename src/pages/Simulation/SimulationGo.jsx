@@ -34,7 +34,6 @@ export default function SimulationGO() {
   const dragOffsetRef = useRef({ x: 0, y: 0 }); // 마우스 클릭 위치와 요소 위치 차이
   const pipRef = useRef(null); // pip 요소의 참조
 
-  // 드래그 시작 시 실행
   const handlePipMouseDown = (e) => {
     e.preventDefault();
     setIsDraggingPip(true);
@@ -48,6 +47,8 @@ export default function SimulationGO() {
       x: window.innerWidth - rect.width - 32, // 오른쪽 여백 16px
       y: window.innerHeight - rect.height - 32, // 아래 여백 16px
     };
+
+    console.log('PIP 드래그 시작, 현재 위치:', currentPos);
 
     if (!pipPosition) setPipPosition(currentPos);
 
@@ -88,13 +89,11 @@ export default function SimulationGO() {
       window.removeEventListener('mouseup', handlePipMouseUp);
     };
   }, [isDraggingPip, handlePipMouseMove, handlePipMouseUp]);
-
-  // pip 스타일 업데이트
   const pipStyle = useMemo(
     () =>
       pipPosition
         ? {
-            position: 'fixed', // 브라우저 전체 기준
+            osition: 'fixed', // 브라우저 전체 기준
             top: `${pipPosition.y}px`, // pipPosition.y 위치로 설정
             left: `${pipPosition.x}px`, // pipPosition.x 위치로 설정
           }
@@ -112,13 +111,11 @@ export default function SimulationGO() {
   const [timeLeft, setTimeLeft] = useState(MAX_SECONDS);
   const [isSessionStarted, setIsSessionStarted] = useState(false);
   const [isQuestionRecording, setIsQuestionRecording] = useState(false);
-
   const [interviewerId, setInterviewerId] = useState(null);
   const [audioById, setAudioById] = useState({});
   const [videoUrl, setVideoUrl] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
   const [videoBlob, setVideoBlob] = useState(null);
-
   const [questionList, setQaList] = useState([]);
   const [randomOrder, setRandomOrder] = useState([]);
   const [simPost, setPost] = useState(null);
@@ -127,11 +124,9 @@ export default function SimulationGO() {
 
   // ★ STT 결과 모음 (qaId -> transcript)
   const [sttByQaId, setSttByQaId] = useState({}); // ★
-
   const videoRef = useRef(null);
   const audioRef = useRef(null);
   const moveNextGuardRef = useRef(false);
-
   // ===== 1) 상세 조회 =====
   useEffect(() => {
     if (!simulationId) return;
@@ -141,7 +136,6 @@ export default function SimulationGO() {
         const resp = await axiosInstance.get(`/simulation/${simulationId}/start`);
         const data = resp.data?.data;
         if (!data) return;
-
         const _interviewerId = data.interviewer?.interviewerId ?? null;
         const _imageUrl = data.interviewer?.interviewerImageUrl ?? null;
         const post = data.post ?? null;
@@ -233,9 +227,7 @@ export default function SimulationGO() {
     setcurrentQuestion('');
     moveNextGuardRef.current = false;
     setCurrentIdx(0);
-
     axiosInstance.patch(`/simulation/${simulationId}/${currentIdx + 1}`);
-
     // 라우터 state로 전달
     navigate(`/simulation/${simulationId}/end`, {
       state: {

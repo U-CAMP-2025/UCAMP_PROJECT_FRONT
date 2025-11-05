@@ -2,23 +2,33 @@
 import { axiosInstance } from '@api/axios';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
+import { url } from '@elevenlabs/elevenlabs-js/core';
 import * as Accordion from '@radix-ui/react-accordion';
-import { CaretDownIcon } from '@radix-ui/react-icons';
+import { CaretDownIcon, PlayIcon } from '@radix-ui/react-icons';
 import { CheckCircledIcon, CaretRightIcon } from '@radix-ui/react-icons';
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 
 export default function SimulationResultPage() {
   const navigate = useNavigate();
   const { simulationId } = useParams();
   const [data, setData] = useState(null);
+  const location = useLocation();
   const [qaList, setQaList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [dirty, setDirty] = useState(false);
-
+  const incomingBlob = location.state?.initialBlob ?? null;
+  const [videoUrl, setVideoUrl] = useState(null);
+  useEffect(() => {
+    if (!incomingBlob) return;
+    let url = URL.createObjectURL(incomingBlob);
+    setVideoUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [incomingBlob]);
+  console.log(incomingBlob);
   useEffect(() => {
     (async () => {
       try {
@@ -74,6 +84,13 @@ export default function SimulationResultPage() {
             답변 변환 결과
           </Typography>
         </SimResHeader>
+        {videoUrl && (
+          <VideoPlayerWrapper>
+            <video controls src={videoUrl}>
+              Your browser does not support the video tag.
+            </video>
+          </VideoPlayerWrapper>
+        )}
         {loading && <div style={{ padding: 24 }}>불러오는 중…</div>}
         {error && <div style={{ padding: 24, color: 'crimson' }}>{error}</div>}
 
@@ -95,7 +112,7 @@ export default function SimulationResultPage() {
                   </StyledAccordionTrigger>
                   <StyledAccordionContent>
                     <AnswerContainer>
-                      <AnswerLabel>이전 답변</AnswerLabel>
+                      <AnswerLabel>준비한 답변</AnswerLabel>
                       <AnswerTextWrapper>
                         <Typography
                           as='p'
@@ -123,11 +140,8 @@ export default function SimulationResultPage() {
               ))}
             </StyledAccordionRoot>
 
-            <FooterMessage>
-              저장 버튼 클릭 시, 기존에 등록했던 답변 스크립트가 수정됩니다.
-            </FooterMessage>
             <ButtonGroup>
-              <CancelButton onClick={handleCancelClick}>나가기</CancelButton>
+              <CancelButton onClick={handleCancelClick}>취소</CancelButton>
               <SaveButton onClick={handleSaveClick} disabled={saving}>
                 {saving ? '저장 중…' : '저장'}
               </SaveButton>
@@ -227,6 +241,7 @@ const AnswerContainer = styled.div`
 `;
 const AnswerLabel = styled(Typography).attrs({ as: 'h4', size: 3, weight: 'semiBold' })`
   color: ${({ theme }) => theme.colors.gray[10]};
+  margin-bottom: ${({ theme }) => theme.space[2]};
 `;
 const SmallHint = styled.span`
   font-weight: normal;
@@ -258,6 +273,36 @@ const EditableTextArea = styled.textarea`
     box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary[5]}40;
   }
 `;
+const VideoPlayerWrapper = styled.div`
+  position: relative;
+  width: 80%;
+  aspect-ratio: 16 / 9;
+  background-color: ${({ theme }) => theme.colors.gray[3]};
+  border-radius: ${({ theme }) => theme.radius.lg};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: ${({ theme }) => theme.shadow.sm};
+  overflow: hidden;
+  margin: ${({ theme }) => theme.space[10]} auto ${({ theme }) => theme.space[10]};
+
+  video {
+    width: 100%;
+    height: 100%;
+    border-radius: ${({ theme }) => theme.radius.lg};
+  }
+`;
+
+const PlayIconWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  background-color: rgba(0, 0, 0, 0.4);
+  border-radius: 50%;
+  color: white;
+`;
 const CharCount = styled.div`
   align-self: flex-end;
   color: ${({ theme }) => theme.colors.gray[9]};
@@ -267,7 +312,7 @@ const ButtonGroup = styled.div`
   display: flex;
   justify-content: center;
   gap: ${({ theme }) => theme.space[4]};
-  margin-top: ${({ theme }) => theme.space[4]};
+  margin-top: ${({ theme }) => theme.space[10]};
 `;
 const BaseButton = styled.button`
   all: unset;
@@ -302,10 +347,4 @@ const CancelButton = styled(BaseButton)`
   &:focus {
     box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.gray[6]};
   }
-`;
-
-const FooterMessage = styled(Typography).attrs({ as: 'p', size: 3 })`
-  text-align: center;
-  color: ${({ theme }) => theme.colors.gray[9]};
-  margin-top: ${({ theme }) => theme.space[10]};
 `;
