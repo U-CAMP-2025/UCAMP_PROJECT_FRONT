@@ -95,7 +95,7 @@ export default function SimulationResultPage() {
                   </StyledAccordionTrigger>
                   <StyledAccordionContent>
                     <AnswerContainer>
-                      <AnswerLabel>준비한 답변</AnswerLabel>
+                      <AnswerLabel>이전 답변</AnswerLabel>
                       <AnswerTextWrapper>
                         <Typography
                           as='p'
@@ -123,8 +123,11 @@ export default function SimulationResultPage() {
               ))}
             </StyledAccordionRoot>
 
+            <FooterMessage>
+              저장 버튼 클릭 시, 기존에 등록했던 답변 스크립트가 수정됩니다.
+            </FooterMessage>
             <ButtonGroup>
-              <CancelButton onClick={handleCancelClick}>취소</CancelButton>
+              <CancelButton onClick={handleCancelClick}>나가기</CancelButton>
               <SaveButton onClick={handleSaveClick} disabled={saving}>
                 {saving ? '저장 중…' : '저장'}
               </SaveButton>
@@ -224,7 +227,6 @@ const AnswerContainer = styled.div`
 `;
 const AnswerLabel = styled(Typography).attrs({ as: 'h4', size: 3, weight: 'semiBold' })`
   color: ${({ theme }) => theme.colors.gray[10]};
-  margin-bottom: ${({ theme }) => theme.space[2]};
 `;
 const SmallHint = styled.span`
   font-weight: normal;
@@ -265,7 +267,7 @@ const ButtonGroup = styled.div`
   display: flex;
   justify-content: center;
   gap: ${({ theme }) => theme.space[4]};
-  margin-top: ${({ theme }) => theme.space[10]};
+  margin-top: ${({ theme }) => theme.space[4]};
 `;
 const BaseButton = styled.button`
   all: unset;
@@ -300,4 +302,10 @@ const CancelButton = styled(BaseButton)`
   &:focus {
     box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.gray[6]};
   }
+`;
+
+const FooterMessage = styled(Typography).attrs({ as: 'p', size: 3 })`
+  text-align: center;
+  color: ${({ theme }) => theme.colors.gray[9]};
+  margin-top: ${({ theme }) => theme.space[10]};
 `;
