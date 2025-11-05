@@ -163,7 +163,7 @@ export default function SimulationPresetPage() {
 
               {/* 질문답변 세트 */}
               <SelectConfigSection>
-                <ConfigLabel>질문답변 세트 선택</ConfigLabel>
+                <ConfigLabel>면접 노트 선택</ConfigLabel>
                 <Controller
                   name='selectedSetId'
                   control={control}
@@ -187,7 +187,7 @@ export default function SimulationPresetPage() {
                           </ItemContent>
                         ) : (
                           <Select.Value
-                            placeholder={loading ? '불러오는 중…' : '질문 세트를 선택하세요'}
+                            placeholder={loading ? '불러오는 중…' : '면접 노트를 선택하세요'}
                           />
                         )}
                         <Select.Icon asChild>

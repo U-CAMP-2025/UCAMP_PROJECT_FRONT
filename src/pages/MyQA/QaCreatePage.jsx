@@ -91,7 +91,7 @@ export default function QACreatePage() {
       <MainContentWrapper>
         <QaCreateHeader>
           <Typography as='h1' size={7} weight='bold'>
-            새 질문답변 세트 만들기
+            새 면접 노트 만들기
           </Typography>
         </QaCreateHeader>
         <SettingsBox>
@@ -120,15 +120,15 @@ export default function QACreatePage() {
                 </Section>
                 {/* 3. 세트 요약 */}
                 <Section>
-                  <SectionTitle>세트 요약 (선택)</SectionTitle>
+                  <SectionTitle>노트 요약 (선택)</SectionTitle>
                   <FormTextAreaSummary
-                    placeholder='이 질문답변 세트에 대한 간단한 설명을 입력하세요'
+                    placeholder='이 면접 노트에 대한 간단한 설명을 입력하세요'
                     {...register('summary')}
                   />{' '}
                 </Section>
                 {/* 4. 질문답변 세트 목록 (dnd-kit 적용) */}{' '}
                 <Section>
-                  <SectionTitle>질문답변 세트</SectionTitle>
+                  <SectionTitle>면접 노트</SectionTitle>
                   {/* 💡 DragDropContext 대신 DndContext 사용 */}{' '}
                   <DndContext
                     sensors={sensors}

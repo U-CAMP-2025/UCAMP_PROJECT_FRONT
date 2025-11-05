@@ -92,8 +92,8 @@ const TabButton = styled.button`
 // 탭 정의
 const TABS = {
   ALL: '전체',
-  MINE: '내가 만든 질문답변',
-  BOOKMARKED: '스크랩한 질문답변',
+  MINE: '내가 만든 노트',
+  BOOKMARKED: '스크랩한 노트',
 };
 
 const MAX_QASET = 10;
@@ -139,7 +139,7 @@ export default function MyQAListPage() {
         {/* 1. 페이지 헤더 (제목 + 추가하기 버튼) */}
         <MyPageHeader>
           <Typography as='h1' size={7} weight='bold'>
-            나의 질문답변 목록
+            나의 면접 노트 목록
           </Typography>
           {myQaList.length < MAX_QASET && (
             <AddButton onClick={handleAddClick}>

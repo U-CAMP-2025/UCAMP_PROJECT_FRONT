@@ -95,7 +95,7 @@ export default function QAListPage() {
       <MainContentWrapper>
         <QaListHeader>
           <Typography as='h1' size={7} weight='bold'>
-            질문답변 둘러보기
+            면접 노트
           </Typography>
         </QaListHeader>
         <FilterAndSortBar>

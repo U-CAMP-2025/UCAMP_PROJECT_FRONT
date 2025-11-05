@@ -21,6 +21,7 @@ export const Content = styled(Dialog.Content)`
   border-radius: ${({ theme }) => theme.radius.lg};
   padding: ${({ theme }) => theme.space[6]};
   box-shadow: ${({ theme }) => theme.shadow.lg};
+  text-align: center;
 `;
 
 export const Title = styled(Typography).attrs({ as: 'h3', size: 5, weight: 'semiBold' })`

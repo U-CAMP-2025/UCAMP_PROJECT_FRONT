@@ -113,7 +113,7 @@ export default function QAUpdatePage() {
       <MainContentWrapper>
         <QaUpdateHeader>
           <Typography as='h1' size={7} weight='bold'>
-            질문답변 세트 수정
+            면접 노트 수정
           </Typography>
         </QaUpdateHeader>
         <SettingsBox>
@@ -137,7 +137,7 @@ export default function QAUpdatePage() {
                 <Section>
                   <SectionTitle>제목</SectionTitle>{' '}
                   <FormInput
-                    placeholder='세트의 제목을 입력하세요'
+                    placeholder='노트의 제목을 입력하세요'
                     {...register('title', { required: '제목은 필수 입력입니다.' })}
                   />{' '}
                   {errors.title && (
@@ -146,15 +146,15 @@ export default function QAUpdatePage() {
                 </Section>
                 {/* 3. 세트 요약 */}{' '}
                 <Section>
-                  <SectionTitle>세트 요약 (선택)</SectionTitle>{' '}
+                  <SectionTitle>노트 요약 (선택)</SectionTitle>{' '}
                   <FormTextAreaSummary
-                    placeholder='이 질문답변 세트에 대한 간단한 설명을 입력하세요'
+                    placeholder='이 면접 노트에 대한 간단한 설명을 입력하세요'
                     {...register('summary')}
                   />{' '}
                 </Section>
                 {/* 4. 질문답변 세트 목록 (dnd-kit 적용) */}{' '}
                 <Section>
-                  <SectionTitle>질문답변 세트</SectionTitle>
+                  <SectionTitle>면접 노트</SectionTitle>
                   {/* 💡 DragDropContext 대신 DndContext 사용 */}{' '}
                   <DndContext
                     sensors={sensors}
