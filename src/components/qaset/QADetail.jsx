@@ -312,10 +312,17 @@ const Divider = styled.hr`
 
 const Placeholder = styled(Typography).attrs({
   as: 'div',
-  size: 3,
-  color: theme.colors.gray[11],
+  size: 2, // 👈 폰트 크기 2
+  color: theme.colors.gray[11], // 👈 텍스트 색상
   weight: 'semiBold',
-})``;
+})`
+  background-color: ${({ theme }) => theme.colors.gray[3]};
+  padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[2]};
+  border-radius: ${({ theme }) => theme.radius.sm};
+
+  display: inline-block;
+  width: fit-content;
+`;
 
 const Pre = styled.pre`
   margin: 0;
