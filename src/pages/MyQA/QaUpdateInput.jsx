@@ -222,7 +222,7 @@ export const QAUpdateInput = ({ id, index, onDelete }) => {
     >
       <FormHeader>
         {/* 💡 드래그 핸들에 listeners와 attributes 적용 */}
-        <DragHandle type='button' {...attributes} {...listeners} title='순서 변경'>
+        <DragHandle type='button' {...attributes} {...listeners} title='드래그하여 순서 변경'>
           <DragHandleDots2Icon width={20} height={20} />
         </DragHandle>
 
