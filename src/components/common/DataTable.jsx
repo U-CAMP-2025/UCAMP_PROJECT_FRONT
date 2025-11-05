@@ -43,12 +43,21 @@ const Td = styled.td`
   border-bottom: 1px solid ${({ theme }) => theme.colors.gray[5]};
   color: ${({ theme }) => theme.colors.gray[12]};
   vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
   ${({ align }) =>
     align &&
     css`
       text-align: ${align};
     `}
-  white-space: nowrap;
+
+  ${({ width }) =>
+    width &&
+    css`
+      max-width: ${width};
+    `}
 `;
 
 const Tr = styled.tr`
