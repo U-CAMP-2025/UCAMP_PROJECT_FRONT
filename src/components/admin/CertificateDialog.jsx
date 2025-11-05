@@ -234,14 +234,6 @@ export default function CertificateDialog({ open, onOpenChange, user, onConfirm 
 
             {/* <RGRoot value={decision} onValueChange={setDecision}>
               <RGBlock>
-                <RGItem value='APPROVED' aria-label='승인'>
-                  <RadioGroup.Indicator>
-                    <CheckIcon width={18} height={18} />
-                  </RadioGroup.Indicator>
-                </RGItem>
-                <RGLabel>승인</RGLabel>
-              </RGBlock>
-              <RGBlock>
                 <RGItem value='REJECTED' aria-label='반려'>
                   <RadioGroup.Indicator>
                     <CheckIcon width={20} height={20} />
@@ -249,23 +241,18 @@ export default function CertificateDialog({ open, onOpenChange, user, onConfirm 
                 </RGItem>
                 <RGLabel>반려</RGLabel>
               </RGBlock>
+              <RGBlock>
+                <RGItem value='APPROVED' aria-label='승인'>
+                  <RadioGroup.Indicator>
+                    <CheckIcon width={18} height={18} />
+                  </RadioGroup.Indicator>
+                </RGItem>
+                <RGLabel>승인</RGLabel>
+              </RGBlock>
             </RGRoot> */}
 
             {/* ✅ 승인/반려 버튼만 표시 */}
             <Actions style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-              <Button
-                onClick={() => handleDecision('APPROVED')}
-                style={{
-                  background: '#E7F8ED', // success bg
-                  color: '#18794E', // success fg
-                  borderRadius: '8px',
-                  fontWeight: 600,
-                  padding: '10px 20px',
-                }}
-              >
-                승인
-              </Button>
-
               <Button
                 onClick={() => handleDecision('REJECTED')}
                 style={{
@@ -277,6 +264,18 @@ export default function CertificateDialog({ open, onOpenChange, user, onConfirm 
                 }}
               >
                 반려
+              </Button>
+              <Button
+                onClick={() => handleDecision('APPROVED')}
+                style={{
+                  background: '#E7F8ED', // success bg
+                  color: '#18794E', // success fg
+                  borderRadius: '8px',
+                  fontWeight: 600,
+                  padding: '10px 20px',
+                }}
+              >
+                승인
               </Button>
             </Actions>
           </Content>

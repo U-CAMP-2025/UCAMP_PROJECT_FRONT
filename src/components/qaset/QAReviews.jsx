@@ -1,9 +1,11 @@
 import { deleteReview, fetchReviewList, postReview } from '@api/reviewAPIS';
 import CertConfirmDialog from '@components/admin/CertConfirmDialog';
 import Button from '@components/common/Button';
+import { Content, Description, Overlay, Title } from '@components/common/Dialog';
 import ErrorDialog from '@components/common/ErrorDialog';
 import SuccessDialog from '@components/common/SuccessDialog';
 import Typography from '@components/common/Typography';
+import * as Dialog from '@radix-ui/react-dialog';
 import { PersonIcon, TrashIcon } from '@radix-ui/react-icons';
 import { useAuthStore } from '@store/auth/useAuthStore';
 import { useEffect, useState, useContext } from 'react';
@@ -38,6 +40,7 @@ export const QAReviews = () => {
   const [successMsg, setSuccessMsg] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingReviewId, setPendingReviewId] = useState(null);
+  const [isReviewDelModalOpen, setIsReviewDelModalOpen] = useState(false);
 
   const { qaId: postId } = useParams();
   const [reviews, setReviews] = useState([]);
