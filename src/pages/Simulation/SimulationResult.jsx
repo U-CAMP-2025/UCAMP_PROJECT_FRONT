@@ -1,5 +1,6 @@
 // SimulationResultPage.jsx
 import { axiosInstance } from '@api/axios';
+import ConfirmDialog from '@components/common/ConfirmDialog';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import { url } from '@elevenlabs/elevenlabs-js/core';
@@ -20,6 +21,8 @@ export default function SimulationResultPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [dirty, setDirty] = useState(false);
+  const [saveConfirmOpen, setSaveConfirmOpen] = useState(false);
+
   const incomingBlob = location.state?.initialBlob ?? null;
   const [videoUrl, setVideoUrl] = useState(null);
   useEffect(() => {
@@ -52,8 +55,11 @@ export default function SimulationResultPage() {
     });
     setDirty(true);
   };
+  const handleSaveButtonClick = () => {
+    setSaveConfirmOpen(true); // 모달 열기
+  };
 
-  const handleSaveClick = async () => {
+  const handleSaveConfirm = async () => {
     try {
       setSaving(true);
       await axiosInstance.put(`/simulation/${simulationId}/finalize`, {
@@ -142,13 +148,20 @@ export default function SimulationResultPage() {
 
             <ButtonGroup>
               <CancelButton onClick={handleCancelClick}>취소</CancelButton>
-              <SaveButton onClick={handleSaveClick} disabled={saving}>
+              <SaveButton onClick={handleSaveButtonClick} disabled={saving}>
                 {saving ? '저장 중…' : '저장'}
               </SaveButton>
             </ButtonGroup>
           </>
         )}
       </MainContentWrapper>
+      <ConfirmDialog
+        open={saveConfirmOpen}
+        onOpenChange={setSaveConfirmOpen}
+        title='면접 결과 저장'
+        message={`저장하면 현재 수정된 답변으로 결과가 덮어써집니다.\n저장하시겠어요?`}
+        onConfirm={handleSaveConfirm}
+      />
     </PageContainer>
   );
 }
