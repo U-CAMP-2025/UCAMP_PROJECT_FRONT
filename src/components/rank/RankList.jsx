@@ -1,3 +1,4 @@
+import { PersonIcon } from '@radix-ui/react-icons';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -78,6 +79,12 @@ const Avatar = styled.div`
   align-items: center;
   justify-content: center;
   font-size: 18px;
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
 `;
 
 const PlayerWrapper = styled.div`
@@ -152,7 +159,17 @@ const RankingTable = ({ data, type }) => {
             <PositionCell>{getRankBadge(index + 1)}</PositionCell>
             <PlayerCell>
               <PlayerWrapper>
-                {/* <Avatar>{player.avatar}</Avatar> */}
+                <Avatar aria-hidden>
+                  {player.profileImageUrl && player.profileImageUrl.startsWith('http') ? (
+                    <img
+                      src={player.profileImageUrl}
+                      alt={`${player.nickname} 프로필 이미지`}
+                      onError={(e) => (e.currentTarget.style.display = 'none')}
+                    />
+                  ) : (
+                    <PersonIcon width={20} height={20} color='#666' />
+                  )}
+                </Avatar>
                 <PlayerInfo>
                   <PlayerName>{player.nickname}</PlayerName>
                 </PlayerInfo>
