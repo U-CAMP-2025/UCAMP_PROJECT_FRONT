@@ -169,10 +169,11 @@ export const QAReviews = () => {
                   {r.content}
                 </Typography>
               </Body>
-
-              <Button variant='ghost' onClick={() => handleDeleteReview(r.reviewId)}>
-                삭제하기
-              </Button>
+              {isLogin && authUser.name === r.nickname && (
+                <Button variant='ghost' onClick={() => handleDeleteReview(r.reviewId)}>
+                  삭제하기
+                </Button>
+              )}
             </Item>
           ))}
         </List>
