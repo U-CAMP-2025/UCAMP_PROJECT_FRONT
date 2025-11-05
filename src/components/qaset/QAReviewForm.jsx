@@ -56,12 +56,6 @@ export default function QAReviewForm({
 
   return (
     <Form onSubmit={handleSubmit(submit)}>
-      <Header>
-        <Typography size={3} weight='semiBold'>
-          {user?.nickname || '로그인 사용자'}
-        </Typography>
-      </Header>
-
       <TextArea
         placeholder='질문 셋에 대한 의견, 개선점, 도움이 된 점 등을 자유롭게 남겨주세요.'
         {...register('content', {

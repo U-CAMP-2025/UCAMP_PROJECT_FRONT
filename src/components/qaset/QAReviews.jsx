@@ -143,43 +143,45 @@ export const QAReviews = () => {
           />
         )}
 
-        <List>
-          {reviews.map((r) => (
-            <Item key={r.reviewId}>
-              <Avatar aria-hidden>
-                {r.profileImage && r.profileImage.startsWith('http') ? (
-                  <img
-                    src={r.profileImage}
-                    alt=''
-                    onError={(e) => (e.currentTarget.style.display = 'none')}
-                  />
-                ) : (
-                  <PersonIcon width={20} height={20} color={theme.colors.primary[10]} />
-                )}
-              </Avatar>
+        {count > 0 && (
+          <List>
+            {reviews.map((r) => (
+              <Item key={r.reviewId}>
+                <Avatar aria-hidden>
+                  {r.profileImage && r.profileImage.startsWith('http') ? (
+                    <img
+                      src={r.profileImage}
+                      alt=''
+                      onError={(e) => (e.currentTarget.style.display = 'none')}
+                    />
+                  ) : (
+                    <PersonIcon width={20} height={20} color={theme.colors.primary[10]} />
+                  )}
+                </Avatar>
 
-              <Body>
-                <Meta>
-                  <Typography size={2} weight='semiBold'>
-                    {r.nickname}
+                <Body>
+                  <Meta>
+                    <Typography size={2} weight='semiBold'>
+                      {r.nickname}
+                    </Typography>
+                    <Dot>•</Dot>
+                    <Typography size={2} color='gray.10'>
+                      {formatDate(r.createdAt)}
+                    </Typography>
+                  </Meta>
+                  <Typography as='p' size={3} style={{ whiteSpace: 'pre-wrap' }}>
+                    {r.content}
                   </Typography>
-                  <Dot>•</Dot>
-                  <Typography size={2} color='gray.10'>
-                    {formatDate(r.createdAt)}
-                  </Typography>
-                </Meta>
-                <Typography as='p' size={2} style={{ whiteSpace: 'pre-wrap' }}>
-                  {r.content}
-                </Typography>
-              </Body>
-              {isLogin && authUser.name === r.nickname && (
-                <IconButton1 onClick={() => handleDeleteReview(r.reviewId)}>
-                  <TrashIcon></TrashIcon>
-                </IconButton1>
-              )}
-            </Item>
-          ))}
-        </List>
+                </Body>
+                {isLogin && authUser.name === r.nickname && (
+                  <IconButton1 onClick={() => handleDeleteReview(r.reviewId)}>
+                    <TrashIcon></TrashIcon>
+                  </IconButton1>
+                )}
+              </Item>
+            ))}
+          </List>
+        )}
       </Wrap>
       <ErrorDialog open={errorOpen} onOpenChange={setErrorOpen} message={errorMsg} />
       <SuccessDialog open={successOpen} onOpenChange={setSuccessOpen} message={successMsg} />

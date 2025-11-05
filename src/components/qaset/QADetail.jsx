@@ -287,7 +287,7 @@ const FieldBox = styled.div`
   align-items: center;
 `;
 
-const FieldLabel = styled(Typography).attrs({ as: 'div', size: 2, weight: 'semiBold' })`
+const FieldLabel = styled(Typography).attrs({ as: 'div', size: 3, weight: 'semiBold' })`
   color: ${({ theme }) => theme.colors.gray[11]};
   margin-right: ${({ theme }) => theme.space[4]};
 `;
@@ -312,7 +312,7 @@ const Divider = styled.hr`
 
 const Placeholder = styled(Typography).attrs({
   as: 'div',
-  size: 2,
+  size: 3,
   color: theme.colors.gray[11],
   weight: 'semiBold',
 })``;
@@ -320,7 +320,7 @@ const Placeholder = styled(Typography).attrs({
 const Pre = styled.pre`
   margin: 0;
   font-family: ${({ theme }) => theme.font.family.primary};
-  font-size: ${({ theme }) => theme.font.size[2]};
+  font-size: ${({ theme }) => theme.font.size[3]};
   line-height: ${({ theme }) => theme.font.lineHeight[4]};
   white-space: pre-wrap;
   word-break: break-word;
