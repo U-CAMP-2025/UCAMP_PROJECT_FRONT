@@ -120,42 +120,51 @@ export default function QAUpdatePage() {
           <FormProvider {...methods}>
             <FormWrapper>
               <form onSubmit={handleSubmit(onSubmit)}>
-                {/* 1. 직무 선택 */}{' '}
+                {/* 1. 직무 선택 */}
                 <Section>
-                  <SectionTitle>직무 선택 (최대 3개)</SectionTitle>{' '}
+                  <SectionTitle>직무 선택 (최대 3개)</SectionTitle>
                   <JobSelector
                     value={selectedJobIds}
                     onChange={(newJobIds) =>
                       setValue('jobIds', newJobIds, { shouldValidate: true })
                     }
-                  />{' '}
-                  {errors.jobIds && (
-                    <Typography color='error'>{errors.jobIds.message}</Typography>
-                  )}{' '}
+                  />
+                  {errors.jobIds && <Typography color='error'>{errors.jobIds.message}</Typography>}
                 </Section>
-                {/* 2. 제목 */}{' '}
+                <Divider />
+                {/* 2. 제목 */}
                 <Section>
-                  <SectionTitle>제목</SectionTitle>{' '}
+                  <SectionTitle>
+                    <span>
+                      제목<RequiredAsterisk>*</RequiredAsterisk>
+                    </span>
+                  </SectionTitle>
                   <FormInput
-                    placeholder='노트의 제목을 입력하세요'
+                    placeholder='노트의 제목을 입력하세요.'
                     {...register('title', { required: '제목은 필수 입력입니다.' })}
-                  />{' '}
+                  />
                   {errors.title && (
                     <Typography color='error'>{errors.title.message}</Typography>
                   )}{' '}
                 </Section>
-                {/* 3. 세트 요약 */}{' '}
+                {/* 3. 세트 요약 */}
                 <Section>
-                  <SectionTitle>노트 요약 (선택)</SectionTitle>{' '}
+                  <SectionTitle>
+                    <span>노트 요약</span>
+                    <OptionalText>(선택사항)</OptionalText>
+                  </SectionTitle>
                   <FormTextAreaSummary
-                    placeholder='이 면접 노트에 대한 간단한 설명을 입력하세요'
+                    placeholder='이 면접 노트에 대한 간단한 설명을 입력하세요.'
                     {...register('summary')}
                   />{' '}
                 </Section>
+                <Divider />
                 {/* 4. 질문답변 세트 목록 (dnd-kit 적용) */}{' '}
                 <Section>
-                  <SectionTitle>면접 노트</SectionTitle>
-                  {/* 💡 DragDropContext 대신 DndContext 사용 */}{' '}
+                  <SectionTitle>
+                    <span>면접 노트</span>
+                    <OptionalText>최소 1개의 노트를 작성해야 합니다.</OptionalText>
+                  </SectionTitle>
                   <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
@@ -296,8 +305,8 @@ const FormInput = styled.input`
   }
 `;
 const FormTextAreaSummary = styled(FormInput).attrs({ as: 'textarea' })`
-  min-height: 100px;
-  resize: vertical;
+  min-height: auto;
+  resize: none;
 `;
 const QASetListContainer = styled.div`
   display: flex;
@@ -382,4 +391,19 @@ const SubmitButton = styled.button`
     cursor: not-allowed;
   }
 `;
-// --- 스타일 정의 끝 ---
+const RequiredAsterisk = styled.span`
+  color: ${({ theme }) => theme.colors.primary[9]};
+  font-size: ${({ theme }) => theme.font.size[5]};
+  margin-left: 4px;
+`;
+const OptionalText = styled.span`
+  font-size: ${({ theme }) => theme.font.size[2]};
+  font-weight: ${({ theme }) => theme.font.weight.regular};
+  color: ${({ theme }) => theme.colors.gray[9]};
+  margin-left: 8px;
+`;
+const Divider = styled.hr`
+  border: 0;
+  border-top: 1px solid ${({ theme }) => theme.colors.gray[5]};
+  margin: ${({ theme }) => theme.space[10]} 0; /* 👈 섹션 간 여백 (40px) */
+`;

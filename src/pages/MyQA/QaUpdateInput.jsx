@@ -111,7 +111,7 @@ const BaseIconButton = styled.button`
   cursor: pointer;
   padding: ${({ theme }) => theme.space[1]};
   border-radius: ${({ theme }) => theme.radius.sm};
-  color: ${({ theme }) => theme.colors.gray[8]};
+  color: ${({ theme }) => theme.colors.gray[10]};
 
   &:hover {
     background-color: ${({ theme }) => theme.colors.gray[3]};
@@ -234,15 +234,8 @@ export const QAUpdateInput = ({ id, index, onDelete }) => {
             </HeaderLeft>
 
             <ControlIconGroup>
-              <EditButton
-                type='button'
-                title='수정'
-                onClick={() => console.log('Edit clicked', index)}
-              >
-                <Pencil1Icon width={16} height={16} />
-              </EditButton>
               <DeleteButton type='button' title='삭제' onClick={onDelete}>
-                <TrashIcon width={16} height={16} />
+                <TrashIcon width={20} height={20} />
               </DeleteButton>
               <CaretIcon aria-hidden />
             </ControlIconGroup>
