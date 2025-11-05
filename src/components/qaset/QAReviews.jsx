@@ -222,7 +222,6 @@ const List = styled.ul`
   margin: 0;
   padding: 0;
   display: grid;
-  gap: ${({ theme }) => theme.space[4]};
   border: 1px solid ${({ theme }) => theme.colors.gray[6]};
   border-radius: ${({ theme }) => theme.radius.md};
   background: #fff;
