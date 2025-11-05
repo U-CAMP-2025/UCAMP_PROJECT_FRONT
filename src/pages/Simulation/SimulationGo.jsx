@@ -1,4 +1,5 @@
 import { axiosInstance } from '@api/axios';
+import ConfirmDialog from '@components/common/ConfirmDialog';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import QuestionAudioRecorder from '@components/simulation/QuestionAudioRecorder';
@@ -17,6 +18,7 @@ const SHOW_CONSOLE_LOGS = true;
 // 1..n 배열 만들고 셔플
 function makeOneBasedShuffled(n) {
   const arr = Array.from({ length: n }, (_, i) => i + 1);
+
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
@@ -27,6 +29,7 @@ function makeOneBasedShuffled(n) {
 export default function SimulationGO() {
   const { simulationId } = useParams();
   const navigate = useNavigate();
+  const [endConfirmOpen, setEndConfirmOpen] = useState(false);
 
   // ===== PIP 드래그 =====
   const [pipPosition, setPipPosition] = useState(null); // pipPosition 상태 관리
@@ -34,6 +37,7 @@ export default function SimulationGO() {
   const dragOffsetRef = useRef({ x: 0, y: 0 }); // 마우스 클릭 위치와 요소 위치 차이
   const pipRef = useRef(null); // pip 요소의 참조
 
+  // 드래그 시작 시 실행
   const handlePipMouseDown = (e) => {
     e.preventDefault();
     setIsDraggingPip(true);
@@ -47,8 +51,6 @@ export default function SimulationGO() {
       x: window.innerWidth - rect.width - 32, // 오른쪽 여백 16px
       y: window.innerHeight - rect.height - 32, // 아래 여백 16px
     };
-
-    console.log('PIP 드래그 시작, 현재 위치:', currentPos);
 
     if (!pipPosition) setPipPosition(currentPos);
 
@@ -89,11 +91,13 @@ export default function SimulationGO() {
       window.removeEventListener('mouseup', handlePipMouseUp);
     };
   }, [isDraggingPip, handlePipMouseMove, handlePipMouseUp]);
+
+  // pip 스타일 업데이트
   const pipStyle = useMemo(
     () =>
       pipPosition
         ? {
-            osition: 'fixed', // 브라우저 전체 기준
+            position: 'fixed', // 브라우저 전체 기준
             top: `${pipPosition.y}px`, // pipPosition.y 위치로 설정
             left: `${pipPosition.x}px`, // pipPosition.x 위치로 설정
           }
@@ -111,11 +115,13 @@ export default function SimulationGO() {
   const [timeLeft, setTimeLeft] = useState(MAX_SECONDS);
   const [isSessionStarted, setIsSessionStarted] = useState(false);
   const [isQuestionRecording, setIsQuestionRecording] = useState(false);
+
   const [interviewerId, setInterviewerId] = useState(null);
   const [audioById, setAudioById] = useState({});
   const [videoUrl, setVideoUrl] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
   const [videoBlob, setVideoBlob] = useState(null);
+
   const [questionList, setQaList] = useState([]);
   const [randomOrder, setRandomOrder] = useState([]);
   const [simPost, setPost] = useState(null);
@@ -124,9 +130,11 @@ export default function SimulationGO() {
 
   // ★ STT 결과 모음 (qaId -> transcript)
   const [sttByQaId, setSttByQaId] = useState({}); // ★
+
   const videoRef = useRef(null);
   const audioRef = useRef(null);
   const moveNextGuardRef = useRef(false);
+
   // ===== 1) 상세 조회 =====
   useEffect(() => {
     if (!simulationId) return;
@@ -136,6 +144,7 @@ export default function SimulationGO() {
         const resp = await axiosInstance.get(`/simulation/${simulationId}/start`);
         const data = resp.data?.data;
         if (!data) return;
+
         const _interviewerId = data.interviewer?.interviewerId ?? null;
         const _imageUrl = data.interviewer?.interviewerImageUrl ?? null;
         const post = data.post ?? null;
@@ -227,7 +236,9 @@ export default function SimulationGO() {
     setcurrentQuestion('');
     moveNextGuardRef.current = false;
     setCurrentIdx(0);
+
     axiosInstance.patch(`/simulation/${simulationId}/${currentIdx + 1}`);
+
     // 라우터 state로 전달
     navigate(`/simulation/${simulationId}/end`, {
       state: {
@@ -322,7 +333,15 @@ export default function SimulationGO() {
           {/* 사이드바 */}
           <S.Sidebar>
             <S.SidebarButton
-              onClick={isSessionStarted ? stopSession : startSession}
+              onClick={
+                isSessionStarted
+                  ? () => {
+                      // 아직 남은 질문이 있으면 경고 모달
+                      if (currentIdx < totalQuestions - 1) setEndConfirmOpen(true);
+                      else stopSession();
+                    }
+                  : startSession
+              }
               $variant={isSessionStarted ? 'danger' : 'default'}
             >
               {isSessionStarted ? <StopIcon /> : <PlayIcon />}
@@ -411,6 +430,16 @@ export default function SimulationGO() {
           </S.MainContent>
         </S.SimulationLayout>
       </S.MainContentWrapper>
+      <ConfirmDialog
+        open={endConfirmOpen}
+        onOpenChange={setEndConfirmOpen}
+        title='면접 종료'
+        message='면접 질문이 남아있는 상태에서 종료하면, 답변을 완료하지 않은 질문의 면접 결과는 저장되지 않습니다. 종료하시겠어요?'
+        onConfirm={async () => {
+          await stopSession(); // 확인 → 진짜 종료
+          // stopSession 안에서 라우팅하므로 setEndConfirmOpen(false)는 생략 가능
+        }}
+      />
     </PageContainer>
   );
 }
