@@ -101,26 +101,17 @@ export default function CertificateDialog({ open, onOpenChange, user, onConfirm 
       setVerifyResult(null);
       setConfirmOpen(false);
     }
-    // reset decision when user or dialog changes
-    // setDecision('');
   }, [user, open]);
 
   // OCR 이벤트
   const handleVerifying = async (fileUrl) => {
-    // console.log('파일경로? ', fileUrl);
     setLoading(true);
     try {
       const res = await axiosInstance.post('/ocr', { imageUrl: fileUrl });
       const data = res.data;
-      // console.log('OCR 결과:', data);
 
       const bizStatus = data?.verfRes?.data?.[0]?.b_stt || null;
       const taxType = data?.verfRes?.data?.[0]?.tax_type || '';
-
-      // console.log('res? ', res);
-      // console.log('검증결과: ', res.data.verfRes.data[0].b_stt); // 정상: 계속사업자, 비정상: 그외 (null)
-      // console.log('검증결과: ', res.data.verfRes.data[0].tax_type); // 비정상: 국세청에 등록되지 않은 사업자등록번호입니다.
-      // console.log('OCR 결과:', res.data);
 
       // "계속사업자"이면서 "일반과세자"류면 성공(= 등록되지 않은~ 이 포함되어 있지 않으면)
       const isValid = bizStatus === '계속사업자' && taxType && !taxType.includes('등록되지 않은');
@@ -138,21 +129,36 @@ export default function CertificateDialog({ open, onOpenChange, user, onConfirm 
   };
 
   // 승인 클릭 로직
-  const handleConfirm = () => {
-    if (!decision) return;
+  // const handleConfirm = () => {
+  //   if (!decision) return;
 
-    if (decision === 'APPROVED') {
+  //   if (decision === 'APPROVED') {
+  //     if (verifyResult?.status === 'fail') {
+  //       setConfirmMessage('사업자 번호가 검증되지 않았습니다. 그래도 승인하시겠습니까?');
+  //     } else {
+  //       setConfirmMessage('(검증 성공) 승인하시겠습니까?');
+  //     }
+  //     setConfirmOpen(true);
+  //   } else if (decision === 'REJECTED') {
+  //     // ✅ 거부 시에도 동일한 모달 사용
+  //     setConfirmMessage('반려하시겠습니까?');
+  //     setConfirmOpen(true);
+  //   }
+  // };
+  const handleDecision = (type) => {
+    setDecision(type);
+
+    if (type === 'APPROVED') {
       if (verifyResult?.status === 'fail') {
         setConfirmMessage('사업자 번호가 검증되지 않았습니다. 그래도 승인하시겠습니까?');
       } else {
         setConfirmMessage('(검증 성공) 승인하시겠습니까?');
       }
-      setConfirmOpen(true);
-    } else if (decision === 'REJECTED') {
-      // ✅ 거부 시에도 동일한 모달 사용
+    } else if (type === 'REJECTED') {
       setConfirmMessage('반려하시겠습니까?');
-      setConfirmOpen(true);
     }
+
+    setConfirmOpen(true);
   };
 
   // 승인 확인 모달
@@ -205,15 +211,6 @@ export default function CertificateDialog({ open, onOpenChange, user, onConfirm 
                       )
                     }
                   />
-                  {/* <button
-                  onClick={() =>
-                    handleVerifying(
-                      `${import.meta.env.VITE_API_URL}${user.certficate.certe_file_url}`,
-                    )
-                  }
-                >
-                  OCR 분석
-                </button> */}
                 </>
               ) : (
                 <Value>-</Value>
@@ -235,7 +232,7 @@ export default function CertificateDialog({ open, onOpenChange, user, onConfirm 
               )
             ) : null}
 
-            <RGRoot value={decision} onValueChange={setDecision}>
+            {/* <RGRoot value={decision} onValueChange={setDecision}>
               <RGBlock>
                 <RGItem value='APPROVED' aria-label='승인'>
                   <RadioGroup.Indicator>
@@ -245,24 +242,41 @@ export default function CertificateDialog({ open, onOpenChange, user, onConfirm 
                 <RGLabel>승인</RGLabel>
               </RGBlock>
               <RGBlock>
-                <RGItem value='REJECTED' aria-label='거부'>
+                <RGItem value='REJECTED' aria-label='반려'>
                   <RadioGroup.Indicator>
                     <CheckIcon width={20} height={20} />
                   </RadioGroup.Indicator>
                 </RGItem>
-                <RGLabel>거부</RGLabel>
+                <RGLabel>반려</RGLabel>
               </RGBlock>
-            </RGRoot>
+            </RGRoot> */}
 
-            <Actions>
+            {/* ✅ 승인/반려 버튼만 표시 */}
+            <Actions style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
               <Button
-                // onClick={() => {
-                //   if (!decision) return;
-                //   onConfirm?.(decision);
-                // }}
-                onClick={handleConfirm}
+                onClick={() => handleDecision('APPROVED')}
+                style={{
+                  background: '#E7F8ED', // success bg
+                  color: '#18794E', // success fg
+                  borderRadius: '8px',
+                  fontWeight: 600,
+                  padding: '10px 20px',
+                }}
               >
-                확인
+                승인
+              </Button>
+
+              <Button
+                onClick={() => handleDecision('REJECTED')}
+                style={{
+                  background: '#E6E6E6', // neutral bg
+                  color: '#555', // neutral fg
+                  borderRadius: '8px',
+                  fontWeight: 600,
+                  padding: '10px 20px',
+                }}
+              >
+                반려
               </Button>
             </Actions>
           </Content>
@@ -272,7 +286,7 @@ export default function CertificateDialog({ open, onOpenChange, user, onConfirm 
       <CertConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        title={decision === 'REJECTED' ? '거부 확인' : '승인 확인'}
+        title={decision === 'REJECTED' ? '반려 확인' : '승인 확인'}
         message={confirmMessage}
         onConfirm={handleConfirmAction}
         status={

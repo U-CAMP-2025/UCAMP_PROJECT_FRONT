@@ -96,37 +96,31 @@ export default function QACreatePage() {
         </QaCreateHeader>
         <SettingsBox>
           <FormProvider {...methods}>
-            {' '}
             <FormWrapper>
-              {' '}
               <form onSubmit={handleSubmit(onSubmit)}>
-                {/* 1. 직무 선택 */}{' '}
+                {/* 1. 직무 선택 */}
                 <Section>
-                  <SectionTitle>직무 선택 (최대 3개)</SectionTitle>{' '}
+                  <SectionTitle>직무 선택 (최대 3개)</SectionTitle>
                   <JobSelector
                     value={selectedJobIds}
                     onChange={(newJobIds) =>
                       setValue('jobIds', newJobIds, { shouldValidate: true })
                     }
-                  />{' '}
-                  {errors.jobIds && (
-                    <Typography color='error'>{errors.jobIds.message}</Typography>
-                  )}{' '}
+                  />
+                  {errors.jobIds && <Typography color='error'>{errors.jobIds.message}</Typography>}
                 </Section>
-                {/* 2. 제목 */}{' '}
+                {/* 2. 제목 */}
                 <Section>
-                  <SectionTitle>제목</SectionTitle>{' '}
+                  <SectionTitle>제목</SectionTitle>
                   <FormInput
                     placeholder='세트의 제목을 입력하세요'
                     {...register('title', { required: '제목은 필수 입력입니다.' })}
-                  />{' '}
-                  {errors.title && (
-                    <Typography color='error'>{errors.title.message}</Typography>
-                  )}{' '}
+                  />
+                  {errors.title && <Typography color='error'>{errors.title.message}</Typography>}
                 </Section>
-                {/* 3. 세트 요약 */}{' '}
+                {/* 3. 세트 요약 */}
                 <Section>
-                  <SectionTitle>세트 요약 (선택)</SectionTitle>{' '}
+                  <SectionTitle>세트 요약 (선택)</SectionTitle>
                   <FormTextAreaSummary
                     placeholder='이 질문답변 세트에 대한 간단한 설명을 입력하세요'
                     {...register('summary')}
