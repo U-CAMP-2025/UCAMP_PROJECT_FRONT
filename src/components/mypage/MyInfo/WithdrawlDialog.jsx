@@ -37,11 +37,7 @@ export const WithdrawlDialog = ({ open, onOpenChange }) => {
               </Dialog.Close>
             </Header>
             <Body>
-              <ContentText>
-                회원 탈퇴 시 보유 중인 정보가 삭제되어 복구가 불가합니다.
-                <br />
-                정말 탈퇴하시겠습니까?
-              </ContentText>
+              <ContentText>정말 탈퇴하시겠습니까?</ContentText>
               <ButtonContainer>
                 <Button variant='ghost' onClick={handleClickCancelButton}>
                   아니오
@@ -120,7 +116,7 @@ const Body = styled.div`
 `;
 
 const ContentText = styled.div`
-  margin-top: 10px;
+  margin: 15px 0;
   font-size: ${({ theme }) => theme.font.size[2]};
   text-align: center;
 `;
