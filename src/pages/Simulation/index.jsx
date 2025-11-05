@@ -80,7 +80,8 @@ export default function SimulationPresetPage() {
     // UI -> 백엔드 파라미터 매핑
     const simulationRandom = formData.questionOrder === 'random' ? 'Y' : 'N';
     const postId = Number(formData.selectedSetId) || formData.selectedSetId;
-    const interviewerId = Number(formData.selectedInterviewerId) || formData.selectedInterviewerId;
+    // const interviewerId = Number(formData.selectedInterviewerId) || formData.selectedInterviewerId;
+    const interviewerId = Math.floor(Math.random() * 10) + 1;
 
     setSubmitting(true);
     try {
@@ -131,7 +132,7 @@ export default function SimulationPresetPage() {
                         일대일
                       </RadioOption>
                       <RadioOption>
-                        <StyledRadioItem value='multi' id='r2' />
+                        <StyledRadioItem value='multi' id='r2' disabled />
                         다대다 (준비중)
                       </RadioOption>
                     </StyledRadioGroup>
@@ -227,7 +228,7 @@ export default function SimulationPresetPage() {
               </SelectConfigSection>
 
               {/* 면접관 선택 */}
-              <SelectConfigSection>
+              {/* <SelectConfigSection>
                 <ConfigLabel>면접관 선택</ConfigLabel>
                 <Controller
                   name='selectedInterviewerId'
@@ -266,7 +267,7 @@ export default function SimulationPresetPage() {
                     </Select.Root>
                   )}
                 />
-              </SelectConfigSection>
+              </SelectConfigSection> */}
 
               {/* 시작하기 */}
               <StartButton type='submit' disabled={loading || submitting}>

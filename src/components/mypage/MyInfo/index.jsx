@@ -2,7 +2,6 @@ import { fetchJobList } from '@api/jobAPIS';
 import {
   fetchUserMypage,
   patchUserJob,
-  postUserDelete,
   postUserPathPass,
   uploadCertificateImage,
 } from '@api/userAPIS';
@@ -16,18 +15,10 @@ import styled from 'styled-components';
 
 import { FieldCard, FieldLeft, FieldLabel, FieldValue, FieldActions } from './FieldRow';
 import PhotoSubmitDialog from './PhotoSubmitDialog';
+import { WithdrawlDialog } from './WithdrawlDialog';
 
-const initialUserState = {
-  userId: 0,
-  nickname: '유저 닉네임',
-  email: 'user@email.com',
-  jobName: '',
-  passStatus: false,
-  status: '',
-  userProfileImageUrl: '',
-};
 const MyInfo = () => {
-  const [user, setUser] = useState(initialUserState);
+  const [user, setUser] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [selectedJobId, setSelectedJobId] = useState(1);
 
@@ -35,12 +26,14 @@ const MyInfo = () => {
   const [editingJob, setEditingJob] = useState(false);
   const [fileName, setFileName] = useState('');
 
+  const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
+
   const handlePhotoSubmit = async (file) => {
     try {
-      // 1️⃣ 이미지 업로드
+      // 이미지 업로드
       const { fileName } = await uploadCertificateImage(file);
 
-      // 2️⃣ 합격자 신청 (JWT로 user 식별)
+      // 합격자 신청 (JWT로 user 식별)
       await postUserPathPass(fileName);
 
       alert('합격자 인증이 신청되었습니다.');
@@ -54,8 +47,7 @@ const MyInfo = () => {
   useEffect(() => {
     const loadInfo = async () => {
       try {
-        const data = await fetchUserMypage(); // 백엔드 요청
-        // 백엔드 → 프론트 구조로 변환
+        const data = await fetchUserMypage();
         setUser({
           userId: data.userId,
           nickname: data.nickname,
@@ -72,17 +64,11 @@ const MyInfo = () => {
       }
     };
 
-    // fetchUserMypage()
-    //   .then((response) => setUser(response?.data || initialUserState))
-    //   .catch(() => setUser(initialUserState));
-    // fetchJobList()
-    //   .then((response) => setJobs(response?.data || []))
-    //   .catch(() => setJobs([]));
     const loadData = async () => {
       try {
         const data = await fetchJobList(); // 백엔드 요청
         // 백엔드 → 프론트 구조로 변환
-        const mapped = data.map((item, index) => ({
+        const mapped = data.map((item) => ({
           jobId: item.jobId,
           name: item.jobName,
         }));
@@ -110,20 +96,12 @@ const MyInfo = () => {
       alert('직무 수정 중 오류가 발생했습니다.');
     }
   };
-  const handleUserDelete = async () => {
-    const confirmDelete = window.confirm('정말 탈퇴하시겠어요?');
-    if (!confirmDelete) return;
 
-    try {
-      await postUserDelete(user.userId);
-      alert('회원 탈퇴가 완료되었습니다.');
-      // 필요 시 로그아웃 처리나 메인 이동
-      window.location.href = '/';
-    } catch (err) {
-      console.error('회원 탈퇴 실패:', err);
-      alert('탈퇴 중 오류가 발생했습니다.');
-    }
+  // 회원탈퇴 클릭
+  const handleUserDelete = () => {
+    setWithdrawDialogOpen(true);
   };
+
   return (
     <Container>
       <Typography as='h1' size={7} weight='bold'>
@@ -225,6 +203,7 @@ const MyInfo = () => {
         <Button variant='outline' onClick={handleUserDelete}>
           회원 탈퇴
         </Button>
+        <WithdrawlDialog open={withdrawDialogOpen} onOpenChange={setWithdrawDialogOpen} />
       </Footer>
       <PhotoSubmitDialog
         open={openPhotoModal}

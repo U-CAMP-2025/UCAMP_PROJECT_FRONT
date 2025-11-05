@@ -155,13 +155,13 @@ export const InterviewerVideo = styled.div`
 `;
 
 export const UserPipVideoWrapper = styled.div`
-  position: absolute;
+  position: fixed;
 
   // 기본 위치
   bottom: ${({ theme }) => theme.space[6]};
   right: ${({ theme }) => theme.space[6]};
 
-  width: 500px;
+  width: 416px;
   aspect-ratio: 16 / 9;
   border-radius: ${({ theme }) => theme.radius.md};
   overflow: hidden;

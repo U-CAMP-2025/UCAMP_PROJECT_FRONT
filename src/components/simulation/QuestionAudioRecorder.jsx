@@ -4,7 +4,7 @@ import RecordRTC, { RecordRTCPromisesHandler } from 'recordrtc';
 
 const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
   {
-    maxSeconds = 60,
+    maxSeconds = 120,
     onSaved, // (url, qaId, transcript)
     onTick, // (timeLeft)
     onRecordingChange, // (isRecording)
@@ -148,24 +148,38 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
             if (qaId != null) form.append('qaId', String(qaId)); // ✅ 서버 식별자
 
             // ✅ baseURL이 /api 이므로 슬래시 없이 호출
-            const res = await axiosInstance.post(
-              qaId != null && simulationId
-                ? `simulation/${simulationId}/answers/${qaId}/audio`
-                : `simulation/answers/audio`,
-              form,
-            );
+            // const res = await axiosInstance.post(
+            //   qaId != null && simulationId
+            //     ? `simulation/${simulationId}/answers/${qaId}/audio`
+            //     : `simulation/answers/audio`,
+            //   form,
+            // );
 
-            const serverUrl = res?.data?.data?.url || res?.data?.url || null;
-            transcript = res?.data?.data?.transcript ?? '';
-            url = serverUrl || localPreviewUrl;
+            axiosInstance
+              .post(
+                qaId != null && simulationId
+                  ? `simulation/${simulationId}/answers/${qaId}/audio`
+                  : `simulation/answers/audio`,
+                form,
+              )
+              .then((res) => {
+                console.log('업로드 성공:', res.data);
+              })
+              .catch((err) => {
+                console.error('업로드 실패:', err);
+              });
+
+            // const serverUrl = res?.data?.data?.url || res?.data?.url || null;
+            // transcript = res?.data?.data?.transcript ?? '';
+            // url = serverUrl || localPreviewUrl;
 
             // ✅ 부모로 (url, qaId, transcript)
-            onSaved?.(url, qaId ?? qIdx, transcript);
-            console.log('upload result:', res.data);
+            // onSaved?.(url, qaId ?? qIdx, transcript);
+            // console.log('upload result:', res.data);
           } catch (uploadErr) {
             console.error('오디오 업로드 실패:', uploadErr);
-            url = localPreviewUrl;
-            onSaved?.(url, qaId ?? qIdx, transcript);
+            // url = localPreviewUrl;
+            // onSaved?.(url, qaId ?? qIdx, transcript);
           }
         }
 
