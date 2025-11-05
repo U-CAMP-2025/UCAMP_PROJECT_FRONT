@@ -234,20 +234,20 @@ export default function CertificateDialog({ open, onOpenChange, user, onConfirm 
 
             {/* <RGRoot value={decision} onValueChange={setDecision}>
               <RGBlock>
-                <RGItem value='APPROVED' aria-label='승인'>
-                  <RadioGroup.Indicator>
-                    <CheckIcon width={18} height={18} />
-                  </RadioGroup.Indicator>
-                </RGItem>
-                <RGLabel>승인</RGLabel>
-              </RGBlock>
-              <RGBlock>
                 <RGItem value='REJECTED' aria-label='반려'>
                   <RadioGroup.Indicator>
                     <CheckIcon width={20} height={20} />
                   </RadioGroup.Indicator>
                 </RGItem>
                 <RGLabel>반려</RGLabel>
+              </RGBlock>
+              <RGBlock>
+                <RGItem value='APPROVED' aria-label='승인'>
+                  <RadioGroup.Indicator>
+                    <CheckIcon width={18} height={18} />
+                  </RadioGroup.Indicator>
+                </RGItem>
+                <RGLabel>승인</RGLabel>
               </RGBlock>
             </RGRoot> */}
 

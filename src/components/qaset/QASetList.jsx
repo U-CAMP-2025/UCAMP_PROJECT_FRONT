@@ -1,4 +1,5 @@
 import Typography from '@components/common/Typography';
+import theme from '@styles/theme';
 import styled from 'styled-components';
 
 import QASetCard from './QASetCard';
@@ -22,9 +23,7 @@ export default function QASetList({ qaList = [] }) {
   if (!qaList.length) {
     return (
       <div style={{ padding: 48, textAlign: 'center' }}>
-        <Typography size={4} muted>
-          아직 등록된 질문답변셋이 없습니다.
-        </Typography>
+        <Typography size={4}>아직 등록된 면접 노트가 없습니다.</Typography>
       </div>
     );
   }

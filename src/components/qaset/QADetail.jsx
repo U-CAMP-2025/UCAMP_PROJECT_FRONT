@@ -19,6 +19,7 @@ export const QADetail = () => {
   const qaId = params.qaId;
   const [qaData, setQaData] = useState(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,7 +36,9 @@ export const QADetail = () => {
 
   const onCopy = () => {
     copyPost(qaId)
-      .then(() => navigate('/myqa'))
+      .then(() => {
+        setIsCopyModalOpen(true);
+      })
       .catch();
   };
 
@@ -103,7 +106,7 @@ export const QADetail = () => {
             <IconButton1
               aria-label='북마크'
               onClick={onCopy}
-              title='현재 질문답변 세트를 나의 세트로 스크랩합니다.'
+              title='현재 면접 노트를 나의 면접 노트로 스크랩합니다.'
             >
               <BookmarkIcon />
             </IconButton1>
@@ -126,14 +129,28 @@ export const QADetail = () => {
         <Dialog.Portal>
           <Overlay />
           <Content>
-            <Title>질문셋 삭제</Title>
+            <Title>면접 노트 삭제</Title>
             <Description>
-              정말로 이 질문셋을 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다.
+              정말로 이 노트를 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다.
             </Description>
             <ButtonRow>
               <DeleteButton onClick={onDeleteConfirm}>삭제</DeleteButton>
               <Dialog.Close asChild>
                 <CancelButton>취소</CancelButton>
+              </Dialog.Close>
+            </ButtonRow>
+          </Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+      <Dialog.Root open={isCopyModalOpen} onOpenChange={setIsCopyModalOpen}>
+        <Dialog.Portal>
+          <Overlay />
+          <Content>
+            <Title>스크랩 완료</Title>
+            <Description>나의 면접 노트에 스크랩되었습니다.</Description>
+            <ButtonRow>
+              <Dialog.Close asChild>
+                <ConfirmButton>확인</ConfirmButton>
               </Dialog.Close>
             </ButtonRow>
           </Content>
@@ -218,7 +235,7 @@ const IconButton2 = styled(IconButton1)``;
 
 const ButtonRow = styled.div`
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   gap: ${({ theme }) => theme.space[3]};
 `;
 
@@ -270,7 +287,7 @@ const FieldBox = styled.div`
   align-items: center;
 `;
 
-const FieldLabel = styled(Typography).attrs({ as: 'div', size: 2, weight: 'semiBold' })`
+const FieldLabel = styled(Typography).attrs({ as: 'div', size: 3, weight: 'semiBold' })`
   color: ${({ theme }) => theme.colors.gray[11]};
   margin-right: ${({ theme }) => theme.space[4]};
 `;
@@ -295,17 +312,26 @@ const Divider = styled.hr`
 
 const Placeholder = styled(Typography).attrs({
   as: 'div',
-  size: 2,
-  color: theme.colors.gray[11],
+  size: 2, // 👈 폰트 크기 2
+  color: theme.colors.gray[11], // 👈 텍스트 색상
   weight: 'semiBold',
-})``;
+})`
+  background-color: ${({ theme }) => theme.colors.gray[3]};
+  padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[2]};
+  border-radius: ${({ theme }) => theme.radius.sm};
+
+  display: inline-block;
+  width: fit-content;
+`;
 
 const Pre = styled.pre`
   margin: 0;
   font-family: ${({ theme }) => theme.font.family.primary};
-  font-size: ${({ theme }) => theme.font.size[2]};
+  font-size: ${({ theme }) => theme.font.size[3]};
   line-height: ${({ theme }) => theme.font.lineHeight[4]};
   white-space: pre-wrap;
   word-break: break-word;
   color: ${({ theme }) => theme.colors.gray[12]};
 `;
+
+const ConfirmButton = styled(DeleteButton)``;

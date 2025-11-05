@@ -95,22 +95,22 @@ export const Header = () => {
         </LeftSection>
         <Nav>
           <NavItem onClick={() => navigate('/qalist')} $isActive={pathname === '/qalist'}>
-            질문답변 둘러보기
+            면접 노트
           </NavItem>
 
           <NavItem onClick={() => navigate('/myqa')} $isActive={pathname === '/myqa'}>
-            질문답변 생성
+            나의 노트
           </NavItem>
 
           <NavItem
             onClick={() => navigate('/simulation')}
             $isActive={pathname.startsWith('/simulation')}
           >
-            면접 시뮬레이션
+            면접 연습
           </NavItem>
 
           <NavItem onClick={() => navigate('/rank')} $isActive={pathname === '/rank'}>
-            랭킹정보
+            랭킹
           </NavItem>
         </Nav>
 

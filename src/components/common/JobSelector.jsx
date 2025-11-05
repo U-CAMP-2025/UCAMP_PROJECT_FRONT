@@ -85,7 +85,7 @@ export const JobSelector = ({ value = [], onChange = () => {} }) => {
             ))}
           </ChipGroup>
         ) : (
-          <PlaceholderText>직무를 선택해주세요. (최대 3개)</PlaceholderText>
+          <PlaceholderText>직무를 선택해주세요.</PlaceholderText>
         )}
 
         {/* 2. 직무 선택 드롭다운 (Radix Select) */}

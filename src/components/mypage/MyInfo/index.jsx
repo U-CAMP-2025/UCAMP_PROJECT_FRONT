@@ -118,15 +118,24 @@ const MyInfo = () => {
   };
   return (
     <Container>
-      <Typography as='h1' size={7} weight='bold'>
-        내 정보
-      </Typography>
+      <MyPageHeader>
+        <Typography as='h1' size={7} weight='bold'>
+          마이 페이지
+        </Typography>
+      </MyPageHeader>
       <Row>
         {/* 닉네임 (수정 불가) */}
         <FieldCard>
           <FieldLeft>
             <FieldLabel htmlFor='nick'>닉네임</FieldLabel>
-            <ReadonlyInput id='nick' style={{ width: '85%', justifyContent: 'flex-end' }}>
+            <ReadonlyInput
+              id='nick'
+              style={{
+                width: '300px',
+                marginLeft: 'auto',
+                justifyContent: 'flex-start',
+              }}
+            >
               {user?.nickname}
             </ReadonlyInput>
           </FieldLeft>
@@ -135,7 +144,14 @@ const MyInfo = () => {
         <FieldCard>
           <FieldLeft>
             <FieldLabel htmlFor='email'>이메일</FieldLabel>
-            <ReadonlyInput id='email' style={{ width: '85%', justifyContent: 'flex-end' }}>
+            <ReadonlyInput
+              id='nick'
+              style={{
+                width: '300px',
+                marginLeft: 'auto',
+                justifyContent: 'flex-start',
+              }}
+            >
               {user?.email}
             </ReadonlyInput>
           </FieldLeft>
@@ -146,7 +162,15 @@ const MyInfo = () => {
           <FieldLeft>
             <FieldLabel>관심직무</FieldLabel>
             {editingJob ? (
-              <div style={{ display: 'flex', gap: 12, alignItems: 'right' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 12,
+                  alignItems: 'center',
+                  flex: 1,
+                  justifyContent: 'flex-end',
+                }}
+              >
                 <SearchableSelect
                   value={selectedJobId}
                   onChange={(id) => setSelectedJobId(id)}
@@ -185,7 +209,7 @@ const MyInfo = () => {
             <FieldLabel>합격 여부</FieldLabel>
             {user?.passStatus === 'Y' ? (
               <>
-                <FieldValue style={{ flex: '1', textAlign: 'right' }}>합격자입니다.</FieldValue>
+                <FieldValue style={{ flex: 1, textAlign: 'right' }}>합격자입니다</FieldValue>
                 <FieldActions>
                   {/* {fileName && (
                     <Typography as='div' size={3}>
@@ -280,18 +304,15 @@ const pillStyle = {
   border: '0',
 };
 
-// const ReadonlyInput = styled.div`
-//   height: 48px;
-//   border: 1px solid ${({ theme }) => theme.colors.gray[7]};
-//   font-size: ${({ theme }) => theme.font.size[2]};
-//   font-weight: ${({ theme }) => theme.font.weight.semiBold};
-//   border-radius: ${({ theme }) => theme.radius.md};
-//   display: flex;
-//   align-items: center;
-//   justify-content: flex-end; /* ✅ 이 줄 추가 */
-//   padding: 0 ${({ theme }) => theme.space[4]};
-//   color: ${({ theme }) => theme.colors.text};
-//   background: ${({ theme }) => theme.colors.gray[2]};
-// `;
+// 페이지 상단 헤더
+const MyPageHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ${({ theme }) => theme.space[6]}; /* 24px */
+  padding-bottom: ${({ theme }) => theme.space[4]}; /* 16px */
+  border-bottom: 2px solid ${({ theme }) => theme.colors.gray[12]};
+  padding-left: ${({ theme }) => theme.space[4]};
+`;
 
 export default MyInfo;
