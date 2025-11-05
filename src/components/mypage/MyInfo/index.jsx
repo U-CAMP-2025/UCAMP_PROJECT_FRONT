@@ -104,9 +104,11 @@ const MyInfo = () => {
 
   return (
     <Container>
-      <Typography as='h1' size={7} weight='bold'>
-        내 정보
-      </Typography>
+      <MyPageHeader>
+        <Typography as='h1' size={7} weight='bold'>
+          마이 페이지
+        </Typography>
+      </MyPageHeader>
       <Row>
         {/* 닉네임 (수정 불가) */}
         <FieldCard>
@@ -265,5 +267,15 @@ const pillStyle = {
   alignItems: 'center',
   border: '0',
 };
+
+// 페이지 상단 헤더
+const MyPageHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ${({ theme }) => theme.space[6]}; /* 24px */
+  padding-bottom: ${({ theme }) => theme.space[4]}; /* 16px */
+  border-bottom: 2px solid ${({ theme }) => theme.colors.gray[12]};
+`;
 
 export default MyInfo;
