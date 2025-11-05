@@ -93,7 +93,7 @@ export default function QACreatePage() {
       <MainContentWrapper>
         <QaCreateHeader>
           <Typography as='h1' size={7} weight='bold'>
-            새 면접 노트 만들기
+            새 면접 노트 작성
           </Typography>
         </QaCreateHeader>
         <SettingsBox>
