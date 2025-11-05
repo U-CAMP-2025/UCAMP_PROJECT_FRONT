@@ -276,6 +276,7 @@ const MyPageHeader = styled.div`
   margin-bottom: ${({ theme }) => theme.space[6]}; /* 24px */
   padding-bottom: ${({ theme }) => theme.space[4]}; /* 16px */
   border-bottom: 2px solid ${({ theme }) => theme.colors.gray[12]};
+  padding-left: ${({ theme }) => theme.space[4]};
 `;
 
 export default MyInfo;

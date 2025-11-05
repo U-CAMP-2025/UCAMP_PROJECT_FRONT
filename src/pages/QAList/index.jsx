@@ -169,6 +169,8 @@ const QaListHeader = styled.div`
   margin-bottom: ${({ theme }) => theme.space[6]}; /* 24px */
   padding-bottom: ${({ theme }) => theme.space[4]}; /* 16px */
   border-bottom: 2px solid ${({ theme }) => theme.colors.gray[12]};
+  padding-left: ${({ theme }) => theme.space[6]};
+  padding-right: ${({ theme }) => theme.space[6]};
 `;
 
 // 💡 MainContentWrapper에 좌우 패딩을 추가하여 중앙 정렬된 콘텐츠 영역을 정의합니다.
