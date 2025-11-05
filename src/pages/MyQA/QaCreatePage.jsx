@@ -50,6 +50,8 @@ export default function QACreatePage() {
     name: 'qaSets',
   });
 
+  const defaultOpenItems = fields.map((item, index) => `item-${index}`);
+
   const selectedJobIds = watch('jobIds');
   const onSubmit = (data) => {
     createPost(data)
@@ -91,7 +93,7 @@ export default function QACreatePage() {
       <MainContentWrapper>
         <QaCreateHeader>
           <Typography as='h1' size={7} weight='bold'>
-            새 질문답변 세트 만들기
+            새 면접 노트 작성
           </Typography>
         </QaCreateHeader>
         <SettingsBox>
@@ -100,7 +102,7 @@ export default function QACreatePage() {
               <form onSubmit={handleSubmit(onSubmit)}>
                 {/* 1. 직무 선택 */}
                 <Section>
-                  <SectionTitle>직무 선택 (최대 3개)</SectionTitle>
+                  <SectionTitle>관련 직무 선택 (최대 3개)</SectionTitle>
                   <JobSelector
                     value={selectedJobIds}
                     onChange={(newJobIds) =>
@@ -109,47 +111,54 @@ export default function QACreatePage() {
                   />
                   {errors.jobIds && <Typography color='error'>{errors.jobIds.message}</Typography>}
                 </Section>
+                <Divider />
                 {/* 2. 제목 */}
                 <Section>
-                  <SectionTitle>제목</SectionTitle>
+                  <SectionTitle>
+                    <span>
+                      제목<RequiredAsterisk>*</RequiredAsterisk>
+                    </span>
+                  </SectionTitle>
                   <FormInput
-                    placeholder='세트의 제목을 입력하세요'
+                    placeholder='면접 노트의 제목을 입력하세요.'
                     {...register('title', { required: '제목은 필수 입력입니다.' })}
                   />
                   {errors.title && <Typography color='error'>{errors.title.message}</Typography>}
                 </Section>
+
                 {/* 3. 세트 요약 */}
                 <Section>
-                  <SectionTitle>세트 요약 (선택)</SectionTitle>
+                  <SectionTitle>
+                    <span>노트 요약</span>
+                    <OptionalText>(선택사항)</OptionalText>
+                  </SectionTitle>
                   <FormTextAreaSummary
-                    placeholder='이 질문답변 세트에 대한 간단한 설명을 입력하세요'
+                    placeholder='노트에 대한 간단한 설명을 입력하세요.'
                     {...register('summary')}
                   />{' '}
                 </Section>
-                {/* 4. 질문답변 세트 목록 (dnd-kit 적용) */}{' '}
+                <Divider />
                 <Section>
-                  <SectionTitle>질문답변 세트</SectionTitle>
-                  {/* 💡 DragDropContext 대신 DndContext 사용 */}{' '}
+                  <SectionTitle>
+                    <span>면접 노트</span>
+                    <OptionalText>최소 1개의 노트를 작성해야 합니다.</OptionalText>
+                  </SectionTitle>
                   <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
                     onDragEnd={onDragEnd}
                   >
-                    {/* 💡 Droppable 대신 SortableContext 사용 */}
                     <SortableContext
-                      items={fields.map((field) => field.id)} // 💡 고유 ID 배열 전달
+                      items={fields.map((field) => field.id)}
                       strategy={verticalListSortingStrategy}
                     >
-                      {' '}
-                      <Accordion.Root type='multiple'>
-                        {' '}
+                      <Accordion.Root type='multiple' defaultValue={defaultOpenItems}>
                         <QASetListContainer>
-                          {' '}
                           {fields.map((item, index) => (
                             // 💡 Draggable 대신 QACreateInput이 useSortable 훅을 사용
                             <QACreateInput
                               key={item.id}
-                              id={item.id} // 💡 dnd-kit에 ID 전달
+                              id={item.id}
                               index={index}
                               onDelete={() =>
                                 fields.length > 1
@@ -252,10 +261,21 @@ const FormWrapper = styled.div`
   padding: ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[6]};
 `;
 const Section = styled.section`
-  margin-bottom: ${({ theme }) => theme.space[10]};
+  margin-bottom: ${({ theme }) => theme.space[8]};
 `;
 const SectionTitle = styled(Typography).attrs({ as: 'h2', size: 5, weight: 'bold' })`
   margin-bottom: ${({ theme }) => theme.space[5]};
+`;
+const RequiredAsterisk = styled.span`
+  color: ${({ theme }) => theme.colors.primary[9]};
+  font-size: ${({ theme }) => theme.font.size[5]};
+  margin-left: 4px;
+`;
+const OptionalText = styled.span`
+  font-size: ${({ theme }) => theme.font.size[2]};
+  font-weight: ${({ theme }) => theme.font.weight.regular};
+  color: ${({ theme }) => theme.colors.gray[9]};
+  margin-left: 8px;
 `;
 const FormInput = styled.input`
   width: 100%;
@@ -270,8 +290,8 @@ const FormInput = styled.input`
   }
 `;
 const FormTextAreaSummary = styled(FormInput).attrs({ as: 'textarea' })`
-  min-height: 100px;
-  resize: vertical;
+  min-height: auto;
+  resize: none;
 `;
 const QASetListContainer = styled.div`
   display: flex;
@@ -355,4 +375,10 @@ const SubmitButton = styled.button`
     background-color: ${({ theme }) => theme.colors.gray[5]};
     cursor: not-allowed;
   }
+`;
+
+const Divider = styled.hr`
+  border: 0;
+  border-top: 1px solid ${({ theme }) => theme.colors.gray[5]};
+  margin: ${({ theme }) => theme.space[10]} 0; /* 👈 섹션 간 여백 (40px) */
 `;

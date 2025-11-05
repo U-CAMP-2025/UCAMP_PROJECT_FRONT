@@ -7,15 +7,18 @@ import { SortSelector } from '@components/common/SortSelector';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import QASetList from '@components/qaset/QASetList';
+import { PlusIcon } from '@radix-ui/react-icons';
 import { useAuthStore } from '@store/auth/useAuthStore';
 import React, { useEffect, useMemo, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { Navigate, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 export default function QAListPage() {
   const { isLogin } = useAuthStore();
   const [currentSort, setCurrentSort] = useState('bookcount_desc');
   const [selectedJobIds, setSelectedJobIds] = useState([99]);
+  const navigate = useNavigate();
 
   // 무한 스크롤 상태
   const [displayList, setDisplayList] = useState([]);
@@ -37,6 +40,10 @@ export default function QAListPage() {
     setPage(1);
     setDisplayList([]);
     setHasMore(true);
+  };
+
+  const handleAddClick = () => {
+    navigate('/qa/create');
   };
 
   // 초기 직무 데이터 로드
@@ -95,8 +102,12 @@ export default function QAListPage() {
       <MainContentWrapper>
         <QaListHeader>
           <Typography as='h1' size={7} weight='bold'>
-            질문답변 둘러보기
+            면접 노트
           </Typography>
+          <AddButton onClick={handleAddClick}>
+            <PlusIcon width={20} height={20} />
+            작성하기
+          </AddButton>
         </QaListHeader>
         <FilterAndSortBar>
           <FilterSection>
@@ -169,6 +180,8 @@ const QaListHeader = styled.div`
   margin-bottom: ${({ theme }) => theme.space[6]}; /* 24px */
   padding-bottom: ${({ theme }) => theme.space[4]}; /* 16px */
   border-bottom: 2px solid ${({ theme }) => theme.colors.gray[12]};
+  padding-left: ${({ theme }) => theme.space[6]};
+  padding-right: ${({ theme }) => theme.space[6]};
 `;
 
 // 💡 MainContentWrapper에 좌우 패딩을 추가하여 중앙 정렬된 콘텐츠 영역을 정의합니다.
@@ -178,4 +191,22 @@ const MainContentWrapper = styled.div`
   margin: 0 auto;
   padding: 0 ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[5]};
   min-height: 80vh;
+`;
+const AddButton = styled.button`
+  all: unset;
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+  padding: ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[4]}; /* 12px 16px */
+  background-color: ${({ theme }) => theme.colors.primary[9]};
+  color: white;
+  border-radius: ${({ theme }) => theme.radius.sm};
+  font-size: ${({ theme }) => theme.font.size[3]};
+  font-weight: ${({ theme }) => theme.font.weight.semiBold};
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.primary[10]};
+  }
 `;

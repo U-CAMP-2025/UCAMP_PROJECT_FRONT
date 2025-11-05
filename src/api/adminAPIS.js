@@ -48,7 +48,7 @@ export const patchUserPass = async (payload) => {
  */
 export const fetchTranscriptions = async ({
   page = 0,
-  size = 20,
+  size = 10,
   sort = 'completed_at,desc',
 } = {}) => {
   const { data } = await axiosInstance.get('/admin/transcription', {

@@ -25,7 +25,13 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
 
   const [timeLeft, setTimeLeft] = useState(maxSeconds);
   const [isRecording, setIsRecording] = useState(false);
+  useEffect(() => {
+    onRecordingChange?.(isRecording);
+  }, [isRecording, onRecordingChange]);
 
+  useEffect(() => {
+    onTick?.(timeLeft);
+  }, [timeLeft, onTick]);
   useImperativeHandle(ref, () => ({
     // 부모에서: start({ qaId, qIdx })
     start: async ({ qaId, qIdx } = {}) => {
@@ -51,19 +57,18 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
 
       setTimeLeft(maxSeconds);
       setIsRecording(true);
-      onRecordingChange?.(true);
-      onTick?.(maxSeconds);
+      // onRecordingChange?.(true);
+      // onTick?.(maxSeconds);
 
       // 카운트다운
       timerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
-          const next = prev - 1;
-          onTick?.(Math.max(next, 0));
+          const next = Math.max(prev - 1, 0);
           if (next <= 0) {
             clearInterval(timerRef.current);
             timerRef.current = null;
           }
-          return Math.max(next, 0);
+          return next;
         });
       }, 1000);
 
@@ -192,7 +197,7 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
     } finally {
       cleanupStream();
       setIsRecording(false);
-      onRecordingChange?.(false);
+      // onRecordingChange?.(false);
       qaIdRef.current = null;
       qIdxRef.current = null;
     }

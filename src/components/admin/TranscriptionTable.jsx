@@ -63,7 +63,7 @@ export default function TranscriptionTable() {
 
   // 페이지 상태
   const [page, setPage] = useState(0); // 0-base
-  const [size, setSize] = useState(20);
+  const [size, setSize] = useState(10);
   const [sort] = useState('simulation_completed_at,desc');
 
   // 서버 응답
