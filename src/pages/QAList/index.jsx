@@ -17,7 +17,7 @@ import styled from 'styled-components';
 export default function QAListPage() {
   const { isLogin } = useAuthStore();
   const [currentSort, setCurrentSort] = useState('bookcount_desc');
-  const [selectedJobIds, setSelectedJobIds] = useState([99]);
+  const [selectedJobIds, setSelectedJobIds] = useState([]);
   const navigate = useNavigate();
 
   // 무한 스크롤 상태
@@ -83,7 +83,9 @@ export default function QAListPage() {
           setHasMore(true);
         }
       })
-      .catch();
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   // 페이지 변경 시 데이터 호출

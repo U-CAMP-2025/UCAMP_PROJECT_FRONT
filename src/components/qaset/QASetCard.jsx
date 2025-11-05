@@ -1,13 +1,17 @@
 import Tag, { TagGroup } from '@components/common/Tag';
 import Typography from '@components/common/Typography';
 import { BookmarkIcon, CommentIcon } from '@components/common/icons';
+import { KakaoLoginDialog } from '@components/signup/KakaoLoginDialog';
 import { BookmarkFilledIcon } from '@radix-ui/react-icons';
+import { useAuthStore } from '@store/auth/useAuthStore';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 export default function QASetCard({ item }) {
   const navigate = useNavigate();
   const theme = useTheme(); // 테마 객체 가져오기
+  const { isLogin } = useAuthStore();
 
   // OTHER_WRITER prop 추가
   const {
@@ -24,56 +28,64 @@ export default function QASetCard({ item }) {
   // OTHER_WRITER 값이 있으면 true (북마크된 게시글)
   const isBookmarked = !!otherWriter;
 
-  return (
-    <Card
-      onClick={() => navigate(`/qa/${postId}`)}
-      role='button'
-      aria-label={`${title} 상세로 이동`}
-    >
-      {/* 북마크 아이콘 추가 */}
-      <CardContentWrapper>
-        {isBookmarked && (
-          <BookmarkRibbon>
-            <BookmarkFilledIcon />
-          </BookmarkRibbon>
-        )}
-        {/* 태그 + 상태 배지 */}
-        <TopRow>
-          {job.length > 0 && (
-            <TagGroup>
-              {job.map((jobName) => (
-                <Tag key={jobName}>{jobName}</Tag>
-              ))}
-            </TagGroup>
-          )}
-          {/* {isMe && <Badge>내 질문</Badge>}{isPass && <Badge>합격자</Badge>} */}
-        </TopRow>
-        <Divider />
-        {/* 제목 + 설명 */}
-        <Typography as='h3' size={3} weight='semiBold'>
-          제목
-        </Typography>
-        <Typography as='p' size={3} weight='bold' style={{ marginTop: 8 }}>
-          {title}
-        </Typography>
-        <>
-          <Typography as='h4' size={3} weight='bold' style={{ marginTop: 16 }}>
-            설명
-          </Typography>
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
 
-          <DescriptionText as='p' size={3} weight='regular'>
-            {description || '설명 없음'}
-          </DescriptionText>
-        </>
-        {/* 생성일 + 작성자 */}
-        <div style={{ marginTop: 16, flexGrow: 1 }}>
-          <Typography as='h4' size={3} weight='bold'>
-            생성일
+  const handleCardClick = () => {
+    if (isLogin) {
+      navigate(`/qa/${postId}`);
+    } else {
+      setLoginDialogOpen(true);
+    }
+  };
+
+  return (
+    <>
+      <KakaoLoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
+      <Card onClick={handleCardClick} role='button' aria-label={`${title} 상세로 이동`}>
+        {/* 북마크 아이콘 추가 */}
+        <CardContentWrapper>
+          {isBookmarked && (
+            <BookmarkRibbon>
+              <BookmarkFilledIcon />
+            </BookmarkRibbon>
+          )}
+          {/* 태그 + 상태 배지 */}
+          <TopRow>
+            {job.length > 0 && (
+              <TagGroup>
+                {job.map((jobName) => (
+                  <Tag key={jobName}>{jobName}</Tag>
+                ))}
+              </TagGroup>
+            )}
+            {/* {isMe && <Badge>내 질문</Badge>}{isPass && <Badge>합격자</Badge>} */}
+          </TopRow>
+          <Divider />
+          {/* 제목 + 설명 */}
+          <Typography as='h3' size={3} weight='semiBold'>
+            제목
           </Typography>
-          <Typography as='p' size={2} weight='regular' style={{ marginTop: 6 }}>
-            {createAt.split('T')[0]}
+          <Typography as='p' size={3} weight='bold' style={{ marginTop: 8 }}>
+            {title}
           </Typography>
-          {/* 북마크된 글일 경우 원작자 표시 (선택 사항)
+          <>
+            <Typography as='h4' size={3} weight='bold' style={{ marginTop: 16 }}>
+              설명
+            </Typography>
+
+            <DescriptionText as='p' size={3} weight='regular'>
+              {description || '설명 없음'}
+            </DescriptionText>
+          </>
+          {/* 생성일 + 작성자 */}
+          <div style={{ marginTop: 16, flexGrow: 1 }}>
+            <Typography as='h4' size={3} weight='bold'>
+              생성일
+            </Typography>
+            <Typography as='p' size={2} weight='regular' style={{ marginTop: 6 }}>
+              {createAt.split('T')[0]}
+            </Typography>
+            {/* 북마크된 글일 경우 원작자 표시 (선택 사항)
           {isBookmarked && (
             <Typography
               as='p'
@@ -84,25 +96,26 @@ export default function QASetCard({ item }) {
               가져온 글 (From: {otherWriter})
             </Typography>
           )} */}
-        </div>
-      </CardContentWrapper>
-      <Divider />
-      {/* 푸터(아이콘/숫자 표시) */}
-      <Footer>
-        <IconStat aria-label='북마크 수'>
-          <BookmarkIcon />
-          <Typography as='span' size={3}>
-            {bookCount}
-          </Typography>
-        </IconStat>
-        <IconStat aria-label='리뷰 수'>
-          <CommentIcon />
-          <Typography as='span' size={3}>
-            {review}
-          </Typography>
-        </IconStat>
-      </Footer>
-    </Card>
+          </div>
+        </CardContentWrapper>
+        <Divider />
+        {/* 푸터(아이콘/숫자 표시) */}
+        <Footer>
+          <IconStat aria-label='북마크 수'>
+            <BookmarkIcon />
+            <Typography as='span' size={3}>
+              {bookCount}
+            </Typography>
+          </IconStat>
+          <IconStat aria-label='리뷰 수'>
+            <CommentIcon />
+            <Typography as='span' size={3}>
+              {review}
+            </Typography>
+          </IconStat>
+        </Footer>
+      </Card>
+    </>
   );
 }
 
