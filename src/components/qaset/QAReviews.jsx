@@ -128,7 +128,7 @@ export const QAReviews = () => {
             리뷰
           </Typography>
           <Typography size={2} weight='bold' color='primary.10'>
-            리뷰 {count}
+            {count}개
           </Typography>
         </Header>
 
@@ -170,9 +170,9 @@ export const QAReviews = () => {
                 </Typography>
               </Body>
               {isLogin && authUser.name === r.nickname && (
-                <Button variant='ghost' onClick={() => handleDeleteReview(r.reviewId)}>
-                  삭제하기
-                </Button>
+                <IconButton1 onClick={() => handleDeleteReview(r.reviewId)}>
+                  <TrashIcon></TrashIcon>
+                </IconButton1>
               )}
             </Item>
           ))}

@@ -144,7 +144,7 @@ export default function MyQAListPage() {
           {myQaList.length < MAX_QASET && (
             <AddButton onClick={handleAddClick}>
               <PlusIcon width={20} height={20} />
-              추가하기
+              작성하기
             </AddButton>
           )}
         </MyPageHeader>
