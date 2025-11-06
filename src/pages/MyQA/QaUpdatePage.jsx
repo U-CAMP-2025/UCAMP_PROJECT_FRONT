@@ -74,12 +74,32 @@ export default function QAUpdatePage() {
     formState: { errors, isSubmitting },
   } = methods;
 
+  useEffect(() => {
+    register('jobIds', {
+      validate: (value) => value.length > 0 || '직무를 최소 1개 이상 선택해야 합니다.',
+    });
+  }, [register]);
+
   const { fields, append, remove, move } = useFieldArray({
     control,
     name: 'qaSets',
   });
 
+  const [openItems, setOpenItems] = useState(['item-0']);
+
+  const handleAddSet = () => {
+    if (fields.length >= 10) {
+      openAlert('질문은 최대 10개까지 등록할 수 있습니다.');
+      return;
+    }
+    const newIndex = fields.length;
+
+    append({ question: '', answer: '' });
+    setOpenItems((prevOpenItems) => [...prevOpenItems, `item-${newIndex}`]);
+  };
+
   const selectedJobIds = watch('jobIds');
+
   const onSubmit = (data) => {
     // 직무가 1개 이상 선택되어 있을 때만 저장 가능
     if (data.jobIds.length === 0) {
@@ -141,7 +161,11 @@ export default function QAUpdatePage() {
                   />
                   {/* 유효성 검사 추가 */}
                   {errors.jobIds && (
-                    <Typography color='error'>직무를 최소 1개 선택해야 합니다.</Typography>
+                    <span
+                      style={{ color: 'red', fontSize: '14px', marginTop: '8px', display: 'block' }}
+                    >
+                      {errors.jobIds.message}
+                    </span>
                   )}
                 </Section>
                 <Divider />
@@ -157,7 +181,13 @@ export default function QAUpdatePage() {
                     placeholder='노트의 제목을 입력하세요.'
                     {...register('title', { required: '제목은 필수 입력입니다.' })}
                   />
-                  {errors.title && <Typography color='error'>{errors.title.message}</Typography>}
+                  {errors.title && (
+                    <span
+                      style={{ color: 'red', fontSize: '14px', marginTop: '8px', display: 'block' }}
+                    >
+                      {errors.title.message}
+                    </span>
+                  )}
                 </Section>
 
                 {/* 세트 요약 */}
@@ -188,7 +218,11 @@ export default function QAUpdatePage() {
                       items={fields.map((field) => field.id)}
                       strategy={verticalListSortingStrategy}
                     >
-                      <Accordion.Root type='multiple'>
+                      <Accordion.Root
+                        type='multiple'
+                        value={openItems}
+                        onValueChange={setOpenItems}
+                      >
                         <QASetListContainer>
                           {fields.map((item, index) => (
                             <QAUpdateInput
@@ -206,14 +240,7 @@ export default function QAUpdatePage() {
                       </Accordion.Root>
                     </SortableContext>
                   </DndContext>
-                  <AddSetButton
-                    type='button'
-                    onClick={() =>
-                      fields.length < 10
-                        ? append({ question: '', answer: '' })
-                        : openAlert('질문은 최대 10개까지 등록할 수 있습니다.')
-                    }
-                  >
+                  <AddSetButton type='button' onClick={handleAddSet}>
                     <PlusIcon width={30} height={30} />
                   </AddSetButton>
                 </Section>
