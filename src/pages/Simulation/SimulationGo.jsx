@@ -318,7 +318,7 @@ export default function SimulationGO() {
 
   // ===== UI =====
   return (
-    <PageContainer header footer activeMenu='면접 시뮬레이션'>
+    <>
       <S.MainContentWrapper>
         {!!interviewerId && isSessionStarted && currentQuestion && (
           <TextToSpeech
@@ -332,6 +332,12 @@ export default function SimulationGO() {
         <S.SimulationLayout>
           {/* 사이드바 */}
           <S.Sidebar>
+            <S.TopInfoBar>
+              <S.TimerPill>{formatTime(timeLeft)}</S.TimerPill>
+              <S.QuestionCounter>
+                {Math.min(currentIdx + 1, totalQuestions)} / {totalQuestions || 0}
+              </S.QuestionCounter>
+            </S.TopInfoBar>
             <S.SidebarButton
               onClick={
                 isSessionStarted
@@ -380,15 +386,9 @@ export default function SimulationGO() {
 
           {/* 메인 */}
           <S.MainContent>
-            <S.TopInfoBar>
-              {isSessionStarted && <S.LiveIndicator>LIVE</S.LiveIndicator>}
-              <S.TimerPill>{formatTime(timeLeft)}</S.TimerPill>
-              <S.QuestionCounter>
-                {Math.min(currentIdx + 1, totalQuestions)} / {totalQuestions || 0}
-              </S.QuestionCounter>
-            </S.TopInfoBar>
-
             <S.InterviewerVideo>
+              {isSessionStarted && <S.LiveIndicator>LIVE</S.LiveIndicator>}
+
               {imageUrl && <img src={imageUrl} alt='면접관 이미지' />}
             </S.InterviewerVideo>
 
@@ -403,7 +403,9 @@ export default function SimulationGO() {
             </S.UserPipVideoWrapper>
 
             <S.QuestionHeader>
-              <S.QuestionBadge>Q{totalQuestions === 0 ? 0 : currentIdx + 1}</S.QuestionBadge>
+              {isSessionStarted && (
+                <S.QuestionBadge>Q{totalQuestions === 0 ? 0 : currentIdx + 1}</S.QuestionBadge>
+              )}
               <S.QuestionText>{currentQuestion || '준비가 완료되면 시작해 주세요!'}</S.QuestionText>
             </S.QuestionHeader>
 
@@ -440,7 +442,7 @@ export default function SimulationGO() {
           // stopSession 안에서 라우팅하므로 setEndConfirmOpen(false)는 생략 가능
         }}
       />
-    </PageContainer>
+    </>
   );
 }
 
