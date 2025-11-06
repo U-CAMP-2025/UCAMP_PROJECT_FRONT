@@ -7,6 +7,7 @@ import { SortSelector } from '@components/common/SortSelector';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import QASetList from '@components/qaset/QASetList';
+import { QASetCardSkeleton } from '@components/qaset/SkeletonCard';
 import { PlusIcon } from '@radix-ui/react-icons';
 import { useAuthStore } from '@store/auth/useAuthStore';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -24,6 +25,7 @@ export default function QAListPage() {
   const [displayList, setDisplayList] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const ITEMS_PER_PAGE = 9;
 
   // 정렬 변경
@@ -32,6 +34,7 @@ export default function QAListPage() {
     setPage(1);
     setDisplayList([]);
     setHasMore(true);
+    setIsInitialLoading(true);
   };
 
   // 직무 필터 변경
@@ -40,6 +43,7 @@ export default function QAListPage() {
     setPage(1);
     setDisplayList([]);
     setHasMore(true);
+    setIsInitialLoading(true);
   };
 
   const handleAddClick = () => {
@@ -85,6 +89,9 @@ export default function QAListPage() {
       })
       .catch((error) => {
         console.log(error);
+      })
+      .finally(() => {
+        setIsInitialLoading(false);
       });
   };
 
@@ -122,15 +129,28 @@ export default function QAListPage() {
             <SortSelector currentSort={currentSort} onSortChange={handleSortChange} />
           </SortSection>
         </FilterAndSortBar>
-
-        <InfiniteScroll
-          dataLength={displayList.length}
-          next={fetchMoreData}
-          hasMore={hasMore}
-          loader={<h4 style={{ textAlign: 'center' }}>Loading...</h4>}
-        >
-          <QASetList qaList={displayList} />
-        </InfiniteScroll>
+        {isInitialLoading ? (
+          <SkeletonGrid>
+            {Array.from({ length: ITEMS_PER_PAGE }).map((_, index) => (
+              <QASetCardSkeleton key={index} />
+            ))}
+          </SkeletonGrid>
+        ) : (
+          <InfiniteScroll
+            dataLength={displayList.length}
+            next={fetchMoreData}
+            hasMore={hasMore}
+            loader={
+              <SkeletonGrid>
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <QASetCardSkeleton key={index} />
+                ))}
+              </SkeletonGrid>
+            }
+          >
+            <QASetList qaList={displayList} />
+          </InfiniteScroll>
+        )}
       </MainContentWrapper>
     </PageContainer>
   );
@@ -211,4 +231,12 @@ const AddButton = styled.button`
   &:hover {
     background-color: ${({ theme }) => theme.colors.primary[10]};
   }
+`;
+
+const SkeletonGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: ${({ theme }) => theme.space[6]};
+  width: 95%;
+  margin: 0 auto;
 `;
