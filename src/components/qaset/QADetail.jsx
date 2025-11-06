@@ -1,4 +1,5 @@
 import { copyPost, delPost, getPost } from '@api/postAPIS';
+import Button from '@components/common/Button';
 import { Overlay, Content, Title, Description } from '@components/common/Dialog';
 import Tag, { TagGroup } from '@components/common/Tag';
 import Typography from '@components/common/Typography';
@@ -21,7 +22,9 @@ export const QADetail = () => {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const navigate = useNavigate();
-
+  const onPractice = () => {
+    navigate('/simulation');
+  };
   useEffect(() => {
     getPost(qaId)
       .then((resp) => {
@@ -182,6 +185,14 @@ export const QADetail = () => {
           <Pre>{item.answer || '-'}</Pre>
         </QABox>
       ))}
+      <Button
+        type='button'
+        size='sm'
+        onClick={onPractice}
+        style={{ alignSelf: 'flex-end', padding: '0 16px' }}
+      >
+        연습 하기
+      </Button>
     </Wrap>
   );
 };
