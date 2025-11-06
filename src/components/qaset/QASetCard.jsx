@@ -143,7 +143,7 @@ const HeaderBar = styled.div`
   display: flex;
   align-items: center;
   position: relative;
-  z-index: 1;
+  // z-index: 1;
 `;
 
 const TopRow = styled.div`
