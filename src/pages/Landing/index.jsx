@@ -1,9 +1,213 @@
+import { fetchUserStatus } from '@api/userAPIS';
 import { Header } from '@components/layout/Header';
 import { PageContainer } from '@components/layout/PageContainer';
 import { KakaoLoginDialog } from '@components/signup/KakaoLoginDialog';
-import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useAuthStore } from '@store/auth/useAuthStore';
+import React, { useEffect, useState } from 'react';
 import styled, { keyframes } from 'styled-components';
+
+export default function LandingPage() {
+  const { isLogin } = useAuthStore();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const cardsPerView = 3;
+  const maxIndex = cardData.length - cardsPerView;
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('friends');
+
+  const currentData = mockData[activeTab];
+  const sortedData = [...currentData].sort((a, b) => b.score - a.score);
+
+  // Reorder for podium display: 2nd, 1st, 3rd
+  const podiumOrder = [
+    sortedData[1], // 2nd place (left)
+    sortedData[0], // 1st place (center)
+    sortedData[2], // 3rd place (right)
+  ];
+
+  const handleClickLoginButton = () => {
+    setLoginDialogOpen(true);
+  };
+
+  const handlePrev = () => {
+    setCurrentIndex((prev) => Math.max(0, prev - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prev) => Math.min(maxIndex, prev + 1));
+  };
+
+  // 신규 유저 판별
+  useEffect(() => {
+    if (isLogin) {
+      fetchUserStatus().then((response) => {
+        console.log(response);
+      });
+    }
+  }, []);
+
+  const offset = -currentIndex * (100 / cardsPerView) - currentIndex * (20 / cardsPerView);
+
+  return (
+    <>
+      <Header></Header>
+      <PageContainer footer>
+        {/* Hero Section */}
+        <HeroContainer>
+          <BackgroundCircle />
+          <ContentWrapper>
+            <MainHeading>
+              면접 강화 툴<br />
+              면접톡!
+            </MainHeading>
+            <SubHeading>
+              합격은 면접톡이 <br />
+              책임진다
+            </SubHeading>
+            <Description>면접 시뮬레이션&피드백 루틴을 경험해보세요!</Description>
+            <ButtonGroup>
+              <PrimaryButton onClick={handleClickLoginButton}>지금 시작하기</PrimaryButton>
+              <KakaoLoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
+            </ButtonGroup>
+          </ContentWrapper>
+
+          <CardsWrapper>
+            <Card as={Card1}>
+              <CardIcon>📝</CardIcon>
+              <CardTitle>AI 면접 분석</CardTitle>
+              <CardDescription>시뮬레이션 후 답변을 분석하고 개선점을 알려드립니다</CardDescription>
+            </Card>
+            <Card as={Card2}>
+              <CardIcon>💼</CardIcon>
+              <CardTitle>합격 전략</CardTitle>
+              <CardDescription>
+                합격자들의 노하우를 바탕으로 한 합격 전략을 배웁니다
+              </CardDescription>
+            </Card>
+            <Card as={Card3}>
+              <CardIcon>🧑‍⚖️</CardIcon>
+              <CardTitle>실전 환경</CardTitle>
+              <CardDescription>AI 면접관으로 더 실감나게 연습해보세요</CardDescription>
+            </Card>
+          </CardsWrapper>
+        </HeroContainer>
+        {/* Course Section */}
+        <Container>
+          <Title2>면접 준비, 혼자 하려니 막막하지 않나요?</Title2>
+          <CardsWrapper2>
+            {cards.map((card) => (
+              <Cardd key={card.id} bgColor={card.bgColor}>
+                <AvatarWrapper2>{card.avatar}</AvatarWrapper2>
+                <CardTitle2>{card.title}</CardTitle2>
+                <CardDescription2>{card.description}</CardDescription2>
+              </Cardd>
+            ))}
+          </CardsWrapper2>
+        </Container>
+        {/* Testimonial Section */}
+        <Container>
+          <Title2>이젠 다른 사람들과 협력해보세요!</Title2>
+          {/* Ranking */}
+          <ContainerR>
+            <HeaderR>
+              <TitleR>주간랭킹</TitleR>
+              <Tabs>
+                <Tab active={activeTab === 'friends'} onClick={() => setActiveTab('friends')}>
+                  활동순
+                </Tab>
+                <Tab active={activeTab === 'world'} onClick={() => setActiveTab('world')}>
+                  북마크순
+                </Tab>
+              </Tabs>
+            </HeaderR>
+
+            <PodiumContainer>
+              {podiumOrder.map((user, index) => {
+                const actualRank = user.rank;
+                const pedestalHeights = [80, 120, 60]; // heights for 2nd, 1st, 3rd
+
+                return (
+                  <PodiumItem key={user.id}>
+                    {actualRank === 1 && <Crown>👑</Crown>}
+                    <AvatarWrapper>
+                      <Avatar bg={actualRank === 1 ? '#fff8e1' : '#f5f5f5'} rank={actualRank}>
+                        {user.avatar}
+                      </Avatar>
+                      <RankBadge rank={actualRank}>{actualRank}</RankBadge>
+                    </AvatarWrapper>
+                    <Username>{user.username}</Username>
+                    <Score>{user.score.toLocaleString()}</Score>
+                    <ScoreLabel>---</ScoreLabel>
+                    <Pedestal height={pedestalHeights[index]} />
+                  </PodiumItem>
+                );
+              })}
+            </PodiumContainer>
+          </ContainerR>
+          {/* ////////////////////////////////////////////////// */}
+          <SliderWrapper>
+            <ArrowButton $direction='left' onClick={handlePrev} disabled={currentIndex === 0}>
+              <svg viewBox='0 0 24 24' fill='none'>
+                <path d='M15 18l-6-6 6-6' strokeLinecap='round' strokeLinejoin='round' />
+              </svg>
+            </ArrowButton>
+
+            <CardContainer2>
+              {cardData.map((card, index) => (
+                <CardWrapper key={card.id} $offset={offset}>
+                  <Cards>
+                    <Title3>{card.title}</Title3>
+                    <ReviewSection>
+                      💬
+                      {card.reviews.map((review, idx) => (
+                        <ReviewItem key={idx}>
+                          <ReviewText>`{review.text}`</ReviewText>
+                        </ReviewItem>
+                      ))}
+                    </ReviewSection>
+                  </Cards>
+                </CardWrapper>
+              ))}
+            </CardContainer2>
+
+            <ArrowButton2
+              $direction='right'
+              onClick={handleNext}
+              disabled={currentIndex === maxIndex}
+            >
+              <svg viewBox='0 0 24 24' fill='none'>
+                <path d='M9 18l6-6-6-6' strokeLinecap='round' strokeLinejoin='round' />
+              </svg>
+            </ArrowButton2>
+          </SliderWrapper>
+        </Container>
+        {/* CTA Section */}
+        <Container2>
+          <CTASection>
+            <Content>
+              <SubText>면접 준비, 지금부터 시작해보세요.</SubText>
+              <MainText>면접톡과 함께 시작할 준비가 되셨나요?</MainText>
+              <ButtonGroup2>
+                <PrimaryButton2 onClick={handleClickLoginButton}>
+                  시작하기
+                  <ArrowIcon>
+                    <svg viewBox='0 0 24 24' fill='none'>
+                      <path
+                        d='M5 12h14M12 5l7 7-7 7'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
+                    </svg>
+                  </ArrowIcon>
+                </PrimaryButton2>
+                <KakaoLoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
+              </ButtonGroup2>
+            </Content>
+          </CTASection>
+        </Container2>
+      </PageContainer>
+    </>
+  );
+}
 
 // const float = keyframes`
 //   0%, 100% { transform: translateY(0px); }
@@ -766,26 +970,6 @@ const ButtonGroup2 = styled.div`
   }
 `;
 
-const Button2 = styled.button`
-  padding: 18px 40px;
-  border-radius: 50px;
-  font-size: 16px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  transition: all 0.3s ease;
-  min-width: 200px;
-  justify-content: center;
-
-  @media (max-width: 640px) {
-    width: 100%;
-    max-width: 300px;
-  }
-`;
-
 const PrimaryButton2 = styled(Button)`
   background: white;
   color: #4a9fe5;
@@ -975,196 +1159,3 @@ const mockData = {
     { id: 3, username: '박순신', score: 41234, avatar: '🎮', rank: 3 },
   ],
 };
-export default function LandingPage() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const cardsPerView = 3;
-  const maxIndex = cardData.length - cardsPerView;
-  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
-  const { pathname } = useLocation();
-  const [activeTab, setActiveTab] = useState('friends');
-
-  const currentData = mockData[activeTab];
-  const sortedData = [...currentData].sort((a, b) => b.score - a.score);
-
-  // Reorder for podium display: 2nd, 1st, 3rd
-  const podiumOrder = [
-    sortedData[1], // 2nd place (left)
-    sortedData[0], // 1st place (center)
-    sortedData[2], // 3rd place (right)
-  ];
-
-  const handleClickLoginButton = () => {
-    setLoginDialogOpen(true);
-  };
-
-  const handlePrev = () => {
-    setCurrentIndex((prev) => Math.max(0, prev - 1));
-  };
-
-  const handleNext = () => {
-    setCurrentIndex((prev) => Math.min(maxIndex, prev + 1));
-  };
-
-  const offset = -currentIndex * (100 / cardsPerView) - currentIndex * (20 / cardsPerView);
-
-  return (
-    <>
-      <Header></Header>
-      <PageContainer footer>
-        {/* Hero Section */}
-        <HeroContainer>
-          <BackgroundCircle />
-          <ContentWrapper>
-            <MainHeading>
-              면접 강화 툴<br />
-              면접톡!
-            </MainHeading>
-            <SubHeading>
-              합격은 면접톡이 <br />
-              책임진다
-            </SubHeading>
-            <Description>면접 시뮬레이션&피드백 루틴을 경험해보세요!</Description>
-            <ButtonGroup>
-              <PrimaryButton onClick={handleClickLoginButton}>지금 시작하기</PrimaryButton>
-              <KakaoLoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
-            </ButtonGroup>
-          </ContentWrapper>
-
-          <CardsWrapper>
-            <Card as={Card1}>
-              <CardIcon>📝</CardIcon>
-              <CardTitle>AI 면접 분석</CardTitle>
-              <CardDescription>시뮬레이션 후 답변을 분석하고 개선점을 알려드립니다</CardDescription>
-            </Card>
-            <Card as={Card2}>
-              <CardIcon>💼</CardIcon>
-              <CardTitle>합격 전략</CardTitle>
-              <CardDescription>
-                합격자들의 노하우를 바탕으로 한 합격 전략을 배웁니다
-              </CardDescription>
-            </Card>
-            <Card as={Card3}>
-              <CardIcon>🧑‍⚖️</CardIcon>
-              <CardTitle>실전 환경</CardTitle>
-              <CardDescription>AI 면접관으로 더 실감나게 연습해보세요</CardDescription>
-            </Card>
-          </CardsWrapper>
-        </HeroContainer>
-        {/* Course Section */}
-        <Container>
-          <Title2>면접 준비, 혼자 하려니 막막하지 않나요?</Title2>
-          <CardsWrapper2>
-            {cards.map((card) => (
-              <Cardd key={card.id} bgColor={card.bgColor}>
-                <AvatarWrapper2>{card.avatar}</AvatarWrapper2>
-                <CardTitle2>{card.title}</CardTitle2>
-                <CardDescription2>{card.description}</CardDescription2>
-              </Cardd>
-            ))}
-          </CardsWrapper2>
-        </Container>
-        {/* Testimonial Section */}
-        <Container>
-          <Title2>이젠 다른 사람들과 협력해보세요!</Title2>
-          {/* Ranking */}
-          <ContainerR>
-            <HeaderR>
-              <TitleR>주간랭킹</TitleR>
-              <Tabs>
-                <Tab active={activeTab === 'friends'} onClick={() => setActiveTab('friends')}>
-                  활동순
-                </Tab>
-                <Tab active={activeTab === 'world'} onClick={() => setActiveTab('world')}>
-                  북마크순
-                </Tab>
-              </Tabs>
-            </HeaderR>
-
-            <PodiumContainer>
-              {podiumOrder.map((user, index) => {
-                const actualRank = user.rank;
-                const pedestalHeights = [80, 120, 60]; // heights for 2nd, 1st, 3rd
-
-                return (
-                  <PodiumItem key={user.id}>
-                    {actualRank === 1 && <Crown>👑</Crown>}
-                    <AvatarWrapper>
-                      <Avatar bg={actualRank === 1 ? '#fff8e1' : '#f5f5f5'} rank={actualRank}>
-                        {user.avatar}
-                      </Avatar>
-                      <RankBadge rank={actualRank}>{actualRank}</RankBadge>
-                    </AvatarWrapper>
-                    <Username>{user.username}</Username>
-                    <Score>{user.score.toLocaleString()}</Score>
-                    <ScoreLabel>---</ScoreLabel>
-                    <Pedestal height={pedestalHeights[index]} />
-                  </PodiumItem>
-                );
-              })}
-            </PodiumContainer>
-          </ContainerR>
-          {/* ////////////////////////////////////////////////// */}
-          <SliderWrapper>
-            <ArrowButton $direction='left' onClick={handlePrev} disabled={currentIndex === 0}>
-              <svg viewBox='0 0 24 24' fill='none'>
-                <path d='M15 18l-6-6 6-6' strokeLinecap='round' strokeLinejoin='round' />
-              </svg>
-            </ArrowButton>
-
-            <CardContainer2>
-              {cardData.map((card, index) => (
-                <CardWrapper key={card.id} $offset={offset}>
-                  <Cards>
-                    <Title3>{card.title}</Title3>
-                    <ReviewSection>
-                      💬
-                      {card.reviews.map((review, idx) => (
-                        <ReviewItem key={idx}>
-                          <ReviewText>`{review.text}`</ReviewText>
-                        </ReviewItem>
-                      ))}
-                    </ReviewSection>
-                  </Cards>
-                </CardWrapper>
-              ))}
-            </CardContainer2>
-
-            <ArrowButton2
-              $direction='right'
-              onClick={handleNext}
-              disabled={currentIndex === maxIndex}
-            >
-              <svg viewBox='0 0 24 24' fill='none'>
-                <path d='M9 18l6-6-6-6' strokeLinecap='round' strokeLinejoin='round' />
-              </svg>
-            </ArrowButton2>
-          </SliderWrapper>
-        </Container>
-        {/* CTA Section */}
-        <Container2>
-          <CTASection>
-            <Content>
-              <SubText>면접 준비, 지금부터 시작해보세요.</SubText>
-              <MainText>면접톡과 함께 시작할 준비가 되셨나요?</MainText>
-              <ButtonGroup2>
-                <PrimaryButton2 onClick={handleClickLoginButton}>
-                  시작하기
-                  <ArrowIcon>
-                    <svg viewBox='0 0 24 24' fill='none'>
-                      <path
-                        d='M5 12h14M12 5l7 7-7 7'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                      />
-                    </svg>
-                  </ArrowIcon>
-                </PrimaryButton2>
-                <KakaoLoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
-              </ButtonGroup2>
-            </Content>
-          </CTASection>
-        </Container2>
-      </PageContainer>
-    </>
-  );
-}
