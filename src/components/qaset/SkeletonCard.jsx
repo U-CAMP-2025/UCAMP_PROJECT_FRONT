@@ -1,4 +1,3 @@
-// QASetCardSkeleton.jsx
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import styled from 'styled-components';
