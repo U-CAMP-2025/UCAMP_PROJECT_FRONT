@@ -31,7 +31,11 @@ const Title = styled(Dialog.Title)`
 const Description = styled(Dialog.Description)`
   font-size: 14px;
   color: ${({ theme }) => theme.colors.gray[11]};
-  margin-bottom: 24px;
+  margin: 2px 0;
+`;
+
+const Descriptions = styled.div`
+  margin: 24px 0;
 `;
 
 const ButtonGroup = styled.div`
@@ -59,13 +63,17 @@ const CancelButton = styled(Button)`
   color: ${({ theme }) => theme.colors.gray[12]};
 `;
 
-export default function CofirmDialog({ open, onOpenChange, title, message, onConfirm }) {
+export default function CofirmDialog({ open, onOpenChange, title, messages, onConfirm }) {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Overlay />
       <Content>
         <Title>{title}</Title>
-        <Description>{message}</Description>
+        <Descriptions>
+          {messages.map((text, idx) => (
+            <Description key={idx}>{text}</Description>
+          ))}
+        </Descriptions>
         <ButtonGroup>
           <CancelButton onClick={() => onOpenChange(false)}>취소</CancelButton>
           <ConfirmButton

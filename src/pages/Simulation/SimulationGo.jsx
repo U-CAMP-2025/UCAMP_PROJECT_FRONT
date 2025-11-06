@@ -436,7 +436,10 @@ export default function SimulationGO() {
         open={endConfirmOpen}
         onOpenChange={setEndConfirmOpen}
         title='면접 종료'
-        message='면접 질문이 남아있는 상태에서 종료하면, 답변을 완료하지 않은 질문의 면접 결과는 저장되지 않습니다. 종료하시겠어요?'
+        messages={[
+          '면접 질문이 남아있는 상태에서 종료하면, 답변을 완료하지 않은 질문의 면접 결과는 저장되지 않습니다.',
+          '종료하시겠어요?',
+        ]}
         onConfirm={async () => {
           await stopSession(); // 확인 → 진짜 종료
           // stopSession 안에서 라우팅하므로 setEndConfirmOpen(false)는 생략 가능

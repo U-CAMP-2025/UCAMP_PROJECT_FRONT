@@ -294,8 +294,7 @@ const SettingsBox = styled.div`
   background-color: ${({ theme }) => theme.colors.gray[2]};
   border: 1px solid ${({ theme }) => theme.colors.gray[4]};
   border-radius: ${({ theme }) => theme.radius.md};
-  padding: ${({ theme }) => theme.space[4]} ${({ theme }) => theme.space[8]}
-    ${({ theme }) => theme.space[6]};
+  padding: ${({ theme }) => theme.space[4]} ${({ theme }) => theme.space[8]};
   margin-top: ${({ theme }) => theme.space[8]};
   box-shadow: ${({ theme }) => theme.shadow.sm};
 
