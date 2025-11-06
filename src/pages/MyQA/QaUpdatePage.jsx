@@ -1,6 +1,7 @@
 import { createPost, editPost, getPost } from '@api/postAPIS';
 import { JobSelector } from '@components/common/JobSelector';
 import Typography from '@components/common/Typography';
+import WarnDialog from '@components/common/WarnDialog';
 import { PageContainer } from '@components/layout/PageContainer';
 import {
   DndContext,
@@ -19,7 +20,7 @@ import { Settings } from '@elevenlabs/elevenlabs-js/api/resources/voices/resourc
 import * as Accordion from '@radix-ui/react-accordion';
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import { CheckIcon, PlusIcon } from '@radix-ui/react-icons';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -28,6 +29,9 @@ import { QAUpdateInput } from './QaUpdateInput';
 
 export default function QAUpdatePage() {
   const location = useLocation();
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+
   const { qaId } = location.state || {};
   const navigate = useNavigate();
   const methods = useForm({
@@ -40,7 +44,10 @@ export default function QAUpdatePage() {
     },
     mode: 'onBlur', // 필드가 변경될 때 유효성 검사 수행
   });
-
+  const openAlert = (message) => {
+    setAlertMessage(message);
+    setAlertOpen(true);
+  };
   const { reset } = methods;
 
   useEffect(() => {
@@ -191,7 +198,7 @@ export default function QAUpdatePage() {
                               onDelete={() =>
                                 fields.length > 1
                                   ? remove(index)
-                                  : alert('최소 1개의 질문 세트가 필요합니다.')
+                                  : openAlert('최소 1개의 질문 세트가 필요합니다.')
                               }
                             />
                           ))}
@@ -204,7 +211,7 @@ export default function QAUpdatePage() {
                     onClick={() =>
                       fields.length < 10
                         ? append({ question: '', answer: '' })
-                        : alert('질문은 최대 10개까지 등록할 수 있습니다.')
+                        : openAlert('질문은 최대 10개까지 등록할 수 있습니다.')
                     }
                   >
                     <PlusIcon width={30} height={30} />
@@ -247,6 +254,13 @@ export default function QAUpdatePage() {
           </FormProvider>
         </SettingsBox>
       </MainContentWrapper>
+      <WarnDialog
+        open={alertOpen}
+        onOpenChange={setAlertOpen}
+        title='알림'
+        message={alertMessage}
+        confirmText='확인'
+      />
     </PageContainer>
   );
 }

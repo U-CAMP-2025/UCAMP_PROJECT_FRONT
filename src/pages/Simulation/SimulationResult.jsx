@@ -1,6 +1,7 @@
 // SimulationResultPage.jsx
 import { axiosInstance } from '@api/axios';
 import ConfirmDialog from '@components/common/ConfirmDialog';
+import ErrorDialog from '@components/common/ErrorDialog';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import { url } from '@elevenlabs/elevenlabs-js/core';
@@ -25,13 +26,19 @@ export default function SimulationResultPage() {
 
   const incomingBlob = location.state?.initialBlob ?? null;
   const [videoUrl, setVideoUrl] = useState(null);
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
   useEffect(() => {
     if (!incomingBlob) return;
     let url = URL.createObjectURL(incomingBlob);
     setVideoUrl(url);
     return () => URL.revokeObjectURL(url);
   }, [incomingBlob]);
-  console.log(incomingBlob);
+  const openAlert = (message) => {
+    setAlertMessage(message);
+    setAlertOpen(true);
+  };
+
   useEffect(() => {
     (async () => {
       try {
@@ -69,10 +76,9 @@ export default function SimulationResultPage() {
         })),
       });
       setDirty(false);
-      alert('저장되었습니다.');
       navigate('/myqa'); // 저장 후 이동 경로 (필요 시 변경)
     } catch (e) {
-      alert(e?.response?.data?.message ?? '저장에 실패했습니다.');
+      openAlert(e?.response?.data?.message ?? '저장에 실패했습니다.');
     } finally {
       setSaving(false);
     }
@@ -159,8 +165,15 @@ export default function SimulationResultPage() {
         open={saveConfirmOpen}
         onOpenChange={setSaveConfirmOpen}
         title='면접 결과 저장'
-        message={`저장하면 현재 수정된 답변으로 결과가 덮어써집니다.\n저장하시겠어요?`}
+        message={`저장하면 현재 수정된 답변으로 결과가 덮어씌워집니다.\n저장하시겠어요?`}
         onConfirm={handleSaveConfirm}
+      />
+      <ErrorDialog
+        open={alertOpen}
+        onOpenChange={setAlertOpen}
+        title='알림'
+        message={alertMessage}
+        confirmText='확인'
       />
     </PageContainer>
   );
