@@ -110,7 +110,7 @@ export default function SimulationPresetPage() {
         {/* 상단 탭 */}
         <StyledTabsRoot defaultValue='/simulation' onValueChange={(value) => navigate(value)}>
           <StyledTabsList>
-            <StyledTabsTrigger value='/simulation'>면접 시뮬레이션 시작</StyledTabsTrigger>
+            <StyledTabsTrigger value='/simulation'>면접 연습 시작</StyledTabsTrigger>
             <StyledTabsTrigger value='/simulation/record'>면접 연습 기록</StyledTabsTrigger>
           </StyledTabsList>
         </StyledTabsRoot>
@@ -297,10 +297,10 @@ const PresetForm = styled.form`
 const SettingsBox = styled.div`
   width: 90%;
   margin: 0 auto;
-  background-color: ${({ theme }) => theme.colors.gray[2]}; -
+  background-color: ${({ theme }) => theme.colors.gray[2]};
   border: 1px solid ${({ theme }) => theme.colors.gray[4]};
   border-radius: ${({ theme }) => theme.radius.md};
-  padding: ${({ theme }) => theme.space[6]} ${({ theme }) => theme.space[8]}; 
+  padding: ${({ theme }) => theme.space[6]} ${({ theme }) => theme.space[8]};
   margin-top: ${({ theme }) => theme.space[8]};
   box-shadow: ${({ theme }) => theme.shadow.sm};
 

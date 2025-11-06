@@ -1,19 +1,17 @@
 import { axiosInstance } from '@api/axios';
 import ConfirmDialog from '@components/common/ConfirmDialog';
 import Typography from '@components/common/Typography';
-import { PageContainer } from '@components/layout/PageContainer';
 import QuestionAudioRecorder from '@components/simulation/QuestionAudioRecorder';
 import SessionVideoRecorder from '@components/simulation/SessionVideoRecorder';
 import VoiceModel from '@components/simulation/VoiceModel';
 import { PlayIcon, StopIcon, DiscIcon, CheckIcon } from '@radix-ui/react-icons';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useParams, useNavigate, UNSAFE_NavigationContext } from 'react-router-dom';
 
 import * as S from './SimulationGoStyle';
 import TextToSpeech from './TextToSpeech';
 
 const MAX_SECONDS = 120;
-const SHOW_CONSOLE_LOGS = true;
 
 // 1..n 배열 만들고 셔플
 function makeOneBasedShuffled(n) {
@@ -26,10 +24,107 @@ function makeOneBasedShuffled(n) {
   return arr;
 }
 
+// Local useBlocker implementation for React Router v6 (using UNSAFE_NavigationContext) with feature detection and fallback
+function useBlocker(when) {
+  const ctx = useContext(UNSAFE_NavigationContext);
+  const navigator = ctx?.navigator;
+
+  const txRef = useRef(null);
+  const [state, setState] = useState('unblocked'); // 'unblocked' | 'blocked'
+
+  useEffect(() => {
+    if (!when) return;
+
+    // If react-router provides a history-like navigator with .block, use it.
+    if (navigator && typeof navigator.block === 'function') {
+      const unblock = navigator.block((tx) => {
+        txRef.current = tx;
+        setState('blocked');
+      });
+      return unblock;
+    }
+
+    // Fallback: minimal browser back interception to open confirm.
+    // Note: This doesn't catch in-app Link pushes without history.block support.
+    const onPopState = () => {
+      // Immediately undo the back navigation and surface the confirm.
+      window.history.pushState(null, '', window.location.href);
+      txRef.current = {
+        retry: () => window.history.back(),
+      };
+      setState('blocked');
+    };
+
+    // Push a dummy entry so the first Back stays on the page and triggers popstate.
+    window.history.pushState(null, '', window.location.href);
+    window.addEventListener('popstate', onPopState);
+    return () => {
+      window.removeEventListener('popstate', onPopState);
+    };
+  }, [navigator, when]);
+
+  const proceed = useCallback(() => {
+    if (txRef.current) {
+      const tx = txRef.current;
+      txRef.current = null;
+      setState('unblocked');
+      try {
+        tx.retry();
+      } catch (e) {
+        // no-op fallback
+      }
+    }
+  }, []);
+
+  const reset = useCallback(() => {
+    txRef.current = null;
+    setState('unblocked');
+  }, []);
+
+  return { state, proceed, reset };
+}
+
 export default function SimulationGO() {
   const { simulationId } = useParams();
   const navigate = useNavigate();
   const [endConfirmOpen, setEndConfirmOpen] = useState(false);
+
+  // ===== 상태 =====
+  const [leaveConfirmOpen, setLeaveConfirmOpen] = useState(false);
+  const [allowLeaveOnce, setAllowLeaveOnce] = useState(false);
+
+  // ===== 상태 =====
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [currentQuestion, setcurrentQuestion] = useState('');
+  const [timeLeft, setTimeLeft] = useState(MAX_SECONDS);
+  const [isSessionStarted, setIsSessionStarted] = useState(false);
+  const [isQuestionRecording, setIsQuestionRecording] = useState(false);
+
+  const [interviewerId, setInterviewerId] = useState(null);
+  const [imageUrl, setImageUrl] = useState(null);
+
+  const [questionList, setQaList] = useState([]);
+  const [randomOrder, setRandomOrder] = useState([]);
+  const [simPost, setPost] = useState(null);
+  const [scriptMode, setScriptMode] = useState(false);
+  const [ttsSpeaking, setTtsSpeaking] = useState(false);
+
+  const shouldBlockLeave = (isSessionStarted || isQuestionRecording) && !allowLeaveOnce; // 떠나기 차단 여부
+
+  const blocker = useBlocker(shouldBlockLeave);
+
+  useEffect(() => {
+    if (blocker.state === 'blocked') {
+      setLeaveConfirmOpen(true);
+    }
+  }, [blocker.state]);
+
+  // ★ STT 결과 모음 (qaId -> transcript)
+  const [sttByQaId, setSttByQaId] = useState({}); // ★
+
+  const videoRef = useRef(null);
+  const audioRef = useRef(null);
+  const moveNextGuardRef = useRef(false);
 
   // ===== PIP 드래그 =====
   const [pipPosition, setPipPosition] = useState(null); // pipPosition 상태 관리
@@ -109,32 +204,6 @@ export default function SimulationGO() {
     [pipPosition],
   );
 
-  // ===== 상태 =====
-  const [currentIdx, setCurrentIdx] = useState(0);
-  const [currentQuestion, setcurrentQuestion] = useState('');
-  const [timeLeft, setTimeLeft] = useState(MAX_SECONDS);
-  const [isSessionStarted, setIsSessionStarted] = useState(false);
-  const [isQuestionRecording, setIsQuestionRecording] = useState(false);
-
-  const [interviewerId, setInterviewerId] = useState(null);
-  const [audioById, setAudioById] = useState({});
-  const [videoUrl, setVideoUrl] = useState(null);
-  const [imageUrl, setImageUrl] = useState(null);
-  const [videoBlob, setVideoBlob] = useState(null);
-
-  const [questionList, setQaList] = useState([]);
-  const [randomOrder, setRandomOrder] = useState([]);
-  const [simPost, setPost] = useState(null);
-  const [scriptMode, setScriptMode] = useState(false);
-  const [ttsSpeaking, setTtsSpeaking] = useState(false);
-
-  // ★ STT 결과 모음 (qaId -> transcript)
-  const [sttByQaId, setSttByQaId] = useState({}); // ★
-
-  const videoRef = useRef(null);
-  const audioRef = useRef(null);
-  const moveNextGuardRef = useRef(false);
-
   // ===== 1) 상세 조회 =====
   useEffect(() => {
     if (!simulationId) return;
@@ -155,7 +224,6 @@ export default function SimulationGO() {
           setImageUrl(_imageUrl);
           setPost(post);
           setQaList(qaList);
-          setAudioById({});
           setSttByQaId({}); // ★ 초기화
 
           setRandomOrder(
@@ -229,7 +297,6 @@ export default function SimulationGO() {
         }
       }
     }
-    if (blob) setVideoBlob(blob);
 
     // 화면 상태 리셋
     setIsSessionStarted(false);
@@ -240,6 +307,7 @@ export default function SimulationGO() {
     axiosInstance.patch(`/simulation/${simulationId}/${currentIdx + 1}`);
 
     // 라우터 state로 전달
+    setAllowLeaveOnce(true);
     navigate(`/simulation/${simulationId}/end`, {
       state: {
         recordedBlob: blob || null,
@@ -259,27 +327,16 @@ export default function SimulationGO() {
 
   const finishAnswer = async () => {
     if (!audioRef.current?.finish) return;
-    const { url, qaId } = await audioRef.current.finish();
-    if (url && qaId) setAudioById((prev) => ({ ...prev, [qaId]: url }));
+    await audioRef.current.finish();
     goNextQuestionGuarded();
   };
 
   // 업로드 성공: (url, qaId, transcript)
   const handleSavedAudio = (url, qaId, transcript) => {
     if (!qaId) return;
-    setAudioById((prev) => ({ ...prev, [qaId]: url }));
-
-    // ★ STT 누적 저장
+    // STT 누적 저장
     if (typeof transcript === 'string' && transcript.trim()) {
       setSttByQaId((prev) => ({ ...prev, [qaId]: transcript }));
-    }
-
-    if (SHOW_CONSOLE_LOGS && typeof transcript === 'string') {
-      const qText = orderedQa.find((q) => q?.qaId === qaId)?.qaQuestion || '';
-      console.groupCollapsed(
-        `[STT] qaId=${qaId} | "${qText.slice(0, 40)}${qText.length > 40 ? '…' : ''}"`,
-      );
-      console.groupEnd();
     }
   };
 
@@ -287,7 +344,6 @@ export default function SimulationGO() {
   const handleRecordingChange = (rec) => setIsQuestionRecording(rec);
 
   const handleAutoFinish = (qaId, url) => {
-    if (url && qaId) setAudioById((prev) => ({ ...prev, [qaId]: url }));
     goNextQuestionGuarded();
   };
 
@@ -436,13 +492,32 @@ export default function SimulationGO() {
         open={endConfirmOpen}
         onOpenChange={setEndConfirmOpen}
         title='면접 종료'
-        messages={[
-          '면접 질문이 남아있는 상태에서 종료하면, 답변을 완료하지 않은 질문의 면접 결과는 저장되지 않습니다.',
-          '종료하시겠어요?',
-        ]}
+        messages={['지금 종료하면 면접 연습 결과가 저장되지 않습니다.', '종료하시겠어요?']}
         onConfirm={async () => {
           await stopSession(); // 확인 → 진짜 종료
           // stopSession 안에서 라우팅하므로 setEndConfirmOpen(false)는 생략 가능
+        }}
+      />
+      <ConfirmDialog
+        open={leaveConfirmOpen}
+        onOpenChange={(open) => {
+          setLeaveConfirmOpen(open);
+          // 사용자가 닫기(X)나 취소로 닫으면 네비게이션 취소
+          if (!open && blocker && blocker.state === 'blocked') {
+            blocker.reset();
+          }
+        }}
+        title='페이지를 떠나시겠어요?'
+        messages={[
+          '면접이 진행 중입니다. 지금 종료하면 면접 연습 결과가 저장되지 않습니다.',
+          '그래도 이동하시겠어요?',
+        ]}
+        onConfirm={() => {
+          setLeaveConfirmOpen(false);
+          setAllowLeaveOnce(true); // 이 한 번은 이동 허용
+          if (blocker && blocker.state === 'blocked') {
+            blocker.proceed();
+          }
         }}
       />
     </>
