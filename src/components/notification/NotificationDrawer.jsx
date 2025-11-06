@@ -83,7 +83,8 @@ export default function NotificationDrawer({
                     <Typography as='p' size={2} style={{ whiteSpace: 'pre-wrap' }}>
                       {it.type === 'REVIEW' ? (
                         <StyledLink to={`/qa/${it.content.split(':::')[1]}`}>
-                          {it.content.split(':::')[0]} 질문셋에 리뷰가 달렸습니다.
+                          {it.content.split(':::')[0]}{' '}
+                          <Message>면접노트에 리뷰가 달렸습니다.</Message>
                         </StyledLink>
                       ) : (
                         <Message>{it.content}</Message>
@@ -101,9 +102,9 @@ export default function NotificationDrawer({
 }
 
 function labelOf(type) {
-  if (type === 'TRANSCRIPTION') return '답변 변환';
+  if (type === 'TRANSCRIPT') return '답변 변환';
   if (type === 'REVIEW') return '리뷰';
-  if (type === 'CERTIFICATE') return '합격자 인증';
+  if (type === 'CERT') return '합격자 인증';
   return type || '알림';
 }
 
@@ -138,6 +139,7 @@ const Panel = styled(Dialog.Content)`
   grid-template-rows: auto 1fr;
   gap: 0;
   overflow: hidden; /* ensure inner content scrolls */
+  z-index: 9999;
 `;
 
 const Header = styled.div`
@@ -256,9 +258,9 @@ const Badge = styled.span`
   font-weight: ${({ theme }) => theme.font.weight.semiBold};
   ${({ $type, theme }) => {
     const map = {
-      TRANSCRIPTION: { bg: theme.colors.primary[3], fg: theme.colors.primary[11] },
+      TRANSCRIPT: { bg: theme.colors.primary[3], fg: theme.colors.primary[11] },
       REVIEW: { bg: '#E7F8ED', fg: '#18794E' },
-      CERTIFICATE: { bg: '#ffedd5', fg: '#fb923c' },
+      CERT: { bg: '#ffedd5', fg: '#fb923c' },
     };
     const v = map[$type] || { bg: theme.colors.gray[3], fg: theme.colors.gray[11] };
     return `background:${v.bg}; color:${v.fg};`;
@@ -270,10 +272,11 @@ const Time = styled.span`
   font-size: ${({ theme }) => theme.font.size[2]};
 `;
 const StyledLink = styled(Link)`
-  color: ${({ theme }) => theme.colors.text};
+  color: ${({ theme }) => theme.colors.primary[8]};
   text-decoration: none;
   font-weight: ${({ theme }) => theme.font.weight.semiBold};
   transition: color 0.2s ease;
+  font-size: ${({ theme }) => theme.font.size[3]};
 
   &:hover {
     color: ${({ theme }) => theme.colors.primary[11]};
@@ -284,4 +287,5 @@ const Message = styled.span`
   color: ${({ theme }) => theme.colors.text};
   text-decoration: none;
   font-weight: ${({ theme }) => theme.font.weight.semiBold};
+  font-size: ${({ theme }) => theme.font.size[2]};
 `;

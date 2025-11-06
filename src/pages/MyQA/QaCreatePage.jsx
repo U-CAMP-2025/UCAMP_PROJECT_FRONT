@@ -1,6 +1,7 @@
-import { createPost } from '@api/postAPIS';
+import { countPost, createPost } from '@api/postAPIS';
 import { JobSelector } from '@components/common/JobSelector';
 import Typography from '@components/common/Typography';
+import WarnDialog from '@components/common/WarnDialog';
 import { PageContainer } from '@components/layout/PageContainer';
 import {
   DndContext,
@@ -18,7 +19,7 @@ import {
 import * as Accordion from '@radix-ui/react-accordion';
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import { CheckIcon, PlusIcon } from '@radix-ui/react-icons';
-import React from 'react';
+import { React, useEffect, useState } from 'react';
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -27,6 +28,10 @@ import { QACreateInput } from './QaCreateInput';
 
 export default function QACreatePage() {
   const navigate = useNavigate();
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertOnClose, setAlertOnClose] = useState(null);
+
   const methods = useForm({
     defaultValues: {
       jobIds: [],
@@ -35,7 +40,15 @@ export default function QACreatePage() {
       qaSets: [{ question: '', answer: '' }],
       status: 'Y',
     },
+    mode: 'onChange', // 입력 즉시 유효성 체크
   });
+
+  const openAlert = (message, onClose) => {
+    setAlertMessage(message);
+    setAlertOnClose(() => onClose);
+    setAlertOpen(true);
+  };
+
   const {
     control,
     register,
@@ -45,10 +58,40 @@ export default function QACreatePage() {
     formState: { errors, isSubmitting },
   } = methods;
 
+  // --- 직무 선택 유효성 등록 ---
+  useEffect(() => {
+    register('jobIds', {
+      validate: (value) => value.length > 0 || '직무를 최소 1개 이상 선택해야 합니다.',
+    });
+  }, [register]);
+
+  useEffect(() => {
+    countPost().then((response) => {
+      if (response?.data >= 5) {
+        openAlert('면접 노트는 최대 10개까지 작성할 수 있습니다.', () => {
+          navigate(-1);
+        });
+      }
+    });
+  }, []);
+
   const { fields, append, remove, move } = useFieldArray({
     control,
     name: 'qaSets',
   });
+
+  const [openItems, setOpenItems] = useState(['item-0']);
+
+  const handleAddSet = () => {
+    if (fields.length >= 10) {
+      openAlert('질문은 최대 10개까지 등록할 수 있습니다.');
+      return;
+    }
+    const newIndex = fields.length;
+
+    append({ question: '', answer: '' });
+    setOpenItems((prevOpenItems) => [...prevOpenItems, `item-${newIndex}`]);
+  };
 
   const selectedJobIds = watch('jobIds');
   const onSubmit = (data) => {
@@ -70,18 +113,18 @@ export default function QACreatePage() {
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
-  ); // 💡 dnd-kit 드래그 종료 핸들러
+  );
 
+  // 💡 dnd-kit 드래그 종료 핸들러
   const onDragEnd = (event) => {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      // useFieldArray의 'id' (item.id)를 기준으로 인덱스 찾기
       const oldIndex = fields.findIndex((field) => field.id === active.id);
       const newIndex = fields.findIndex((field) => field.id === over.id);
 
       if (oldIndex !== -1 && newIndex !== -1) {
-        move(oldIndex, newIndex); // 💡 react-hook-form의 'move' 함수 호출
+        move(oldIndex, newIndex);
       }
     }
   };
@@ -91,94 +134,109 @@ export default function QACreatePage() {
       <MainContentWrapper>
         <QaCreateHeader>
           <Typography as='h1' size={7} weight='bold'>
-            새 질문답변 세트 만들기
+            새 면접 노트 작성
           </Typography>
         </QaCreateHeader>
         <SettingsBox>
           <FormProvider {...methods}>
-            {' '}
             <FormWrapper>
-              {' '}
               <form onSubmit={handleSubmit(onSubmit)}>
-                {/* 1. 직무 선택 */}{' '}
+                {/* 1. 직무 선택 */}
                 <Section>
-                  <SectionTitle>직무 선택 (최대 3개)</SectionTitle>{' '}
+                  <SectionTitle>관련 직무 선택 (최대 3개)</SectionTitle>
                   <JobSelector
                     value={selectedJobIds}
                     onChange={(newJobIds) =>
                       setValue('jobIds', newJobIds, { shouldValidate: true })
                     }
-                  />{' '}
+                  />
                   {errors.jobIds && (
-                    <Typography color='error'>{errors.jobIds.message}</Typography>
-                  )}{' '}
+                    <span
+                      style={{ color: 'red', fontSize: '14px', marginTop: '8px', display: 'block' }}
+                    >
+                      {errors.jobIds.message}
+                    </span>
+                  )}
                 </Section>
-                {/* 2. 제목 */}{' '}
+
+                <Divider />
+
+                {/* 2. 제목 */}
                 <Section>
-                  <SectionTitle>제목</SectionTitle>{' '}
+                  <SectionTitle>
+                    <span>
+                      제목<RequiredAsterisk>*</RequiredAsterisk>
+                    </span>
+                  </SectionTitle>
                   <FormInput
-                    placeholder='세트의 제목을 입력하세요'
+                    placeholder='면접 노트의 제목을 입력하세요.'
                     {...register('title', { required: '제목은 필수 입력입니다.' })}
-                  />{' '}
+                  />
                   {errors.title && (
-                    <Typography color='error'>{errors.title.message}</Typography>
-                  )}{' '}
+                    <span
+                      style={{ color: 'red', fontSize: '14px', marginTop: '8px', display: 'block' }}
+                    >
+                      {errors.title.message}
+                    </span>
+                  )}
                 </Section>
-                {/* 3. 세트 요약 */}{' '}
+
+                {/* 3. 세트 요약 */}
                 <Section>
-                  <SectionTitle>세트 요약 (선택)</SectionTitle>{' '}
+                  <SectionTitle>
+                    <span>노트 요약</span>
+                    <OptionalText>(선택사항)</OptionalText>
+                  </SectionTitle>
                   <FormTextAreaSummary
-                    placeholder='이 질문답변 세트에 대한 간단한 설명을 입력하세요'
+                    placeholder='노트에 대한 간단한 설명을 입력하세요.'
                     {...register('summary')}
-                  />{' '}
+                  />
                 </Section>
-                {/* 4. 질문답변 세트 목록 (dnd-kit 적용) */}{' '}
+
+                <Divider />
+
+                {/* 4. 면접 노트 */}
                 <Section>
-                  <SectionTitle>질문답변 세트</SectionTitle>
-                  {/* 💡 DragDropContext 대신 DndContext 사용 */}{' '}
+                  <SectionTitle>
+                    <span>면접 노트</span>
+                    <OptionalText>최소 1개의 노트를 작성해야 합니다.</OptionalText>
+                  </SectionTitle>
                   <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
                     onDragEnd={onDragEnd}
                   >
-                    {/* 💡 Droppable 대신 SortableContext 사용 */}
                     <SortableContext
-                      items={fields.map((field) => field.id)} // 💡 고유 ID 배열 전달
+                      items={fields.map((field) => field.id)}
                       strategy={verticalListSortingStrategy}
                     >
-                      {' '}
-                      <Accordion.Root type='multiple'>
-                        {' '}
+                      <Accordion.Root
+                        type='multiple'
+                        value={openItems}
+                        onValueChange={setOpenItems}
+                      >
                         <QASetListContainer>
-                          {' '}
                           {fields.map((item, index) => (
-                            // 💡 Draggable 대신 QACreateInput이 useSortable 훅을 사용
                             <QACreateInput
                               key={item.id}
-                              id={item.id} // 💡 dnd-kit에 ID 전달
+                              id={item.id}
                               index={index}
                               onDelete={() =>
                                 fields.length > 1
                                   ? remove(index)
-                                  : alert('최소 1개의 질문 세트가 필요합니다.')
+                                  : openAlert('최소 1개의 질문 세트가 필요합니다.')
                               }
                             />
-                          ))}{' '}
-                        </QASetListContainer>{' '}
+                          ))}
+                        </QASetListContainer>
                       </Accordion.Root>
                     </SortableContext>
-                  </DndContext>{' '}
-                  <AddSetButton
-                    type='button'
-                    onClick={() =>
-                      fields.length < 10
-                        ? append({ question: '', answer: '' })
-                        : alert('질문은 최대 10개까지 등록할 수 있습니다.')
-                    }
-                  >
-                    <PlusIcon width={30} height={30} />{' '}
-                  </AddSetButton>{' '}
+                  </DndContext>
+                  <AddSetButton type='button' onClick={handleAddSet}>
+                    <PlusIcon width={30} height={30} />
+                  </AddSetButton>
                 </Section>
+
                 {/* 5. 공개 설정 및 저장 */}
                 <FormFooter>
                   <CheckboxLabel htmlFor='status-public'>
@@ -193,6 +251,7 @@ export default function QACreatePage() {
                     </CheckboxRoot>
                     공개
                   </CheckboxLabel>
+
                   <CheckboxLabel htmlFor='status-private'>
                     <CheckboxRoot
                       id='status-private'
@@ -205,6 +264,7 @@ export default function QACreatePage() {
                     </CheckboxRoot>
                     비공개
                   </CheckboxLabel>
+
                   <input type='hidden' {...register('status')} />
                   <SubmitButton type='submit' disabled={isSubmitting}>
                     {isSubmitting ? '저장 중...' : '저장'}
@@ -215,6 +275,19 @@ export default function QACreatePage() {
           </FormProvider>
         </SettingsBox>
       </MainContentWrapper>
+      <WarnDialog
+        open={alertOpen}
+        onOpenChange={(open) => {
+          setAlertOpen(open);
+          if (!open && alertOnClose) {
+            alertOnClose();
+            setAlertOnClose(null);
+          }
+        }}
+        title='알림'
+        message={alertMessage}
+        confirmText='확인'
+      />
     </PageContainer>
   );
 }
@@ -239,10 +312,10 @@ const QaCreateHeader = styled.div`
 const SettingsBox = styled.div`
   width: 90%;
   margin: 0 auto;
-  background-color: ${({ theme }) => theme.colors.gray[2]}; -
+  background-color: ${({ theme }) => theme.colors.gray[2]};
   border: 1px solid ${({ theme }) => theme.colors.gray[4]};
   border-radius: ${({ theme }) => theme.radius.md};
-  padding: ${({ theme }) => theme.space[4]} ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[6]};
+  padding: ${({ theme }) => theme.space[4]} ${({ theme }) => theme.space[8]};
   margin-top: ${({ theme }) => theme.space[8]};
   box-shadow: ${({ theme }) => theme.shadow.sm};
 
@@ -257,12 +330,28 @@ const SettingsBox = styled.div`
 const FormWrapper = styled.div`
   padding: ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[6]};
 `;
+
 const Section = styled.section`
-  margin-bottom: ${({ theme }) => theme.space[10]};
+  margin-bottom: ${({ theme }) => theme.space[8]};
 `;
+
 const SectionTitle = styled(Typography).attrs({ as: 'h2', size: 5, weight: 'bold' })`
   margin-bottom: ${({ theme }) => theme.space[5]};
 `;
+
+const RequiredAsterisk = styled.span`
+  color: ${({ theme }) => theme.colors.primary[9]};
+  font-size: ${({ theme }) => theme.font.size[5]};
+  margin-left: 4px;
+`;
+
+const OptionalText = styled.span`
+  font-size: ${({ theme }) => theme.font.size[2]};
+  font-weight: ${({ theme }) => theme.font.weight.regular};
+  color: ${({ theme }) => theme.colors.gray[9]};
+  margin-left: 8px;
+`;
+
 const FormInput = styled.input`
   width: 100%;
   padding: ${({ theme }) => theme.space[4]};
@@ -275,15 +364,18 @@ const FormInput = styled.input`
     box-shadow: 0 0 0 1px ${({ theme }) => theme.colors.primary[7]};
   }
 `;
+
 const FormTextAreaSummary = styled(FormInput).attrs({ as: 'textarea' })`
-  min-height: 100px;
-  resize: vertical;
+  min-height: auto;
+  resize: none;
 `;
+
 const QASetListContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.space[4]};
 `;
+
 const AddSetButton = styled.button`
   all: unset;
   display: flex;
@@ -302,7 +394,6 @@ const AddSetButton = styled.button`
   }
 `;
 
-// Radix Checkbox 스타일
 const CheckboxRoot = styled(CheckboxPrimitive.Root)`
   all: unset;
   background-color: white;
@@ -326,9 +417,11 @@ const CheckboxRoot = styled(CheckboxPrimitive.Root)`
     box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary[6]};
   }
 `;
+
 const CheckboxIndicator = styled(CheckboxPrimitive.Indicator)`
   color: white;
 `;
+
 const CheckboxLabel = styled.label`
   display: flex;
   align-items: center;
@@ -338,13 +431,15 @@ const CheckboxLabel = styled.label`
   cursor: pointer;
   user-select: none;
 `;
+
 const FormFooter = styled.div`
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: ${({ theme }) => theme.space[4]};
-  margin-top: ${({ theme }) => theme.space[8]}; /* 하단 여백 32px */
+  margin-top: ${({ theme }) => theme.space[8]};
 `;
+
 const SubmitButton = styled.button`
   padding: ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[5]};
   background-color: ${({ theme }) => theme.colors.primary[9]};
@@ -361,4 +456,10 @@ const SubmitButton = styled.button`
     background-color: ${({ theme }) => theme.colors.gray[5]};
     cursor: not-allowed;
   }
+`;
+
+const Divider = styled.hr`
+  border: 0;
+  border-top: 1px solid ${({ theme }) => theme.colors.gray[5]};
+  margin: ${({ theme }) => theme.space[10]} 0;
 `;

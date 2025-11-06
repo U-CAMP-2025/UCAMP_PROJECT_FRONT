@@ -56,15 +56,6 @@ export default function QAReviewForm({
 
   return (
     <Form onSubmit={handleSubmit(submit)}>
-      <Header>
-        <Typography size={3} weight='semiBold'>
-          {user?.nickname || '로그인 사용자'}
-        </Typography>
-        <Typography size={1} color='gray.10'>
-          리뷰를 작성해주세요
-        </Typography>
-      </Header>
-
       <TextArea
         placeholder='질문 셋에 대한 의견, 개선점, 도움이 된 점 등을 자유롭게 남겨주세요.'
         {...register('content', {
@@ -118,12 +109,14 @@ const Header = styled.div`
 const TextArea = styled.textarea`
   width: 100%;
   min-height: 140px;
-  resize: vertical;
+  resize: none;
   border: 1px solid ${({ theme }) => theme.colors.gray[6]};
   border-radius: ${({ theme }) => theme.radius.md};
   background: ${({ theme }) => theme.colors.gray[2]};
   padding: ${({ theme }) => theme.space[4]};
   outline: none;
+  font-size: 14px;
+  line-height: 1.6;
   &:focus {
     border-color: ${({ theme }) => theme.colors.primary[8]};
     box-shadow: 0 0 0 3px rgba(110, 86, 207, 0.15);

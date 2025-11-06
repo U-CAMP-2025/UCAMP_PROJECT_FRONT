@@ -74,7 +74,7 @@ const CaretIconStyled = styled(CaretDownIcon)`
 `;
 
 const sortOptions = [
-  { value: 'bookcount_desc', label: '가져오기 순' },
+  { value: 'bookcount_desc', label: '스크랩 순' },
   // { value: 'review_desc', label: '리뷰 많은 순' },
   { value: 'latest_desc', label: '최신순' },
 ];

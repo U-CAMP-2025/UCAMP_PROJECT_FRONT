@@ -80,7 +80,8 @@ export default function SimulationPresetPage() {
     // UI -> 백엔드 파라미터 매핑
     const simulationRandom = formData.questionOrder === 'random' ? 'Y' : 'N';
     const postId = Number(formData.selectedSetId) || formData.selectedSetId;
-    const interviewerId = Number(formData.selectedInterviewerId) || formData.selectedInterviewerId;
+    // const interviewerId = Number(formData.selectedInterviewerId) || formData.selectedInterviewerId;
+    const interviewerId = Math.floor(Math.random() * 10) + 1;
 
     setSubmitting(true);
     try {
@@ -109,7 +110,7 @@ export default function SimulationPresetPage() {
         {/* 상단 탭 */}
         <StyledTabsRoot defaultValue='/simulation' onValueChange={(value) => navigate(value)}>
           <StyledTabsList>
-            <StyledTabsTrigger value='/simulation'>면접 시뮬레이션 시작</StyledTabsTrigger>
+            <StyledTabsTrigger value='/simulation'>면접 연습 시작</StyledTabsTrigger>
             <StyledTabsTrigger value='/simulation/record'>면접 연습 기록</StyledTabsTrigger>
           </StyledTabsList>
         </StyledTabsRoot>
@@ -131,7 +132,7 @@ export default function SimulationPresetPage() {
                         일대일
                       </RadioOption>
                       <RadioOption>
-                        <StyledRadioItem value='multi' id='r2' />
+                        <StyledRadioItem value='multi' id='r2' disabled />
                         다대다 (준비중)
                       </RadioOption>
                     </StyledRadioGroup>
@@ -162,7 +163,7 @@ export default function SimulationPresetPage() {
 
               {/* 질문답변 세트 */}
               <SelectConfigSection>
-                <ConfigLabel>질문답변 세트 선택</ConfigLabel>
+                <ConfigLabel>면접 노트 선택</ConfigLabel>
                 <Controller
                   name='selectedSetId'
                   control={control}
@@ -186,7 +187,7 @@ export default function SimulationPresetPage() {
                           </ItemContent>
                         ) : (
                           <Select.Value
-                            placeholder={loading ? '불러오는 중…' : '질문 세트를 선택하세요'}
+                            placeholder={loading ? '불러오는 중…' : '면접 노트를 선택하세요'}
                           />
                         )}
                         <Select.Icon asChild>
@@ -227,7 +228,7 @@ export default function SimulationPresetPage() {
               </SelectConfigSection>
 
               {/* 면접관 선택 */}
-              <SelectConfigSection>
+              {/* <SelectConfigSection>
                 <ConfigLabel>면접관 선택</ConfigLabel>
                 <Controller
                   name='selectedInterviewerId'
@@ -266,7 +267,7 @@ export default function SimulationPresetPage() {
                     </Select.Root>
                   )}
                 />
-              </SelectConfigSection>
+              </SelectConfigSection> */}
 
               {/* 시작하기 */}
               <StartButton type='submit' disabled={loading || submitting}>
@@ -296,10 +297,10 @@ const PresetForm = styled.form`
 const SettingsBox = styled.div`
   width: 90%;
   margin: 0 auto;
-  background-color: ${({ theme }) => theme.colors.gray[2]}; -
+  background-color: ${({ theme }) => theme.colors.gray[2]};
   border: 1px solid ${({ theme }) => theme.colors.gray[4]};
   border-radius: ${({ theme }) => theme.radius.md};
-  padding: ${({ theme }) => theme.space[6]} ${({ theme }) => theme.space[8]}; 
+  padding: ${({ theme }) => theme.space[6]} ${({ theme }) => theme.space[8]};
   margin-top: ${({ theme }) => theme.space[8]};
   box-shadow: ${({ theme }) => theme.shadow.sm};
 
@@ -450,12 +451,15 @@ const StyledSelectContent = styled(Select.Content)`
   box-shadow: ${({ theme }) => theme.shadow.md};
   z-index: 101;
   width: var(--radix-select-trigger-width);
+  max-height: 320px;
 `;
 
 const StyledSelectViewport = styled(Select.Viewport)`
   padding: ${({ theme }) => theme.space[1]};
+  padding: ${({ theme }) => theme.space[1]};
+  max-height: 200px; /* ⬅️ 리스트 높이 제한 */
+  overflow-y: auto; /* ⬅️ 세로 스크롤 */
 `;
-
 const StyledSelectItem = styled(Select.Item)`
   font-size: ${({ theme }) => theme.font.size[3]};
   color: ${({ theme }) => theme.colors.gray[12]};

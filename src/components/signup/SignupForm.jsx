@@ -28,7 +28,6 @@ export const SignupForm = () => {
   const handleSubmitForm = (data) => {
     const { nickname, jobId } = data;
     postSignUp(nickname, jobId).then((response) => {
-      console.log('signupresponse: ', response);
       login({
         user: {
           name: response.nickname,

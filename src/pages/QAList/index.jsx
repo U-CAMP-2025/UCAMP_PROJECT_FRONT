@@ -7,22 +7,26 @@ import { SortSelector } from '@components/common/SortSelector';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import QASetList from '@components/qaset/QASetList';
-import { ALL_JOBS_MAP } from '@pages/List/AllJobsMap';
-import { qaList } from '@pages/List/qaList';
+import { QASetCardSkeleton } from '@components/qaset/SkeletonCard';
+import { PlusIcon } from '@radix-ui/react-icons';
 import { useAuthStore } from '@store/auth/useAuthStore';
 import React, { useEffect, useMemo, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { Navigate, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 export default function QAListPage() {
   const { isLogin } = useAuthStore();
   const [currentSort, setCurrentSort] = useState('bookcount_desc');
-  const [selectedJobIds, setSelectedJobIds] = useState([99]);
+  const [selectedJobIds, setSelectedJobIds] = useState([]);
+  const navigate = useNavigate();
 
   // 무한 스크롤 상태
   const [displayList, setDisplayList] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [yourJob, setYourJob] = useState(null);
   const ITEMS_PER_PAGE = 9;
 
   // 정렬 변경
@@ -31,6 +35,7 @@ export default function QAListPage() {
     setPage(1);
     setDisplayList([]);
     setHasMore(true);
+    setIsInitialLoading(true);
   };
 
   // 직무 필터 변경
@@ -39,13 +44,18 @@ export default function QAListPage() {
     setPage(1);
     setDisplayList([]);
     setHasMore(true);
+    setIsInitialLoading(true);
+  };
+
+  const handleAddClick = () => {
+    navigate('/qa/create');
   };
 
   // 초기 직무 데이터 로드
   useEffect(() => {
     if (isLogin) {
       fetchUserMypage().then((res) => {
-        setSelectedJobIds([res?.job?.jobId]);
+        setYourJob(res?.job?.jobId || null);
       });
     }
   }, []);
@@ -78,7 +88,12 @@ export default function QAListPage() {
           setHasMore(true);
         }
       })
-      .catch();
+      .catch((error) => {
+        console.log(error);
+      })
+      .finally(() => {
+        setIsInitialLoading(false);
+      });
   };
 
   // 페이지 변경 시 데이터 호출
@@ -97,12 +112,18 @@ export default function QAListPage() {
       <MainContentWrapper>
         <QaListHeader>
           <Typography as='h1' size={7} weight='bold'>
-            질문답변 둘러보기
+            면접 노트
           </Typography>
+          {isLogin && (
+            <AddButton onClick={handleAddClick}>
+              <PlusIcon width={20} height={20} />
+              신규 노트
+            </AddButton>
+          )}
         </QaListHeader>
         <FilterAndSortBar>
           <FilterSection>
-            <JobSelector value={selectedJobIds} onChange={handleJobChange} />
+            <JobSelector value={selectedJobIds} onChange={handleJobChange} yourJobId={yourJob} />
           </FilterSection>
           <SortSection>
             <Typography size={3} style={{ fontWeight: 500, color: 'inherit' }}>
@@ -111,15 +132,28 @@ export default function QAListPage() {
             <SortSelector currentSort={currentSort} onSortChange={handleSortChange} />
           </SortSection>
         </FilterAndSortBar>
-
-        <InfiniteScroll
-          dataLength={displayList.length}
-          next={fetchMoreData}
-          hasMore={hasMore}
-          loader={<h4 style={{ textAlign: 'center' }}>Loading...</h4>}
-        >
-          <QASetList qaList={displayList} />
-        </InfiniteScroll>
+        {isInitialLoading ? (
+          <SkeletonGrid>
+            {Array.from({ length: ITEMS_PER_PAGE }).map((_, index) => (
+              <QASetCardSkeleton key={index} />
+            ))}
+          </SkeletonGrid>
+        ) : (
+          <InfiniteScroll
+            dataLength={displayList.length}
+            next={fetchMoreData}
+            hasMore={hasMore}
+            loader={
+              <SkeletonGrid>
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <QASetCardSkeleton key={index} />
+                ))}
+              </SkeletonGrid>
+            }
+          >
+            <QASetList qaList={displayList} />
+          </InfiniteScroll>
+        )}
       </MainContentWrapper>
     </PageContainer>
   );
@@ -171,6 +205,8 @@ const QaListHeader = styled.div`
   margin-bottom: ${({ theme }) => theme.space[6]}; /* 24px */
   padding-bottom: ${({ theme }) => theme.space[4]}; /* 16px */
   border-bottom: 2px solid ${({ theme }) => theme.colors.gray[12]};
+  padding-left: ${({ theme }) => theme.space[6]};
+  padding-right: ${({ theme }) => theme.space[6]};
 `;
 
 // 💡 MainContentWrapper에 좌우 패딩을 추가하여 중앙 정렬된 콘텐츠 영역을 정의합니다.
@@ -180,4 +216,30 @@ const MainContentWrapper = styled.div`
   margin: 0 auto;
   padding: 0 ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[5]};
   min-height: 80vh;
+`;
+const AddButton = styled.button`
+  all: unset;
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+  padding: ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[4]}; /* 12px 16px */
+  background-color: ${({ theme }) => theme.colors.primary[9]};
+  color: white;
+  border-radius: ${({ theme }) => theme.radius.sm};
+  font-size: ${({ theme }) => theme.font.size[3]};
+  font-weight: ${({ theme }) => theme.font.weight.semiBold};
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.primary[10]};
+  }
+`;
+
+const SkeletonGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: ${({ theme }) => theme.space[6]};
+  width: 95%;
+  margin: 0 auto;
 `;

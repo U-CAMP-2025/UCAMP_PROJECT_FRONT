@@ -18,7 +18,6 @@ export default function LoginBridge() {
         const next = params.get('next') || '/'; // next 파라미터 읽기, 없으면 메인으로 이동
 
         if (!accessToken) {
-          console.warn('LoginBridge: No accessToken found, redirecting to signup');
           navigate('/signup', { replace: true });
           return;
         }

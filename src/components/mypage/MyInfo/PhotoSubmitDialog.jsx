@@ -51,7 +51,7 @@ export default function PhotoSubmitDialog({ open, onOpenChange, onSubmit, onFile
         <Overlay />
         <Content>
           <Typography as='h3' size={5} weight='semiBold'>
-            합격 인증 제출
+            합격자 증명 신청
           </Typography>
           <Typography size={3}>
             합격을 증명할 수 있는 사진(재직증명서 등)을 첨부해주세요.
@@ -66,10 +66,20 @@ export default function PhotoSubmitDialog({ open, onOpenChange, onSubmit, onFile
           />
 
           <Drop onClick={() => inputRef.current?.click()}>
-            <Typography size={3}>클릭하여 파일 선택 또는 드래그 앤 드롭</Typography>
+            <Typography size={3}>클릭하여 파일 업로드</Typography>
             {file && (
               <Typography as='div' size={3} style={{ marginTop: 8 }}>
-                {file.name}
+                <img
+                  src={URL.createObjectURL(file)}
+                  alt='업로드한 이미지 미리보기'
+                  style={{
+                    width: '100%',
+                    maxWidth: '300px',
+                    borderRadius: '8px',
+                    marginTop: '8px',
+                    objectFit: 'cover',
+                  }}
+                />
               </Typography>
             )}
           </Drop>

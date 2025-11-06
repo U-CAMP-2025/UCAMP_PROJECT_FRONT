@@ -18,7 +18,7 @@ export const HeaderContentWrapper = styled.div`
   justify-content: space-between;
   align-items: center;
   width: 90%;
-  max-width: 1200px;
+  max-width: 1140px;
 `;
 
 export const Logo = styled.button`
@@ -60,7 +60,11 @@ export const Nav = styled.nav`
   gap: ${({ theme }) => theme.space[10]};
 `;
 
-export const NavItem = styled.a`
+export const NavItem = styled.button`
+  background: none;
+  border: none;
+  padding: 0;
+
   font-family: ${({ theme }) => theme.font.family.primary};
   font-weight: ${({ theme }) => theme.font.weight.semiBold};
   font-size: ${({ theme }) => theme.font.size[3]};
@@ -70,6 +74,7 @@ export const NavItem = styled.a`
   padding: ${({ theme }) => theme.space[1]} 0;
   cursor: pointer;
   position: relative;
+  white-space: nowrap;
 
   &:hover {
     color: ${({ theme }) => theme.colors.primary[10]};

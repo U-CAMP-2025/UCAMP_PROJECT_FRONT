@@ -59,3 +59,31 @@ export const fetchUserLogout = async () => {
   const { data } = await axiosInstance.get('/users/logout');
   return data;
 };
+
+/**
+ * GET: 유저 role 조회
+ * @returns {Promise<Object>} response
+ */
+export const fetchUserRole = async () => {
+  const { data } = await axiosInstance.get('/users/role');
+  return data;
+};
+
+/**
+ * GET: 유저 status 조회
+ */
+export const fetchUserStatus = async () => {
+  const { data } = await axiosInstance.get('/users/status');
+  return data;
+};
+
+/**
+ * Patch: 유저 status 업데이트
+ * status: 신규면 NEW, 아니면 ACTIVE
+ */
+export const patchUserStaus = async (status) => {
+  const { data } = await axiosInstance.patch('/users/status', {
+    status,
+  });
+  return data;
+};

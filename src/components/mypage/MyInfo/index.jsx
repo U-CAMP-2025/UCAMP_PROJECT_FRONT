@@ -2,32 +2,30 @@ import { fetchJobList } from '@api/jobAPIS';
 import {
   fetchUserMypage,
   patchUserJob,
-  postUserDelete,
   postUserPathPass,
   uploadCertificateImage,
 } from '@api/userAPIS';
 import Button from '@components/common/Button';
+import ErrorDialog from '@components/common/ErrorDialog';
 import ReadonlyInput from '@components/common/ReadOnlyInput';
 import SearchableSelect from '@components/common/SearchableSelect';
+import SuccessDialog from '@components/common/SuccessDialog';
 import Typography from '@components/common/Typography';
 import theme from '@styles/theme';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { FieldCard, FieldLeft, FieldLabel, FieldValue, FieldActions } from './FieldRow';
+import { FieldCard, FieldLeft, FieldLabel, FieldValue, FieldActions, FieldRight } from './FieldRow';
 import PhotoSubmitDialog from './PhotoSubmitDialog';
+import { WithdrawlDialog } from './WithdrawlDialog';
 
-const initialUserState = {
-  userId: 0,
-  nickname: '유저 닉네임',
-  email: 'user@email.com',
-  jobName: '',
-  passStatus: false,
-  status: '',
-  userProfileImageUrl: '',
-};
 const MyInfo = () => {
-  const [user, setUser] = useState(initialUserState);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [errorOpen, setErrorOpen] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
+  const [user, setUser] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [selectedJobId, setSelectedJobId] = useState(1);
 
@@ -35,27 +33,32 @@ const MyInfo = () => {
   const [editingJob, setEditingJob] = useState(false);
   const [fileName, setFileName] = useState('');
 
+  const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
+
   const handlePhotoSubmit = async (file) => {
     try {
-      // 1️⃣ 이미지 업로드
+      // 이미지 업로드
       const { fileName } = await uploadCertificateImage(file);
 
-      // 2️⃣ 합격자 신청 (JWT로 user 식별)
+      // 합격자 신청 (JWT로 user 식별)
       await postUserPathPass(fileName);
 
-      alert('합격자 인증이 신청되었습니다.');
+      // alert('합격자 인증이 신청되었습니다.');
+      setSuccessMsg('합격자 인증이 신청되었습니다.');
+      setSuccessOpen(true);
       setOpenPhotoModal(false);
     } catch (err) {
       console.error(err);
-      alert('신청 중 오류가 발생했습니다.');
+      // alert('신청 중 오류가 발생했습니다.');
+      setErrorMsg('합격자 인증 신청 중 오류가 발생했습니다.');
+      setErrorOpen(true);
     }
   };
 
   useEffect(() => {
     const loadInfo = async () => {
       try {
-        const data = await fetchUserMypage(); // 백엔드 요청
-        // 백엔드 → 프론트 구조로 변환
+        const data = await fetchUserMypage();
         setUser({
           userId: data.userId,
           nickname: data.nickname,
@@ -72,17 +75,11 @@ const MyInfo = () => {
       }
     };
 
-    // fetchUserMypage()
-    //   .then((response) => setUser(response?.data || initialUserState))
-    //   .catch(() => setUser(initialUserState));
-    // fetchJobList()
-    //   .then((response) => setJobs(response?.data || []))
-    //   .catch(() => setJobs([]));
     const loadData = async () => {
       try {
         const data = await fetchJobList(); // 백엔드 요청
         // 백엔드 → 프론트 구조로 변환
-        const mapped = data.map((item, index) => ({
+        const mapped = data.map((item) => ({
           jobId: item.jobId,
           name: item.jobName,
         }));
@@ -104,56 +101,78 @@ const MyInfo = () => {
       await patchUserJob(user.userId, selectedJobId); // 서버 PATCH 요청
       setEditingJob(false); // 수정 모드 종료
       setUser((prev) => ({ ...prev, jobId: selectedJobId })); // 로컬 상태 갱신
-      alert('관심 직무가 수정되었습니다.');
+      // alert('관심 직무가 수정되었습니다.');
+      setSuccessMsg('관심 직무가 수정되었습니다.');
+      setSuccessOpen(true);
     } catch (err) {
       console.error('직무 수정 실패:', err);
-      alert('직무 수정 중 오류가 발생했습니다.');
+      // alert('직무 수정 중 오류가 발생했습니다.');
+      setErrorMsg('직무 수정 중 오류가 발생했습니다.');
+      setErrorOpen(true);
     }
   };
-  const handleUserDelete = async () => {
-    const confirmDelete = window.confirm('정말 탈퇴하시겠어요?');
-    if (!confirmDelete) return;
 
-    try {
-      await postUserDelete(user.userId);
-      alert('회원 탈퇴가 완료되었습니다.');
-      // 필요 시 로그아웃 처리나 메인 이동
-      window.location.href = '/';
-    } catch (err) {
-      console.error('회원 탈퇴 실패:', err);
-      alert('탈퇴 중 오류가 발생했습니다.');
-    }
+  // 회원탈퇴 클릭
+  const handleUserDelete = () => {
+    setWithdrawDialogOpen(true);
   };
   return (
     <Container>
-      <Typography as='h1' size={7} weight='bold'>
-        내 정보
-      </Typography>
+      <MyPageHeader>
+        <Typography as='h1' size={7} weight='bold'>
+          마이 페이지
+        </Typography>
+      </MyPageHeader>
       <Row>
         {/* 닉네임 (수정 불가) */}
         <FieldCard>
           <FieldLeft>
             <FieldLabel htmlFor='nick'>닉네임</FieldLabel>
-            <ReadonlyInput id='nick' style={{ width: '85%' }}>
-              {user?.nickname}
-            </ReadonlyInput>
+            {/* <ReadonlyInput
+              id='nick'
+              style={{
+                width: '300px',
+                marginLeft: 'auto',
+                justifyContent: 'flex-end',
+              }}
+            > */}
+            {/* {user?.nickname}
+            </ReadonlyInput> */}
+            <FieldValue>{user?.nickname}</FieldValue>
           </FieldLeft>
         </FieldCard>
         {/* 이메일 (수정 불가) */}
         <FieldCard>
           <FieldLeft>
             <FieldLabel htmlFor='email'>이메일</FieldLabel>
-            <ReadonlyInput id='email' style={{ width: '85%' }}>
+            {/* <ReadonlyInput
+              id='nick'
+              style={{
+                width: '300px',
+                marginLeft: 'auto',
+                justifyContent: 'flex-end',
+              }}
+            >
               {user?.email}
-            </ReadonlyInput>
+            </ReadonlyInput> */}
+            <FieldValue>{user?.email}</FieldValue>
           </FieldLeft>
         </FieldCard>
+
         {/* 관심 직무 */}
         <FieldCard>
           <FieldLeft>
-            <FieldLabel>관심직무</FieldLabel>
+            <FieldLabel>관심 직무</FieldLabel>
             {editingJob ? (
-              <div style={{ display: 'flex', gap: 12, alignItems: 'left' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 12,
+                  alignItems: 'center',
+                  flex: 1,
+                  justifyContent: 'flex-end',
+                }}
+              >
                 <SearchableSelect
                   value={selectedJobId}
                   onChange={(id) => setSelectedJobId(id)}
@@ -190,12 +209,30 @@ const MyInfo = () => {
         <FieldCard>
           <FieldLeft>
             <FieldLabel>합격 여부</FieldLabel>
-            {user?.passStatus ? (
+            {user?.passStatus === 'Y' ? (
               <>
-                <FieldValue>합격자입니다</FieldValue>
+                <FieldValue style={{ flex: 1, textAlign: 'right' }}>합격자입니다.</FieldValue>
                 <FieldActions>
-                  <button style={pillStyle} onClick={() => setOpenPhotoModal(true)}>
-                    <Typography as='span' size={2} weight='semiBold'>
+                  {/* {fileName && (
+                    <Typography as='div' size={3}>
+                      {fileName}
+                    </Typography>
+                  )} */}
+                  <button
+                    disabled
+                    style={{
+                      ...pillStyle,
+                      background: theme.colors.primary[4],
+                      opacity: 0.5,
+                    }}
+                    onClick={() => setOpenPhotoModal(true)}
+                  >
+                    <Typography
+                      as='span'
+                      size={2}
+                      weight='semiBold'
+                      color={theme.colors.primary[7]}
+                    >
                       신청
                     </Typography>
                   </button>
@@ -203,13 +240,15 @@ const MyInfo = () => {
               </>
             ) : (
               <>
-                <FieldValue />
+                <FieldValue style={{ flex: '1', textAlign: 'right' }}>
+                  일반 사용자입니다.
+                </FieldValue>
                 <FieldActions>
-                  {fileName && (
+                  {/* {fileName && (
                     <Typography as='div' size={3}>
                       {fileName}
                     </Typography>
-                  )}
+                  )} */}
                   <button style={pillStyle} onClick={() => setOpenPhotoModal(true)}>
                     <Typography as='span' size={2} weight='semiBold'>
                       신청
@@ -225,6 +264,7 @@ const MyInfo = () => {
         <Button variant='outline' onClick={handleUserDelete}>
           회원 탈퇴
         </Button>
+        <WithdrawlDialog open={withdrawDialogOpen} onOpenChange={setWithdrawDialogOpen} />
       </Footer>
       <PhotoSubmitDialog
         open={openPhotoModal}
@@ -232,6 +272,8 @@ const MyInfo = () => {
         onSubmit={handlePhotoSubmit}
         onFilePick={handleFilePick}
       />
+      <ErrorDialog open={errorOpen} onOpenChange={setErrorOpen} message={errorMsg} />
+      <SuccessDialog open={successOpen} onOpenChange={setSuccessOpen} message={successMsg} />
     </Container>
   );
 };
@@ -239,7 +281,7 @@ const MyInfo = () => {
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  width: 700px;
+  width: 70%;
 `;
 
 const Row = styled.div`
@@ -264,5 +306,16 @@ const pillStyle = {
   alignItems: 'center',
   border: '0',
 };
+
+// 페이지 상단 헤더
+const MyPageHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ${({ theme }) => theme.space[6]}; /* 24px */
+  padding-bottom: ${({ theme }) => theme.space[4]}; /* 16px */
+  border-bottom: 2px solid ${({ theme }) => theme.colors.gray[12]};
+  padding-left: ${({ theme }) => theme.space[4]};
+`;
 
 export default MyInfo;

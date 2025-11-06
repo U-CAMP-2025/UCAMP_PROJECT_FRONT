@@ -1,9 +1,244 @@
+import { fetchUserStatus } from '@api/userAPIS';
 import { Header } from '@components/layout/Header';
 import { PageContainer } from '@components/layout/PageContainer';
 import { KakaoLoginDialog } from '@components/signup/KakaoLoginDialog';
-import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useAuthStore } from '@store/auth/useAuthStore';
+import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
+
+export default function LandingPage() {
+  const { isLogin } = useAuthStore();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const cardsPerView = 3;
+  const maxIndex = cardData.length - cardsPerView;
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('friends');
+  const navigate = useNavigate();
+  const currentData = mockData[activeTab];
+  const sortedData = [...currentData].sort((a, b) => b.score - a.score);
+
+  // Reorder for podium display: 2nd, 1st, 3rd
+  const podiumOrder = [
+    sortedData[1], // 2nd place (left)
+    sortedData[0], // 1st place (center)
+    sortedData[2], // 3rd place (right)
+  ];
+
+  const handleClickLoginButton = () => {
+    if (isLogin) {
+      navigate('/myqa'); // 이미 로그인된 경우 마이페이지로 이동
+    } else {
+      setLoginDialogOpen(true); // 로그인 안 됐으면 다이얼로그 열기
+    }
+  };
+
+  const handlePrev = () => {
+    setCurrentIndex((prev) => Math.max(0, prev - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prev) => Math.min(maxIndex, prev + 1));
+  };
+
+  // 신규 유저 판별
+  useEffect(() => {
+    if (isLogin) {
+      fetchUserStatus().then((response) => {
+        console.log(response);
+      });
+    }
+  }, []);
+
+  // slider pixel-based calculation
+  const containerRef = useRef(null);
+  const [cardWidthPx, setCardWidthPx] = useState(0);
+  const cardGap = 20; // px
+
+  useLayoutEffect(() => {
+    function update() {
+      if (!containerRef.current) return;
+      const w = containerRef.current.clientWidth;
+      const cardW = (w - cardGap * (cardsPerView - 1)) / cardsPerView;
+      setCardWidthPx(cardW);
+    }
+
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, [cardsPerView]);
+
+  const offsetPx = cardWidthPx ? -currentIndex * (cardWidthPx + cardGap) : 0;
+
+  return (
+    <>
+      <Header></Header>
+      <PageContainer footer>
+        {/* Hero Section */}
+        <HeroContainer>
+          <BackgroundCircle />
+          <ContentWrapper>
+            <MainHeading>
+              면접 강화 툴<br />
+              면접톡!
+            </MainHeading>
+            <SubHeading>
+              합격은 면접톡이 <br />
+              책임진다
+            </SubHeading>
+            <Description>면접 연습&피드백 루틴을 경험해보세요!</Description>
+            <ButtonGroup>
+              <PrimaryButton onClick={handleClickLoginButton}>지금 시작하기</PrimaryButton>
+              <KakaoLoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
+            </ButtonGroup>
+          </ContentWrapper>
+
+          <CardsWrapper>
+            <Card as={Card1}>
+              <CardIcon>📝</CardIcon>
+              <CardTitle>AI 면접 분석</CardTitle>
+              <CardDescription>연습 후 답변을 분석하고 개선점을 알려드립니다</CardDescription>
+            </Card>
+            <Card as={Card2}>
+              <CardIcon>💼</CardIcon>
+              <CardTitle>합격 전략</CardTitle>
+              <CardDescription>
+                지원자들의 면접노트 공유하며
+                <br /> 정보 고립을 해결합니다.
+              </CardDescription>
+            </Card>
+            <Card as={Card3}>
+              <CardIcon>🧑‍⚖️</CardIcon>
+              <CardTitle>실전 환경</CardTitle>
+              <CardDescription>
+                AI 면접관과 함께 실전처럼 연습하고 결과를 저장하세요.
+              </CardDescription>
+            </Card>
+          </CardsWrapper>
+        </HeroContainer>
+        {/* Course Section */}
+        <Container>
+          <Title2>면접 준비, 혼자 하려니 막막하지 않나요?</Title2>
+          <CardsWrapper2>
+            {cards.map((card) => (
+              <Cardd key={card.id} bgColor={card.bgColor}>
+                <AvatarWrapper2>{card.avatar}</AvatarWrapper2>
+                <CardTitle2>{card.title}</CardTitle2>
+                <CardDescription2>{card.description}</CardDescription2>
+              </Cardd>
+            ))}
+          </CardsWrapper2>
+        </Container>
+        {/* Testimonial Section */}
+        <Container>
+          <Title2>이젠 다른 사람들과 협력해보세요!</Title2>
+          {/* Ranking */}
+          <ContainerR>
+            <HeaderR>
+              <TitleR>주간랭킹</TitleR>
+              <Tabs>
+                <Tab active={activeTab === 'friends'} onClick={() => setActiveTab('friends')}>
+                  활동순
+                </Tab>
+                <Tab active={activeTab === 'world'} onClick={() => setActiveTab('world')}>
+                  북마크순
+                </Tab>
+              </Tabs>
+            </HeaderR>
+
+            <PodiumContainer>
+              {podiumOrder.map((user, index) => {
+                const actualRank = user.rank;
+                const pedestalHeights = [80, 120, 60]; // heights for 2nd, 1st, 3rd
+
+                return (
+                  <PodiumItem key={user.id}>
+                    {actualRank === 1 && <Crown>👑</Crown>}
+                    <AvatarWrapper>
+                      <Avatar bg={actualRank === 1 ? '#fff8e1' : '#f5f5f5'} rank={actualRank}>
+                        {user.avatar}
+                      </Avatar>
+                      <RankBadge rank={actualRank}>{actualRank}</RankBadge>
+                    </AvatarWrapper>
+                    <Username>{user.username}</Username>
+                    <Score>{user.score.toLocaleString()}</Score>
+                    <ScoreLabel>---</ScoreLabel>
+                    <Pedestal height={pedestalHeights[index]} />
+                  </PodiumItem>
+                );
+              })}
+            </PodiumContainer>
+          </ContainerR>
+          {/* ////////////////////////////////////////////////// */}
+          <SliderWrapper>
+            <ArrowButton $direction='left' onClick={handlePrev} disabled={currentIndex === 0}>
+              <svg viewBox='0 0 24 24' fill='none'>
+                <path d='M15 18l-6-6 6-6' strokeLinecap='round' strokeLinejoin='round' />
+              </svg>
+            </ArrowButton>
+
+            <CardContainer2 ref={containerRef}>
+              <Track $translatePx={offsetPx}>
+                {cardData.map((card) => (
+                  <CardWrapper
+                    key={card.id}
+                    style={{ minWidth: cardWidthPx ? `${cardWidthPx}px` : undefined }}
+                  >
+                    <Cards>
+                      <Title3>{card.title}</Title3>
+                      <ReviewSection>
+                        💬
+                        {card.reviews.map((review, idx) => (
+                          <ReviewItem key={idx}>
+                            <ReviewText>`{review.text}`</ReviewText>
+                          </ReviewItem>
+                        ))}
+                      </ReviewSection>
+                    </Cards>
+                  </CardWrapper>
+                ))}
+              </Track>
+            </CardContainer2>
+
+            <ArrowButton2
+              $direction='right'
+              onClick={handleNext}
+              disabled={currentIndex === maxIndex}
+            >
+              <svg viewBox='0 0 24 24' fill='none'>
+                <path d='M9 18l6-6-6-6' strokeLinecap='round' strokeLinejoin='round' />
+              </svg>
+            </ArrowButton2>
+          </SliderWrapper>
+        </Container>
+        {/* CTA Section */}
+        <Container2>
+          <CTASection>
+            <Content>
+              <SubText>면접 준비, 지금부터 시작해보세요.</SubText>
+              <MainText>면접톡과 함께 시작할 준비가 되셨나요?</MainText>
+              <ButtonGroup2>
+                <PrimaryButton2 onClick={handleClickLoginButton}>
+                  시작하기
+                  <ArrowIcon>
+                    <svg viewBox='0 0 24 24' fill='none'>
+                      <path
+                        d='M5 12h14M12 5l7 7-7 7'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
+                    </svg>
+                  </ArrowIcon>
+                </PrimaryButton2>
+                <KakaoLoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
+              </ButtonGroup2>
+            </Content>
+          </CTASection>
+        </Container2>
+      </PageContainer>
+    </>
+  );
+}
 
 // const float = keyframes`
 //   0%, 100% { transform: translateY(0px); }
@@ -30,16 +265,16 @@ const HeroContainer = styled.section`
   position: relative;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 600px;
-  padding: 80px 40px;
+  padding: 80px 0px 80px 70px;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 90%;
   border-radius: 40px;
   width: 100%;
   max-width: 1200px; /* 너무 넓어지는 것 방지 */
   margin: 0 auto;
+  margin-bottom: 30px;
 
   @media (max-width: 968px) {
     flex-direction: column;
@@ -231,18 +466,18 @@ const Card = styled.div`
 `;
 const Card1 = styled(Card)`
   top: 70px;
-  right: 180px;
+  right: 200px;
   z-index: 2;
 `;
 const Card2 = styled(Card)`
-  top: 50px;
-  left: 250px;
+  top: 40px;
+  left: 280px;
   transform: translateX(-50%);
   z-index: 1;
 `;
 const Card3 = styled(Card)`
-  bottom: 30px;
-  right: 350px;
+  bottom: 10px;
+  right: 360px;
   z-index: 3;
 `;
 
@@ -283,6 +518,12 @@ const Container = styled.div`
   margin: 0 auto;
   padding: 20px 0px;
   text-align: center;
+  box-sizing: border-box;
+
+  @media (max-width: 968px) {
+    padding: 16px;
+    width: 95%;
+  }
 `;
 const Container2 = styled.div`
   width: 100%;
@@ -290,6 +531,12 @@ const Container2 = styled.div`
   margin: 0 auto;
   padding: 40px 20px;
   text-align: center;
+  box-sizing: border-box;
+
+  @media (max-width: 968px) {
+    padding: 24px 16px;
+    width: 100%;
+  }
 `;
 
 const Title = styled.h1`
@@ -329,10 +576,12 @@ const Title2 = styled.h1`
   font-size: 2.2rem;
   font-weight: 700;
   color: #1a1a1a;
-  margin-bottom: 12px;
+  margin-bottom: 40px;
 
-  @media (max-width: 768px) {
-    font-size: 1.8rem;
+  @media (max-width: 968px) {
+    font-size: 1.6rem;
+    margin-bottom: 24px;
+    text-align: center;
   }
 `;
 
@@ -355,6 +604,13 @@ const CardsWrapper2 = styled.div`
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
+  box-sizing: border-box;
+
+  @media (max-width: 968px) {
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    padding: 0 8px;
+  }
 `;
 
 const Cardd = styled.div`
@@ -420,7 +676,7 @@ const CardContainer2 = styled.div`
 const CardWrapper = styled.div`
   min-width: calc(33.333% - 14px);
   transition: transform 0.5s ease-in-out;
-  transform: translateX(${(props) => props.$offset}%);
+  /* translate handled by Track wrapper */
 
   @media (max-width: 1024px) {
     min-width: calc(50% - 10px);
@@ -438,6 +694,13 @@ const Cards = styled.div`
   padding: 10px 28px 22px 28px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   height: 100%;
+`;
+
+const Track = styled.div`
+  display: flex;
+  gap: 20px;
+  transition: transform 0.35s ease;
+  transform: translateX(${(props) => (props.$translatePx ? `${props.$translatePx}px` : '0px')});
 `;
 
 const Title3 = styled.h3`
@@ -565,7 +828,7 @@ const HeaderR = styled.div`
 const TitleR = styled.h1`
   font-size: 28px;
   font-weight: 600;
-  margin: 0;
+  margin: 10px 0px 0px 10px;
 `;
 
 const Tabs = styled.div`
@@ -692,6 +955,8 @@ const Pedestal = styled.div`
 // `;
 
 const CTASection = styled.div`
+  width: 80%;
+  margin: 0 auto;
   background: linear-gradient(135deg, #4a90e2 0%, #50c9c3 50%, #3b8b7a 100%);
   border-radius: 24px;
   padding: 80px 60px;
@@ -725,19 +990,16 @@ const CTASection = styled.div`
     padding: 60px 30px;
   }
 `;
-
 const Content = styled.div`
   position: relative;
   z-index: 1;
 `;
-
 const SubText = styled.p`
   font-size: 16px;
   color: rgba(255, 255, 255, 0.9);
   margin-bottom: 16px;
   font-weight: 400;
 `;
-
 const MainText = styled.h2`
   font-size: 42px;
   font-weight: 700;
@@ -763,27 +1025,6 @@ const ButtonGroup2 = styled.div`
     max-width: 320px;
   }
 `;
-
-const Button2 = styled.button`
-  padding: 18px 40px;
-  border-radius: 50px;
-  font-size: 16px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  transition: all 0.3s ease;
-  min-width: 200px;
-  justify-content: center;
-
-  @media (max-width: 640px) {
-    width: 100%;
-    max-width: 300px;
-  }
-`;
-
 const PrimaryButton2 = styled(Button)`
   background: white;
   color: #4a9fe5;
@@ -809,33 +1050,6 @@ const PrimaryButton2 = styled(Button)`
     justify-content: center;
   }
 `;
-
-const SecondaryButton2 = styled(Button)`
-  background: transparent;
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.9);
-  border-radius: 50px;
-  padding: 12px 32px;
-  font-size: 16px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: white;
-  }
-
-  @media (max-width: 640px) {
-    width: 100%;
-    justify-content: center;
-  }
-`;
-
 const ArrowIcon = styled.span`
   display: flex;
   align-items: center;
@@ -849,29 +1063,6 @@ const ArrowIcon = styled.span`
 
   ${PrimaryButton}:hover & {
     transform: translateX(4px);
-  }
-
-  svg {
-    width: 14px;
-    height: 14px;
-    stroke: white;
-    stroke-width: 2.5;
-  }
-`;
-const ArrowIconSecondary = styled.span`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 50%;
-  flex-shrink: 0;
-  transition: all 0.3s ease;
-
-  ${SecondaryButton}:hover & {
-    transform: translateX(4px);
-    background: rgba(255, 255, 255, 0.35);
   }
 
   svg {
@@ -940,25 +1131,25 @@ const cards = [
     id: 1,
     bgColor: '#d4f4e7',
     avatar: '👩🏻',
-    title: '제가 했던 행동이나 참여했던 프로젝트가 기억이 안 나요.',
+    title: '혼자 연습하려니까 번거롭고 힘들어요.',
     description:
-      '이전에 참여했던 활동의 구체적인 내용이 잘 기억나지 않아 면접 질문에 당황할까 봐 걱정돼요.',
+      '질문을 일일이 정리하고 답변을 관리하는 것도 벅찬데, 실전처럼 환경을 갖추는 것도 어려워요. 이렇게 준비하는 게 맞는지 모르겠어요.',
   },
   {
     id: 2,
     bgColor: '#e8e5f5',
     avatar: '👨🏻',
-    title: '면접에서 어떤 활동을 들어볼지 감도 안 와요.',
+    title: '효율적으로 면접 준비하는 방법을 모르겠어요.',
     description:
-      '어떤 경험과 활동을 면접에서 중요하게 생각할지 알기가 어려워요. 준비해야 할 질문이 너무 많아 보여서 어떻게 해야 할지 모르겠어요.',
+      '이번이 첫 면접인데, 무엇부터 준비해야 할지 막막해요. 다른 사람들은 어떻게 준비하는지 궁금해요.',
   },
   {
     id: 3,
     bgColor: '#ffd4d4',
     avatar: '👨🏻‍🦱',
-    title: '면접관 앞에만 서면 긴장해서 말을 잘 못해요.',
+    title: '제 답변, 이대로 괜찮은 걸까요?',
     description:
-      '아무리 연습해도 실제 상황에서는 긴장감으로 실력을 발휘하지 못해요. 실전과 비슷한 환경에서 먼저 연습할 기회가 부족해요.',
+      '저 혼자 준비한 답변이 면접관 입장에서 어떻게 들릴지, 다른 사람들에게 피드백을 받고 싶어요.',
   },
 ];
 const mockData = {
@@ -973,213 +1164,3 @@ const mockData = {
     { id: 3, username: '박순신', score: 41234, avatar: '🎮', rank: 3 },
   ],
 };
-export default function LandingPage() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const cardsPerView = 3;
-  const maxIndex = cardData.length - cardsPerView;
-  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
-  const { pathname } = useLocation();
-  const [activeTab, setActiveTab] = useState('friends');
-
-  const currentData = mockData[activeTab];
-  const sortedData = [...currentData].sort((a, b) => b.score - a.score);
-
-  // Reorder for podium display: 2nd, 1st, 3rd
-  const podiumOrder = [
-    sortedData[1], // 2nd place (left)
-    sortedData[0], // 1st place (center)
-    sortedData[2], // 3rd place (right)
-  ];
-
-  const handleClickLoginButton = () => {
-    setLoginDialogOpen(true);
-  };
-
-  const handlePrev = () => {
-    setCurrentIndex((prev) => Math.max(0, prev - 1));
-  };
-
-  const handleNext = () => {
-    setCurrentIndex((prev) => Math.min(maxIndex, prev + 1));
-  };
-
-  const offset = -currentIndex * (100 / cardsPerView) - currentIndex * (20 / cardsPerView);
-
-  return (
-    <>
-      <Header></Header>
-      <PageContainer footer>
-        {/* Hero Section */}
-        <HeroContainer>
-          <BackgroundCircle />
-          <ContentWrapper>
-            <MainHeading>
-              면접 강화 툴<br />
-              면접톡!
-            </MainHeading>
-            <SubHeading>
-              합격은 면접톡이 <br />
-              책임진다
-            </SubHeading>
-            <Description>함께 쓰면 시너지! 면접&모범 답변 루틴</Description>
-            <ButtonGroup>
-              <PrimaryButton onClick={handleClickLoginButton}>지금 시작하기</PrimaryButton>
-              <KakaoLoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
-              <SecondaryButton as='a' href='/myqa' $isActive={pathname === '/myqa'}>
-                더 알아보기
-              </SecondaryButton>
-            </ButtonGroup>
-          </ContentWrapper>
-
-          <CardsWrapper>
-            <Card as={Card1}>
-              <CardIcon>📝</CardIcon>
-              <CardTitle>AI 면접 분석</CardTitle>
-              <CardDescription>실시간으로 답변을 분석하고 개선점을 알려드립니다</CardDescription>
-            </Card>
-            <Card as={Card2}>
-              <CardIcon>💼</CardIcon>
-              <CardTitle>합격 전략</CardTitle>
-              <CardDescription>합격자들의 노하우를 바탕으로 한 전략을 배웁니다</CardDescription>
-            </Card>
-            <Card as={Card3}>
-              <CardIcon>💼</CardIcon>
-              <CardTitle>합격 전략</CardTitle>
-              <CardDescription>합격자들의 노하우를 바탕으로 한 전략을 배웁니다</CardDescription>
-            </Card>
-          </CardsWrapper>
-        </HeroContainer>
-        {/* Course Section */}
-        <Container>
-          <Title2>면접 준비, 혼자 하려니 막막하지 않나요?</Title2>
-          <Subtitle2>
-            면접 준비에서 자기 경험을 효과적으로 표현하는 방법을 몰라 어려움을 겪고 있어요.
-          </Subtitle2>
-          <CardsWrapper2>
-            {cards.map((card) => (
-              <Cardd key={card.id} bgColor={card.bgColor}>
-                <AvatarWrapper2>{card.avatar}</AvatarWrapper2>
-                <CardTitle2>{card.title}</CardTitle2>
-                <CardDescription2>{card.description}</CardDescription2>
-              </Cardd>
-            ))}
-          </CardsWrapper2>
-        </Container>
-        {/* Testimonial Section */}
-        <Container>
-          <Title2>이젠 사람들과 협력하며 도움왕이 되어보세요!</Title2>
-          <Subtitle2>다른 사람들은 어떻게 준비하는지 궁금해요.</Subtitle2>
-          {/* Ranking */}
-          <ContainerR>
-            <HeaderR>
-              <TitleR>주간랭킹</TitleR>
-              <Tabs>
-                <Tab active={activeTab === 'friends'} onClick={() => setActiveTab('friends')}>
-                  활동순
-                </Tab>
-                <Tab active={activeTab === 'world'} onClick={() => setActiveTab('world')}>
-                  북마크순
-                </Tab>
-              </Tabs>
-            </HeaderR>
-
-            <PodiumContainer>
-              {podiumOrder.map((user, index) => {
-                const actualRank = user.rank;
-                const pedestalHeights = [80, 120, 60]; // heights for 2nd, 1st, 3rd
-
-                return (
-                  <PodiumItem key={user.id}>
-                    {actualRank === 1 && <Crown>👑</Crown>}
-                    <AvatarWrapper>
-                      <Avatar bg={actualRank === 1 ? '#fff8e1' : '#f5f5f5'} rank={actualRank}>
-                        {user.avatar}
-                      </Avatar>
-                      <RankBadge rank={actualRank}>{actualRank}</RankBadge>
-                    </AvatarWrapper>
-                    <Username>{user.username}</Username>
-                    <Score>{user.score.toLocaleString()}</Score>
-                    <ScoreLabel>---</ScoreLabel>
-                    <Pedestal height={pedestalHeights[index]} />
-                  </PodiumItem>
-                );
-              })}
-            </PodiumContainer>
-          </ContainerR>
-          {/* ////////////////////////////////////////////////// */}
-          <SliderWrapper>
-            <ArrowButton $direction='left' onClick={handlePrev} disabled={currentIndex === 0}>
-              <svg viewBox='0 0 24 24' fill='none'>
-                <path d='M15 18l-6-6 6-6' strokeLinecap='round' strokeLinejoin='round' />
-              </svg>
-            </ArrowButton>
-
-            <CardContainer2>
-              {cardData.map((card, index) => (
-                <CardWrapper key={card.id} $offset={offset}>
-                  <Cards>
-                    <Title3>{card.title}</Title3>
-                    <ReviewSection>
-                      💬
-                      {card.reviews.map((review, idx) => (
-                        <ReviewItem key={idx}>
-                          <ReviewText>`{review.text}`</ReviewText>
-                        </ReviewItem>
-                      ))}
-                    </ReviewSection>
-                  </Cards>
-                </CardWrapper>
-              ))}
-            </CardContainer2>
-
-            <ArrowButton2
-              $direction='right'
-              onClick={handleNext}
-              disabled={currentIndex === maxIndex}
-            >
-              <svg viewBox='0 0 24 24' fill='none'>
-                <path d='M9 18l6-6-6-6' strokeLinecap='round' strokeLinejoin='round' />
-              </svg>
-            </ArrowButton2>
-          </SliderWrapper>
-        </Container>
-        {/* CTA Section */}
-        <Container2>
-          <CTASection>
-            <Content>
-              <SubText>무료로 시작하세요. 가입 후 신원인증으로 즉시 사용가능합니다.</SubText>
-              <MainText>면접톡을 시작할 준비가 되셨나요?</MainText>
-              <ButtonGroup2>
-                <PrimaryButton2 onClick={handleClickLoginButton}>
-                  무료로 시작하기
-                  <ArrowIcon>
-                    <svg viewBox='0 0 24 24' fill='none'>
-                      <path
-                        d='M5 12h14M12 5l7 7-7 7'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                      />
-                    </svg>
-                  </ArrowIcon>
-                </PrimaryButton2>
-                <KakaoLoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
-                <SecondaryButton2>
-                  상담하기
-                  <ArrowIconSecondary>
-                    <svg viewBox='0 0 24 24' fill='none'>
-                      <path
-                        d='M5 12h14M12 5l7 7-7 7'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                      />
-                    </svg>
-                  </ArrowIconSecondary>
-                </SecondaryButton2>
-              </ButtonGroup2>
-            </Content>
-          </CTASection>
-        </Container2>
-      </PageContainer>
-    </>
-  );
-}

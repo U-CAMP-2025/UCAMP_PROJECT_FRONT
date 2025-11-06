@@ -2,6 +2,8 @@ import Typography from '@components/common/Typography';
 import styled from 'styled-components';
 
 export const FieldCard = styled.div`
+  width: 80%;
+  margin: 0 auto;
   border: 1px solid ${({ theme }) => theme.colors.gray[6]};
   border-radius: ${({ theme }) => theme.radius.md};
   background: #fff;

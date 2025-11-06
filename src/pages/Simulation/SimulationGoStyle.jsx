@@ -5,7 +5,7 @@ import styled, { css, keyframes } from 'styled-components';
 // --- [스타일 정의] ---
 
 export const MainContentWrapper = styled.div`
-  max-width: 100%;
+  width: 100%;
   margin: 0 auto;
   padding: ${({ theme }) => theme.space[6]} ${({ theme }) => theme.space[6]};
   min-height: 80vh;
@@ -14,7 +14,7 @@ export const MainContentWrapper = styled.div`
 // 1. 레이아웃 (사이드바 + 메인)
 export const SimulationLayout = styled.div`
   display: grid;
-  grid-template-columns: 2.5fr 8fr 2.5fr;
+  grid-template-columns: 2.8fr 10fr 2.8fr;
   gap: ${({ theme }) => theme.space[6]};
 
   @media (max-width: 1024px) {
@@ -126,21 +126,36 @@ const spin = keyframes`
 `;
 
 export const LiveIndicator = styled(Typography).attrs({ size: 2, weight: 'bold' })`
-  color: ${({ theme }) => theme.colors.gray[1]};
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.space[1]};
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
 
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: red;
+  font-size: ${({ theme }) => theme.font.size[2]};
+  font-weight: ${({ theme }) => theme.font.weight.bold};
+  letter-spacing: 0.3px;
+
+  /* 빨간 점 아이콘 */
   &::before {
-    content: '●';
-    font-size: 10px;
-    color: #d93025;
-    animation: ${spin} 1.5s linear infinite;
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: red;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25);
   }
 `;
 
 // InterviewerImage -> InterviewerVideo (기존 InterviewerImage 스타일 재사용)
 export const InterviewerVideo = styled.div`
+  position: relative; /* 오버레이 기준점 */
   width: 100%;
   aspect-ratio: 16 / 9;
   border-radius: ${({ theme }) => theme.radius.lg};
@@ -155,13 +170,13 @@ export const InterviewerVideo = styled.div`
 `;
 
 export const UserPipVideoWrapper = styled.div`
-  position: absolute;
+  position: fixed;
 
   // 기본 위치
   bottom: ${({ theme }) => theme.space[6]};
   right: ${({ theme }) => theme.space[6]};
 
-  width: 500px;
+  width: 416px;
   aspect-ratio: 16 / 9;
   border-radius: ${({ theme }) => theme.radius.md};
   overflow: hidden;
@@ -263,6 +278,23 @@ export const ScriptAnswer = styled(Typography).attrs({ as: 'p', size: 3 })`
   line-height: 1.6;
   color: ${({ $hasContent, theme }) =>
     $hasContent ? theme.colors.gray[12] : theme.colors.gray[9]};
+  /* 길어질 때 스크롤 */
+  max-height: clamp(160px, 28vh, 360px);
+  overflow-y: auto;
+  padding-right: 8px; /* 스크롤바 겹침 방지 */
+  -webkit-overflow-scrolling: touch;
+
+  /* (선택) 스크롤바 미세 스타일 */
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: ${({ theme }) => theme.colors.gray[6]};
+    border-radius: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: ${({ theme }) => theme.colors.gray[3]};
+  }
 `;
 
 // 4. Radix Switch 스타일

@@ -2,11 +2,11 @@
 import { axiosInstance } from '@api/axios';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
-import { CheckCircledIcon, UpdateIcon } from '@radix-ui/react-icons';
+import { CheckCircledIcon, CaretRightIcon } from '@radix-ui/react-icons';
 import * as Tabs from '@radix-ui/react-tabs';
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import styled, { css, keyframes } from 'styled-components';
+import styled, { css } from 'styled-components';
 
 export default function SimulationRecordPage() {
   const navigate = useNavigate();
@@ -18,6 +18,7 @@ export default function SimulationRecordPage() {
     (async () => {
       try {
         const res = await axiosInstance.get('/simulation/records');
+        console.log(res.data);
         setRecords(res.data?.data ?? []);
       } catch (e) {
         setError(e?.response?.data?.message ?? '기록을 불러오지 못했습니다.');
@@ -28,37 +29,30 @@ export default function SimulationRecordPage() {
   }, []);
 
   const renderRecordItem = (record) => {
-    const isClickable = record.simulationStatus === 'COMPLETED';
-    const targetUrl = `/simulation/${record.simulationId}/result`;
-    const WrapperComponent = isClickable ? Link : 'div';
-    const wrapperProps = { to: isClickable ? targetUrl : undefined, $isClickable: isClickable };
+    const simId = record?.simulationId;
+    const post = record?.post ?? {};
+    const jobs = Array.isArray(post?.job) ? post.job : [];
+    const title = post?.title || post?.postTitle || '(제목 없음)';
 
     return (
-      <RecordItemBase as={WrapperComponent} {...wrapperProps} key={record.simulationId}>
+      <RecordItemLink to={`/simulation/${simId}/result`} key={simId}>
         <RecordItemLeft>
           <TagGroup>
-            {record.post.job.map((jobName) => (
-              <JobChip key={jobName}>{jobName}</JobChip>
+            {jobs.map((jobName, i) => (
+              <JobChip key={`${simId}-job-${i}`}>{jobName}</JobChip>
             ))}
           </TagGroup>
           <Typography as='h3' size={4} weight='semiBold'>
-            {record.post.title}
+            {title}
           </Typography>
         </RecordItemLeft>
         <RecordItemRight>
-          {isClickable ? (
-            <StatusIndicator $status='COMPLETED'>
-              <CheckCircledIcon width={18} height={18} />
-              변환 완료
-            </StatusIndicator>
-          ) : (
-            <StatusIndicator $status='INPROGRESS'>
-              <UpdateIcon width={18} height={18} />
-              변환 진행 중
-            </StatusIndicator>
-          )}
+          <ViewResultText>
+            <CheckCircledIcon width={16} height={16} />
+            확인하기 <CaretRightIcon width={16} height={16} />
+          </ViewResultText>
         </RecordItemRight>
-      </RecordItemBase>
+      </RecordItemLink>
     );
   };
 
@@ -76,18 +70,17 @@ export default function SimulationRecordPage() {
         </StyledTabsRoot>
 
         <RecordListContainer>
-          {loading && <div style={{ padding: 24 }}>불러오는 중…</div>}
           {error && <div style={{ padding: 24, color: 'crimson' }}>{error}</div>}
-          {!loading &&
-            !error &&
+          {!error &&
+            !loading &&
             (records.length > 0 ? (
               records.map(renderRecordItem)
             ) : (
-              <div style={{ padding: '48px', textAlign: 'center' }}>
+              <EmptyState>
                 <Typography size={4} muted>
                   아직 연습 기록이 없습니다.
                 </Typography>
-              </div>
+              </EmptyState>
             ))}
         </RecordListContainer>
       </MainContentWrapper>
@@ -95,14 +88,13 @@ export default function SimulationRecordPage() {
   );
 }
 
-/* 스타일 그대로 */
+/* ---------------- 스타일 ---------------- */
+
 const MainContentWrapper = styled.div`
   width: 90%;
-  //   max-width: 1200px;
-  //   margin: 0 auto;
-  // padding: ${({ theme }) => theme.space[8]} ${({ theme }) => theme.space[6]};
   min-height: 80vh;
 `;
+
 const StyledTabsRoot = styled(Tabs.Root)`
   width: 100%;
   margin-bottom: ${({ theme }) => theme.space[8]};
@@ -120,9 +112,11 @@ const StyledTabsTrigger = styled(Tabs.Trigger)`
   padding: ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[4]};
   cursor: pointer;
   position: relative;
+
   &[data-state='active'] {
     color: ${({ theme }) => theme.colors.primary[9]};
   }
+
   &[data-state='active']::after {
     content: '';
     position: absolute;
@@ -133,13 +127,21 @@ const StyledTabsTrigger = styled(Tabs.Trigger)`
     background-color: ${({ theme }) => theme.colors.primary[9]};
   }
 `;
+
+const RecordItemRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+`;
+
 const RecordListContainer = styled.div`
   width: 90%;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
 `;
-const RecordItemBase = styled.div`
+
+const RecordItemLink = styled(Link)`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -148,25 +150,24 @@ const RecordItemBase = styled.div`
   text-decoration: none;
   color: inherit;
   transition: background-color 0.2s ease;
-  ${({ $isClickable }) =>
-    $isClickable &&
-    css`
-      cursor: pointer;
-      &:hover {
-        background-color: ${({ theme }) => theme.colors.gray[2]};
-      }
-    `}
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.gray[2]};
+  }
 `;
+
 const RecordItemLeft = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.space[3]};
 `;
+
 const TagGroup = styled.div`
   display: flex;
   gap: ${({ theme }) => theme.space[2]};
   flex-wrap: wrap;
 `;
+
 const JobChip = styled.div`
   display: inline-flex;
   align-items: center;
@@ -177,31 +178,15 @@ const JobChip = styled.div`
   font-size: ${({ theme }) => theme.font.size[2]};
   font-weight: ${({ theme }) => theme.font.weight.semiBold};
 `;
-const RecordItemRight = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.space[2]};
+
+const EmptyState = styled.div`
+  padding: 48px;
+  text-align: center;
 `;
-const spin = keyframes` from { transform: rotate(0deg); } to { transform: rotate(360deg); } `;
-const StatusIndicator = styled(Typography).attrs({ size: 3, weight: 'semiBold' })`
+
+const ViewResultText = styled(Typography).attrs({ size: 3, weight: 'semiBold' })`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[2]};
-  ${({ $status }) =>
-    $status === 'COMPLETED' &&
-    css`
-      color: #1e9654;
-      svg {
-        color: #1e9654;
-      }
-    `}
-  ${({ $status }) =>
-    $status === 'INPROGRESS' &&
-    css`
-      color: #d93025;
-      svg {
-        color: #d93025;
-        animation: ${spin} 1.5s linear infinite;
-      }
-    `}
+  color: ${({ theme }) => theme.colors.primary[9]};
 `;

@@ -4,7 +4,7 @@ import RecordRTC, { RecordRTCPromisesHandler } from 'recordrtc';
 
 const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
   {
-    maxSeconds = 60,
+    maxSeconds = 120,
     onSaved, // (url, qaId, transcript)
     onTick, // (timeLeft)
     onRecordingChange, // (isRecording)
@@ -25,7 +25,13 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
 
   const [timeLeft, setTimeLeft] = useState(maxSeconds);
   const [isRecording, setIsRecording] = useState(false);
+  useEffect(() => {
+    onRecordingChange?.(isRecording);
+  }, [isRecording, onRecordingChange]);
 
+  useEffect(() => {
+    onTick?.(timeLeft);
+  }, [timeLeft, onTick]);
   useImperativeHandle(ref, () => ({
     // 부모에서: start({ qaId, qIdx })
     start: async ({ qaId, qIdx } = {}) => {
@@ -51,19 +57,18 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
 
       setTimeLeft(maxSeconds);
       setIsRecording(true);
-      onRecordingChange?.(true);
-      onTick?.(maxSeconds);
+      // onRecordingChange?.(true);
+      // onTick?.(maxSeconds);
 
       // 카운트다운
       timerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
-          const next = prev - 1;
-          onTick?.(Math.max(next, 0));
+          const next = Math.max(prev - 1, 0);
           if (next <= 0) {
             clearInterval(timerRef.current);
             timerRef.current = null;
           }
-          return Math.max(next, 0);
+          return next;
         });
       }, 1000);
 
@@ -148,24 +153,38 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
             if (qaId != null) form.append('qaId', String(qaId)); // ✅ 서버 식별자
 
             // ✅ baseURL이 /api 이므로 슬래시 없이 호출
-            const res = await axiosInstance.post(
-              qaId != null && simulationId
-                ? `simulation/${simulationId}/answers/${qaId}/audio`
-                : `simulation/answers/audio`,
-              form,
-            );
+            // const res = await axiosInstance.post(
+            //   qaId != null && simulationId
+            //     ? `simulation/${simulationId}/answers/${qaId}/audio`
+            //     : `simulation/answers/audio`,
+            //   form,
+            // );
 
-            const serverUrl = res?.data?.data?.url || res?.data?.url || null;
-            transcript = res?.data?.data?.transcript ?? '';
-            url = serverUrl || localPreviewUrl;
+            axiosInstance
+              .post(
+                qaId != null && simulationId
+                  ? `simulation/${simulationId}/answers/${qaId}/audio`
+                  : `simulation/answers/audio`,
+                form,
+              )
+              .then((res) => {
+                console.log('업로드 성공:', res.data);
+              })
+              .catch((err) => {
+                console.error('업로드 실패:', err);
+              });
+
+            // const serverUrl = res?.data?.data?.url || res?.data?.url || null;
+            // transcript = res?.data?.data?.transcript ?? '';
+            // url = serverUrl || localPreviewUrl;
 
             // ✅ 부모로 (url, qaId, transcript)
-            onSaved?.(url, qaId ?? qIdx, transcript);
-            console.log('upload result:', res.data);
+            // onSaved?.(url, qaId ?? qIdx, transcript);
+            // console.log('upload result:', res.data);
           } catch (uploadErr) {
             console.error('오디오 업로드 실패:', uploadErr);
-            url = localPreviewUrl;
-            onSaved?.(url, qaId ?? qIdx, transcript);
+            // url = localPreviewUrl;
+            // onSaved?.(url, qaId ?? qIdx, transcript);
           }
         }
 
@@ -178,7 +197,7 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
     } finally {
       cleanupStream();
       setIsRecording(false);
-      onRecordingChange?.(false);
+      // onRecordingChange?.(false);
       qaIdRef.current = null;
       qIdxRef.current = null;
     }
