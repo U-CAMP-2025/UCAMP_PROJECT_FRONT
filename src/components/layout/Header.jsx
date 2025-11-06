@@ -38,21 +38,6 @@ export const Header = () => {
 
   const tourSteps = [
     {
-      target: '#tour-logo', // 1. 로고
-      content: (
-        <>
-          <b style={{ fontSize: '20px' }}>면접톡</b>
-          <br />
-          <br />
-          면접톡 로고입니다.
-          <br />
-          클릭하면 메인 페이지로 이동합니다.
-        </>
-      ),
-      placement: 'bottom',
-      disableBeacon: true,
-    },
-    {
       target: '#tour-nav-qalist', // 2. 면접 노트
       content: (
         <>
@@ -64,6 +49,7 @@ export const Header = () => {
         </>
       ),
       placement: 'bottom',
+      disableBeacon: true,
     },
     {
       target: '#tour-nav-myqa', // 3. 나의 노트
@@ -104,15 +90,25 @@ export const Header = () => {
       ),
       placement: 'bottom',
     },
+    {
+      target: '#tour-nav-qalist', // 다시 면접노트
+      content: (
+        <>
+          <br />
+          이제 <b>면접 노트</b>를 클릭하여 <br />
+          다른 유저의 면접 질문과 답변을 확인해보세요!
+        </>
+      ),
+      placement: 'bottom',
+    },
   ];
 
   useEffect(() => {
     if (isLogin) {
       fetchUserStatus()
         .then((response) => {
-          if (response?.status === 'NEW') {
-            tourStartedByButton.current = false; // 플래그 초기화
-            setWelcomeModalOpen(true); // 튜토리얼 대신 모달 열기
+          if (response?.status === 'NEW' && localStorage.getItem('seenHeaderTour')) {
+            setWelcomeModalOpen(true); // 튜토리얼 모달 열기
           }
         })
         .catch((err) => {
@@ -122,7 +118,6 @@ export const Header = () => {
   }, [isLogin]);
 
   const handleStartTutorial = () => {
-    tourStartedByButton.current = true;
     setWelcomeModalOpen(false);
     setTimeout(() => {
       setRunTour(true);
@@ -130,41 +125,39 @@ export const Header = () => {
   };
 
   const handleSkipAndClose = () => {
-    if (tourStartedByButton.current) {
-      return;
-    }
     setWelcomeModalOpen(false);
+    setRunTour(false);
+    localStorage.setItem('seenHeaderTour', 'true');
 
-    // 튜토리얼을 보지 않았으므로 상태를 'ACTIVE'로 업데이트
-    patchUserStaus('ACTIVE')
-      .then(() => {
-        console.log("튜토리얼 건너뜀: 유저 상태가 'ACTIVE'로 업데이트되었습니다.");
-      })
-      .catch((err) => {
-        console.error('유저 상태 업데이트에 실패했습니다:', err);
-      });
+    // // 튜토리얼을 보지 않았으므로 상태를 'ACTIVE'로 업데이트
+    // patchUserStaus('ACTIVE')
+    //   .then(() => {
+    //     console.log("튜토리얼 건너뜀: 유저 상태가 'ACTIVE'로 업데이트되었습니다.");
+    //   })
+    //   .catch((err) => {
+    //     console.error('유저 상태 업데이트에 실패했습니다:', err);
+    //   });
   };
 
   const handleJoyrideCallback = (data) => {
     const { status, action } = data;
-    // 튜토리얼이 종료 또는 스킵되었는지 확인
     const finishedStatuses = ['finished', 'skipped'];
 
     if (finishedStatuses.includes(status) || action === 'close') {
-      // 1. 튜토리얼을 닫습니다.
       setRunTour(false);
+      localStorage.setItem('seenHeaderTour', 'true');
 
-      // 2. 서버에 유저 상태를 'ACTIVE'로 업데이트합니다.
-      patchUserStaus('ACTIVE')
-        .then(() => {
-          console.log("튜토리얼 완료: 유저 상태가 'ACTIVE'로 업데이트되었습니다.");
-        })
-        .catch((err) => {
-          console.error('유저 상태 업데이트에 실패했습니다:', err);
-        });
+      // // 서버에 유저 상태를 'ACTIVE'로 업데이트
+      // patchUserStaus('ACTIVE')
+      //   .then(() => {
+      //     console.log("튜토리얼 완료: 유저 상태가 'ACTIVE'로 업데이트되었습니다.");
+      //   })
+      //   .catch((err) => {
+      //     console.error('유저 상태 업데이트에 실패했습니다:', err);
+      //   });
     }
   };
-  // ========================== 유저 가이드투어 ===================================
+  // ========================== 유저 가이드투어 ================================
 
   const handleClickLogoButton = () => {
     navigate('/');
@@ -393,7 +386,7 @@ export const Header = () => {
           next: '다음',
           back: '이전',
           skip: '건너뛰기',
-          last: '마침',
+          last: '확인',
         }}
         // 스타일 커스터마이징
         styles={{
