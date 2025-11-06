@@ -7,6 +7,7 @@ export const Overlay = styled(Dialog.Overlay)`
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
+  z-index: 10000;
 `;
 
 export const Content = styled(Dialog.Content)`
@@ -22,6 +23,7 @@ export const Content = styled(Dialog.Content)`
   padding: ${({ theme }) => theme.space[6]};
   box-shadow: ${({ theme }) => theme.shadow.lg};
   text-align: center;
+  z-index: 10001;
 `;
 
 export const Title = styled(Typography).attrs({ as: 'h3', size: 5, weight: 'semiBold' })`
