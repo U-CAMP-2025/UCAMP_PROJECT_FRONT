@@ -42,6 +42,7 @@ export default function QACreatePage() {
     },
     mode: 'onChange', // 입력 즉시 유효성 체크
   });
+
   const openAlert = (message, onClose) => {
     setAlertMessage(message);
     setAlertOnClose(() => onClose);
@@ -79,20 +80,17 @@ export default function QACreatePage() {
     name: 'qaSets',
   });
 
-  const defaultOpenItems = fields.map((item, index) => `item-${index}`);
   const [openItems, setOpenItems] = useState(['item-0']);
 
   const handleAddSet = () => {
     if (fields.length >= 10) {
-      alert('질문은 최대 10개까지 등록할 수 있습니다.');
+      openAlert('질문은 최대 10개까지 등록할 수 있습니다.');
       return;
     }
-
     const newIndex = fields.length;
-    append({ question: '', answer: '' });
 
-    // 새로 추가된 아이템만 열림 상태에 추가
-    setOpenItems((prev) => [...prev, `item-${newIndex}`]);
+    append({ question: '', answer: '' });
+    setOpenItems((prevOpenItems) => [...prevOpenItems, `item-${newIndex}`]);
   };
 
   const selectedJobIds = watch('jobIds');
@@ -234,14 +232,7 @@ export default function QACreatePage() {
                       </Accordion.Root>
                     </SortableContext>
                   </DndContext>
-                  <AddSetButton
-                    type='button'
-                    onClick={() =>
-                      fields.length < 10
-                        ? append({ question: '', answer: '' })
-                        : openAlert('질문은 최대 10개까지 등록할 수 있습니다.')
-                    }
-                  >
+                  <AddSetButton type='button' onClick={handleAddSet}>
                     <PlusIcon width={30} height={30} />
                   </AddSetButton>
                 </Section>
