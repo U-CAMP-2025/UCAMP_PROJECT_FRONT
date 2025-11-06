@@ -26,6 +26,7 @@ export default function QAListPage() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [yourJob, setYourJob] = useState(null);
   const ITEMS_PER_PAGE = 9;
 
   // 정렬 변경
@@ -54,7 +55,7 @@ export default function QAListPage() {
   useEffect(() => {
     if (isLogin) {
       fetchUserMypage().then((res) => {
-        setSelectedJobIds([res?.job?.jobId]);
+        setYourJob(res?.job?.jobId || null);
       });
     }
   }, []);
@@ -113,14 +114,16 @@ export default function QAListPage() {
           <Typography as='h1' size={7} weight='bold'>
             면접 노트
           </Typography>
-          <AddButton onClick={handleAddClick}>
-            <PlusIcon width={20} height={20} />
-            신규 노트
-          </AddButton>
+          {isLogin && (
+            <AddButton onClick={handleAddClick}>
+              <PlusIcon width={20} height={20} />
+              신규 노트
+            </AddButton>
+          )}
         </QaListHeader>
         <FilterAndSortBar>
           <FilterSection>
-            <JobSelector value={selectedJobIds} onChange={handleJobChange} />
+            <JobSelector value={selectedJobIds} onChange={handleJobChange} yourJobId={yourJob} />
           </FilterSection>
           <SortSection>
             <Typography size={3} style={{ fontWeight: 500, color: 'inherit' }}>
