@@ -1,4 +1,3 @@
-// 💡 새로운 컴포넌트 임포트
 import { fetchJobList } from '@api/jobAPIS';
 import { scrollQaSet } from '@api/postAPIS';
 import { fetchUserMypage } from '@api/userAPIS';
