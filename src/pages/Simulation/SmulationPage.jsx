@@ -8,11 +8,10 @@ import SimulationGO from './SimulationGo';
 const SimulationPage = () => {
   return (
     <PageContainer header footer>
-      <NavLink to='/simulation'>면접 시뮬레이션</NavLink> /
+      <NavLink to='/simulation'>면접 연습</NavLink> /
       <NavLink to='/simulation/record'>면접 연습 기록</NavLink>
       <Routes>
         <Route index='true' element={<SimulationStart />} />
-        {/* <Route path='/record' element={<SimulationGO />} /> */}
         <Route path='/:simulationId/start' element={<SimulationGO />} />
       </Routes>
     </PageContainer>

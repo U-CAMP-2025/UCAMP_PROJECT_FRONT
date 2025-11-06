@@ -63,7 +63,7 @@ export default function LandingPage() {
               합격은 면접톡이 <br />
               책임진다
             </SubHeading>
-            <Description>면접 시뮬레이션&피드백 루틴을 경험해보세요!</Description>
+            <Description>면접 연습&피드백 루틴을 경험해보세요!</Description>
             <ButtonGroup>
               <PrimaryButton onClick={handleClickLoginButton}>지금 시작하기</PrimaryButton>
               <KakaoLoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
@@ -74,7 +74,7 @@ export default function LandingPage() {
             <Card as={Card1}>
               <CardIcon>📝</CardIcon>
               <CardTitle>AI 면접 분석</CardTitle>
-              <CardDescription>시뮬레이션 후 답변을 분석하고 개선점을 알려드립니다</CardDescription>
+              <CardDescription>연습 후 답변을 분석하고 개선점을 알려드립니다</CardDescription>
             </Card>
             <Card as={Card2}>
               <CardIcon>💼</CardIcon>
