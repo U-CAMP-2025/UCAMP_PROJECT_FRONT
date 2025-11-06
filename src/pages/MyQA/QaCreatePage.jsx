@@ -1,6 +1,7 @@
-import { createPost } from '@api/postAPIS';
+import { countPost, createPost } from '@api/postAPIS';
 import { JobSelector } from '@components/common/JobSelector';
 import Typography from '@components/common/Typography';
+import WarnDialog from '@components/common/WarnDialog';
 import { PageContainer } from '@components/layout/PageContainer';
 import {
   DndContext,
@@ -18,7 +19,7 @@ import {
 import * as Accordion from '@radix-ui/react-accordion';
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import { CheckIcon, PlusIcon } from '@radix-ui/react-icons';
-import React from 'react';
+import { React, useEffect, useState } from 'react';
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -27,6 +28,10 @@ import { QACreateInput } from './QaCreateInput';
 
 export default function QACreatePage() {
   const navigate = useNavigate();
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertOnClose, setAlertOnClose] = useState(null);
+
   const methods = useForm({
     defaultValues: {
       jobIds: [],
@@ -37,6 +42,11 @@ export default function QACreatePage() {
     },
     mode: 'onChange', // 입력 즉시 유효성 체크
   });
+  const openAlert = (message, onClose) => {
+    setAlertMessage(message);
+    setAlertOnClose(() => onClose);
+    setAlertOpen(true);
+  };
 
   const {
     control,
@@ -48,11 +58,21 @@ export default function QACreatePage() {
   } = methods;
 
   // --- 직무 선택 유효성 등록 ---
-  React.useEffect(() => {
+  useEffect(() => {
     register('jobIds', {
       validate: (value) => value.length > 0 || '직무를 최소 1개 이상 선택해야 합니다.',
     });
   }, [register]);
+
+  useEffect(() => {
+    countPost().then((response) => {
+      if (response?.data >= 5) {
+        openAlert('면접 노트는 최대 10개까지 작성할 수 있습니다.', () => {
+          navigate(-1);
+        });
+      }
+    });
+  }, []);
 
   const { fields, append, remove, move } = useFieldArray({
     control,
@@ -206,7 +226,7 @@ export default function QACreatePage() {
                               onDelete={() =>
                                 fields.length > 1
                                   ? remove(index)
-                                  : alert('최소 1개의 질문 세트가 필요합니다.')
+                                  : openAlert('최소 1개의 질문 세트가 필요합니다.')
                               }
                             />
                           ))}
@@ -214,7 +234,14 @@ export default function QACreatePage() {
                       </Accordion.Root>
                     </SortableContext>
                   </DndContext>
-                  <AddSetButton type='button' onClick={handleAddSet}>
+                  <AddSetButton
+                    type='button'
+                    onClick={() =>
+                      fields.length < 10
+                        ? append({ question: '', answer: '' })
+                        : openAlert('질문은 최대 10개까지 등록할 수 있습니다.')
+                    }
+                  >
                     <PlusIcon width={30} height={30} />
                   </AddSetButton>
                 </Section>
@@ -257,6 +284,19 @@ export default function QACreatePage() {
           </FormProvider>
         </SettingsBox>
       </MainContentWrapper>
+      <WarnDialog
+        open={alertOpen}
+        onOpenChange={(open) => {
+          setAlertOpen(open);
+          if (!open && alertOnClose) {
+            alertOnClose();
+            setAlertOnClose(null);
+          }
+        }}
+        title='알림'
+        message={alertMessage}
+        confirmText='확인'
+      />
     </PageContainer>
   );
 }

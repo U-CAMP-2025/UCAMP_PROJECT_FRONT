@@ -451,12 +451,15 @@ const StyledSelectContent = styled(Select.Content)`
   box-shadow: ${({ theme }) => theme.shadow.md};
   z-index: 101;
   width: var(--radix-select-trigger-width);
+  max-height: 320px;
 `;
 
 const StyledSelectViewport = styled(Select.Viewport)`
   padding: ${({ theme }) => theme.space[1]};
+  padding: ${({ theme }) => theme.space[1]};
+  max-height: 200px; /* ⬅️ 리스트 높이 제한 */
+  overflow-y: auto; /* ⬅️ 세로 스크롤 */
 `;
-
 const StyledSelectItem = styled(Select.Item)`
   font-size: ${({ theme }) => theme.font.size[3]};
   color: ${({ theme }) => theme.colors.gray[12]};

@@ -1,18 +1,18 @@
 import { useAuthStore } from '@store/auth/useAuthStore';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { SSE } from 'sse.js';
+
+// 경로에 맞게 수정 필요
 
 export const useSSE = (trigger) => {
   const { isLogin, accessToken } = useAuthStore();
+  const [reconnectAttempts, setReconnectAttempts] = useState(0);
 
   let trig = 0;
+  let sse; // effect 외부에 sse 변수 선언하여 cleanup에서 참조
 
-  useEffect(() => {
-    if (!accessToken && isLogin) {
-      return;
-    }
-
-    const sse = new SSE(
+  const createSSE = () => {
+    sse = new SSE(
       (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api') + '/notifications/sse',
       {
         headers: {
@@ -29,12 +29,34 @@ export const useSSE = (trigger) => {
     });
 
     sse.addEventListener('error', (err) => {
+      console.error('SSE error:', err);
       sse.close();
+      attemptReconnect();
     });
+  };
 
-    // cleanup
+  const attemptReconnect = () => {
+    const maxReconnectAttempts = 20;
+    if (reconnectAttempts < maxReconnectAttempts) {
+      const timeout = Math.pow(2, reconnectAttempts) * 1000;
+      setReconnectAttempts((prev) => prev + 1);
+      setTimeout(() => {
+        createSSE();
+      }, timeout);
+    } else {
+      console.log('최대 재연결 시도 횟수 도달');
+    }
+  };
+
+  useEffect(() => {
+    if (!accessToken || !isLogin) {
+      return;
+    }
+
+    createSSE();
+
     return () => {
-      sse.close();
+      if (sse) sse.close();
     };
-  }, [isLogin]);
+  }, [accessToken, isLogin, reconnectAttempts]);
 };

@@ -73,3 +73,12 @@ export const copyPost = async (postId) => {
   const { data } = await axiosInstance.post(`/posts/${postId}`);
   return data;
 };
+
+/**
+ * GET: 질문세트 카운트 데이터
+ * @returns {Promise<Object>} response
+ */
+export const countPost = async () => {
+  const { data } = await axiosInstance.get(`/posts/count`);
+  return data;
+};
