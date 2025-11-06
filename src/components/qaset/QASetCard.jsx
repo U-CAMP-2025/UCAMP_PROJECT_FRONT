@@ -42,10 +42,11 @@ export default function QASetCard({ item }) {
     <>
       <KakaoLoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
       <Card onClick={handleCardClick} role='button' aria-label={`${title} 상세로 이동`}>
-        {/* 북마크 인덱스 탭 */}
-        {isBookmarked && <BookmarkRibbon></BookmarkRibbon>}
-
-        {/* 보라색 헤더 띠 (태그 포함) */}
+        {isBookmarked && (
+          <BookmarkIconWrapper>
+            <BookmarkFilledIcon /> {/* 채워진 아이콘 사용 */}
+          </BookmarkIconWrapper>
+        )}
         <HeaderBar>
           <TopRow>
             {job.length > 0 && (
@@ -109,7 +110,7 @@ export default function QASetCard({ item }) {
 const Card = styled.article`
   border: 1px solid #e8e5d9;
   border-radius: ${({ theme }) => theme.radius.xl};
-  background: #fdfdf8;
+  background: #ffffff;
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
   transition:
     box-shadow 0.2s ease,
@@ -133,7 +134,7 @@ const Card = styled.article`
 `;
 
 const HeaderBar = styled.div`
-  background: ${({ theme }) => theme.colors.primary[9]};
+  background: ${({ theme }) => theme.colors.primary[5]};
   border-radius: ${({ theme }) => theme.radius.xl} ${({ theme }) => theme.radius.xl} 0 0;
   padding: ${({ theme }) => theme.space[4]} ${({ theme }) => theme.space[5]};
 
@@ -154,40 +155,15 @@ const TopRow = styled.div`
   overflow: hidden;
 
   & ${Tag} {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.7);
+    color: #6d5b18;
+    border: none;
     font-weight: ${({ theme }) => theme.font.weight.regular};
 
     &:hover {
-      background: rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.9);
     }
   }
-`;
-
-const BookmarkRibbon = styled.div`
-  position: absolute;
-  right: 10px;
-  width: 50px;
-  z-index: 2;
-
-  height: 60px;
-  top: -20px;
-
-  background: linear-gradient(
-    to bottom,
-    ${({ theme }) => theme.colors.primary[7]} 0%,
-    ${({ theme }) => theme.colors.primary[7]} 45%,
-    #fdfdf8 33.33%,
-    #fdfdf8 100%
-  );
-
-  border-radius: 4px;
-
-  border: 1px solid #e8e5d9;
-  border-bottom: none;
-
-  box-shadow: 0 -1px 6px rgba(0, 0, 0, 0.1);
 `;
 
 const CardContentWrapper = styled.div`
@@ -195,7 +171,7 @@ const CardContentWrapper = styled.div`
   display: flex;
   flex-direction: column;
   padding: ${({ theme }) => theme.space[5]};
-  background: #fdfdf8;
+  background: #ffffff;
 `;
 
 const DescriptionText = styled(Typography)`
@@ -213,7 +189,8 @@ const Divider = styled.hr`
   border: 0;
   border-top: 1px solid ${({ theme }) => theme.colors.gray[7]};
   margin: 0 ${({ theme }) => theme.space[5]};
-  background: #fdfdf8;
+
+  background: #ffffff;
 `;
 
 const Footer = styled.div`
@@ -222,7 +199,7 @@ const Footer = styled.div`
   justify-content: flex-end;
   gap: ${({ theme }) => theme.space[6]};
   padding: ${({ theme }) => theme.space[6]};
-  background: #fdfdf8;
+  background: #ffffff;
   border-radius: 0 0 ${({ theme }) => theme.radius.xl} ${({ theme }) => theme.radius.xl};
 `;
 
@@ -232,4 +209,30 @@ const IconStat = styled.div`
   gap: ${({ theme }) => theme.space[2]};
   color: ${({ theme }) => theme.colors.gray[11]};
   user-select: none;
+`;
+
+const BookmarkIconWrapper = styled.div`
+  position: absolute;
+  top: -12px;
+  right: 7px;
+  z-index: 3;
+  color: ${({ theme }) => theme.colors.primary[8]};
+  font-size: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+
+  ${Card}:hover & {
+    transform: translateY(-4px);
+  }
+  ${Card}:active & {
+    transform: translateY(1px);
+  }
+
+  & svg {
+    width: 1em;
+    height: 1em;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
+  }
 `;
