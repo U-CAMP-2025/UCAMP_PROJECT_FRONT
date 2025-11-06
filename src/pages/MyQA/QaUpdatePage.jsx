@@ -42,7 +42,7 @@ export default function QAUpdatePage() {
       qaSets: [{ question: '', answer: '' }],
       status: 'Y',
     },
-    mode: 'onBlur', // 필드가 변경될 때 유효성 검사 수행
+    mode: 'onChange', // 필드가 변경될 때 유효성 검사 수행
   });
   const openAlert = (message) => {
     setAlertMessage(message);
@@ -155,11 +155,10 @@ export default function QAUpdatePage() {
                   <SectionTitle>직무 선택 (최대 3개)</SectionTitle>
                   <JobSelector
                     value={selectedJobIds}
-                    onChange={
-                      (newJobIds) => setValue('jobIds', newJobIds, { shouldValidate: true }) // 변경 시 강제 유효성 검사
-                    }
+                    onChange={(newJobIds) => {
+                      setValue('jobIds', newJobIds, { shouldValidate: true });
+                    }}
                   />
-                  {/* 유효성 검사 추가 */}
                   {errors.jobIds && (
                     <span
                       style={{ color: 'red', fontSize: '14px', marginTop: '8px', display: 'block' }}
