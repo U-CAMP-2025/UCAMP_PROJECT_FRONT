@@ -108,7 +108,7 @@ export default function QAListPage() {
           </Typography>
           <AddButton onClick={handleAddClick}>
             <PlusIcon width={20} height={20} />
-            작성하기
+            신규 노트
           </AddButton>
         </QaListHeader>
         <FilterAndSortBar>
