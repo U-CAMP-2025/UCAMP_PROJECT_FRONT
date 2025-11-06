@@ -1,3 +1,4 @@
+import { transCheckimulation } from '@api/simulationAPIS';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import React, { useEffect } from 'react';
@@ -27,19 +28,25 @@ export default function SimulationEndPage() {
   // GO 페이지에서 Blob으로 전달받음
   const initialBlob = location.state?.recordedBlob ?? null;
 
-  // ★ Blob → objectURL 생성 (cleanup 시 revoke)
   useEffect(() => {
-    let timer = setTimeout(() => {
-      console.log(initialBlob);
-      navigate(`/simulation/${simulationId}/result`, {
-        state: {
-          initialBlob,
-        },
-        replace: true,
-      });
-    }, 10000); // 살짝의 로딩 연출
-    return () => clearTimeout(timer);
-  }, []);
+    const run = async () => {
+      try {
+        const result = await transCheckimulation(simulationId);
+        console.log('transCheckimulation result:', result);
+
+        if (result?.data) {
+          navigate(`/simulation/${simulationId}/result`, {
+            state: { initialBlob },
+            replace: true,
+          });
+        }
+      } catch (err) {
+        console.error('transCheckimulation failed:', err);
+      }
+    };
+
+    run(); // ✅ 실제 실행
+  }, [simulationId, initialBlob, navigate]);
 
   return (
     <PageContainer header footer>
