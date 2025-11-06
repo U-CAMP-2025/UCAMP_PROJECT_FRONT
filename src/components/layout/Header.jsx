@@ -34,7 +34,6 @@ export const Header = () => {
   // ======================= 유저 가이드투어 ======================
   // Joyride 실행 state
   const [runTour, setRunTour] = useState(false);
-  const tourStartedByButton = useRef(false);
 
   const tourSteps = [
     {
@@ -107,7 +106,7 @@ export const Header = () => {
     if (isLogin) {
       fetchUserStatus()
         .then((response) => {
-          if (response?.status === 'NEW' && localStorage.getItem('seenHeaderTour')) {
+          if (response?.status === 'NEW' && !localStorage.getItem('seenHeaderTour')) {
             setWelcomeModalOpen(true); // 튜토리얼 모달 열기
           }
         })
@@ -119,6 +118,7 @@ export const Header = () => {
 
   const handleStartTutorial = () => {
     setWelcomeModalOpen(false);
+    localStorage.setItem('seenHeaderTour', true);
     setTimeout(() => {
       setRunTour(true);
     }, 100);
@@ -126,8 +126,8 @@ export const Header = () => {
 
   const handleSkipAndClose = () => {
     setWelcomeModalOpen(false);
+    localStorage.setItem('seenHeaderTour', true);
     setRunTour(false);
-    localStorage.setItem('seenHeaderTour', 'true');
 
     // // 튜토리얼을 보지 않았으므로 상태를 'ACTIVE'로 업데이트
     // patchUserStaus('ACTIVE')
