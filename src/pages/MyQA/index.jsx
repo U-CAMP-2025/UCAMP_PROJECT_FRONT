@@ -65,12 +65,10 @@ export default function MyQAListPage() {
           <Typography as='h1' size={7} weight='bold'>
             나의 면접 노트 목록
           </Typography>
-          {myQaList.length < MAX_QASET && (
-            <AddButton onClick={handleAddClick}>
-              <PlusIcon width={20} height={20} />
-              신규 노트
-            </AddButton>
-          )}
+          <AddButton onClick={handleAddClick}>
+            <PlusIcon width={20} height={20} />
+            신규 노트
+          </AddButton>
         </MyPageHeader>
         {/* 2. 탭 네비게이션 */}
         <TabContainer>

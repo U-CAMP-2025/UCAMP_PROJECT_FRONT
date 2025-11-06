@@ -11,7 +11,7 @@ import Typography from './Typography';
 // 1. COMPONENT LOGIC
 // ===========================================
 
-export const JobSelector = ({ value = [], onChange = () => {} }) => {
+export const JobSelector = ({ value = [], onChange = () => {}, yourJobId = null }) => {
   const theme = useTheme();
 
   const [jobs, setJobs] = useState([]);
@@ -19,9 +19,16 @@ export const JobSelector = ({ value = [], onChange = () => {} }) => {
 
   useEffect(() => {
     fetchJobList().then((resp) => {
-      setJobs(resp);
+      if (yourJobId) {
+        const sortedJobs = resp.sort((a, b) => {
+          return a.jobId === yourJobId ? -1 : b.jobId === yourJobId ? 1 : 0;
+        });
+        setJobs(sortedJobs);
+      } else {
+        setJobs(resp);
+      }
     });
-  }, []);
+  }, [yourJobId]);
 
   const getJobNameById = (jobId) => {
     const job = jobs.find((j) => j.jobId === jobId);
