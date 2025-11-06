@@ -1,8 +1,9 @@
 import { Header } from '@components/layout/Header';
 import { PageContainer } from '@components/layout/PageContainer';
 import { KakaoLoginDialog } from '@components/signup/KakaoLoginDialog';
+import { useAuthStore } from '@store/auth/useAuthStore';
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 
 // const float = keyframes`
@@ -565,7 +566,7 @@ const HeaderR = styled.div`
 const TitleR = styled.h1`
   font-size: 28px;
   font-weight: 600;
-  margin: 0;
+  margin: 10px 0px 0px 10px;
 `;
 
 const Tabs = styled.div`
@@ -727,19 +728,16 @@ const CTASection = styled.div`
     padding: 60px 30px;
   }
 `;
-
 const Content = styled.div`
   position: relative;
   z-index: 1;
 `;
-
 const SubText = styled.p`
   font-size: 16px;
   color: rgba(255, 255, 255, 0.9);
   margin-bottom: 16px;
   font-weight: 400;
 `;
-
 const MainText = styled.h2`
   font-size: 42px;
   font-weight: 700;
@@ -765,27 +763,6 @@ const ButtonGroup2 = styled.div`
     max-width: 320px;
   }
 `;
-
-const Button2 = styled.button`
-  padding: 18px 40px;
-  border-radius: 50px;
-  font-size: 16px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  transition: all 0.3s ease;
-  min-width: 200px;
-  justify-content: center;
-
-  @media (max-width: 640px) {
-    width: 100%;
-    max-width: 300px;
-  }
-`;
-
 const PrimaryButton2 = styled(Button)`
   background: white;
   color: #4a9fe5;
@@ -811,33 +788,6 @@ const PrimaryButton2 = styled(Button)`
     justify-content: center;
   }
 `;
-
-const SecondaryButton2 = styled(Button)`
-  background: transparent;
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.9);
-  border-radius: 50px;
-  padding: 12px 32px;
-  font-size: 16px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: white;
-  }
-
-  @media (max-width: 640px) {
-    width: 100%;
-    justify-content: center;
-  }
-`;
-
 const ArrowIcon = styled.span`
   display: flex;
   align-items: center;
@@ -851,29 +801,6 @@ const ArrowIcon = styled.span`
 
   ${PrimaryButton}:hover & {
     transform: translateX(4px);
-  }
-
-  svg {
-    width: 14px;
-    height: 14px;
-    stroke: white;
-    stroke-width: 2.5;
-  }
-`;
-const ArrowIconSecondary = styled.span`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 50%;
-  flex-shrink: 0;
-  transition: all 0.3s ease;
-
-  ${SecondaryButton}:hover & {
-    transform: translateX(4px);
-    background: rgba(255, 255, 255, 0.35);
   }
 
   svg {
@@ -980,7 +907,6 @@ export default function LandingPage() {
   const cardsPerView = 3;
   const maxIndex = cardData.length - cardsPerView;
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
-  const { pathname } = useLocation();
   const [activeTab, setActiveTab] = useState('friends');
 
   const currentData = mockData[activeTab];
@@ -993,7 +919,15 @@ export default function LandingPage() {
     sortedData[2], // 3rd place (right)
   ];
 
-  const handleClickLoginButton = () => {
+  const isLogin = useAuthStore((s) => s.isLogin);
+  const navigate = useNavigate();
+
+  // If logged in -> go to /myqa, otherwise open login dialog
+  const handleStartOrMyQA = () => {
+    if (isLogin) {
+      navigate('/myqa');
+      return;
+    }
     setLoginDialogOpen(true);
   };
 
@@ -1025,7 +959,7 @@ export default function LandingPage() {
             </SubHeading>
             <Description>면접 시뮬레이션&피드백 루틴을 경험해보세요!</Description>
             <ButtonGroup>
-              <PrimaryButton onClick={handleClickLoginButton}>지금 시작하기</PrimaryButton>
+              <PrimaryButton onClick={handleStartOrMyQA}>지금 시작하기</PrimaryButton>
               <KakaoLoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
             </ButtonGroup>
           </ContentWrapper>
@@ -1069,7 +1003,7 @@ export default function LandingPage() {
           {/* Ranking */}
           <ContainerR>
             <HeaderR>
-              <TitleR>주간랭킹</TitleR>
+              <TitleR>랭킹</TitleR>
               <Tabs>
                 <Tab active={activeTab === 'friends'} onClick={() => setActiveTab('friends')}>
                   활동순
@@ -1112,7 +1046,7 @@ export default function LandingPage() {
             </ArrowButton>
 
             <CardContainer2>
-              {cardData.map((card, index) => (
+              {cardData.map((card) => (
                 <CardWrapper key={card.id} $offset={offset}>
                   <Cards>
                     <Title3>{card.title}</Title3>
@@ -1147,7 +1081,7 @@ export default function LandingPage() {
               <SubText>면접 준비, 지금부터 시작해보세요.</SubText>
               <MainText>면접톡과 함께 시작할 준비가 되셨나요?</MainText>
               <ButtonGroup2>
-                <PrimaryButton2 onClick={handleClickLoginButton}>
+                <PrimaryButton2 onClick={handleStartOrMyQA}>
                   시작하기
                   <ArrowIcon>
                     <svg viewBox='0 0 24 24' fill='none'>

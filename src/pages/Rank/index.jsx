@@ -7,11 +7,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
 
 const Container = styled.div`
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
 `;
-
 const Header1 = styled.div`
   display: flex;
   justify-content: space-between;
@@ -21,14 +20,12 @@ const Header1 = styled.div`
   gap: ${({ theme }) => theme.space[8]};
   padding: ${({ theme }) => theme.space[4]};
 `;
-
 const Title = styled.h2`
   font-size: 24px;
   font-weight: 600;
   color: #333;
   margin: 0;
 `;
-
 const SubHeader = styled.div`
   display: flex;
   align-items: center;
@@ -36,7 +33,6 @@ const SubHeader = styled.div`
   font-size: 14px;
   color: #666;
 `;
-
 const DateSelector = styled.select`
   padding: 6px 12px;
   border: 1px solid #ddd;
@@ -45,14 +41,12 @@ const DateSelector = styled.select`
   cursor: pointer;
   font-size: 14px;
 `;
-
 const TabContainer = styled.div`
   display: flex;
   gap: ${({ theme }) => theme.space[5]};
-  margin-bottom: ${({ theme }) => theme.space[6]};
+  margin-bottom: ${({ theme }) => theme.space[12]};
   border-bottom: 1px solid ${({ theme }) => theme.colors.gray[5]};
 `;
-
 const TabButton = styled.button`
   all: unset;
   font-size: ${({ theme }) => theme.font.size[4]};
@@ -78,22 +72,23 @@ const TabButton = styled.button`
       }
     `}
 `;
-
 const TABS = {
-  PRACTICE: '연습횟수',
+  WEEKPRACTICE: '주간연습횟수',
+  MONTHPRACTICE: '월간연습횟수',
   BOOKMARKS: '북마크수',
 };
 
 const MonthlyRanking = () => {
-  // ✅ 기본값을 "연습횟수"로 설정
-  const [activeTab, setActiveTab] = useState(TABS.PRACTICE);
+  // 기본 탭을 주간 연습으로 설정
+  const [activeTab, setActiveTab] = useState(TABS.WEEKPRACTICE);
   const [dateRange, setDateRange] = useState('thisweek');
   const [RankList, setRankList] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       try {
         let resp;
-        if (activeTab === TABS.PRACTICE) {
+        if (activeTab === TABS.WEEKPRACTICE || activeTab === TABS.MONTHPRACTICE) {
+          // 둘 다 practice API 사용, period 파라미터로 기간 전달
           resp = await practice({ period: dateRange });
         } else {
           resp = await bookmark();
@@ -118,8 +113,7 @@ const MonthlyRanking = () => {
     <>
       <Header />
       <Container>
-        <Header1>
-          <Title>주간 랭킹</Title>
+        {/* <Header1>
           <SubHeader>
             {activeTab === TABS.PRACTICE && (
               <>
@@ -133,7 +127,7 @@ const MonthlyRanking = () => {
               </>
             )}
           </SubHeader>
-        </Header1>
+        </Header1> */}
 
         {/* 탭 */}
         <TabContainer>
@@ -141,7 +135,13 @@ const MonthlyRanking = () => {
             <TabButton
               key={tabName}
               $isActive={activeTab === tabName}
-              onClick={() => setActiveTab(tabName)}
+              onClick={() => {
+                // 탭 유형에 따라 activeTab 설정
+                setActiveTab(tabName);
+                // 주간/월간 연습 탭이면 period도 함께 설정해서 백엔드로 전달
+                if (tabName === TABS.WEEKPRACTICE) setDateRange('thisweek');
+                else if (tabName === TABS.MONTHPRACTICE) setDateRange('thismonth');
+              }}
             >
               {tabName}
             </TabButton>
@@ -149,7 +149,12 @@ const MonthlyRanking = () => {
         </TabContainer>
 
         {/* 탭별 테이블 표시 */}
-        {activeTab === TABS.PRACTICE && <RankingTable data={RankList} type='practice' />}
+        {activeTab === TABS.WEEKPRACTICE && (
+          <RankingTable data={RankList} type='practice' value={dateRange} />
+        )}
+        {activeTab === TABS.MONTHPRACTICE && (
+          <RankingTable data={RankList} type='practice' value={dateRange} />
+        )}
         {activeTab === TABS.BOOKMARKS && <RankingTable data={RankList} type='bookmark' />}
       </Container>
     </>

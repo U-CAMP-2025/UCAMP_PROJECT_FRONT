@@ -138,6 +138,7 @@ const Panel = styled(Dialog.Content)`
   grid-template-rows: auto 1fr;
   gap: 0;
   overflow: hidden; /* ensure inner content scrolls */
+  z-index: 9999;
 `;
 
 const Header = styled.div`
