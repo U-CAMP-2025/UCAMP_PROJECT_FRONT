@@ -80,7 +80,7 @@ export default function QACreatePage() {
   });
 
   const defaultOpenItems = fields.map((item, index) => `item-${index}`);
-  const [openItems, setOpenItems] = React.useState(['item-0']);
+  const [openItems, setOpenItems] = useState(['item-0']);
 
   const handleAddSet = () => {
     if (fields.length >= 10) {
