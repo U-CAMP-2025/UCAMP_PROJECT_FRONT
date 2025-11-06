@@ -14,7 +14,7 @@ export default function LandingPage() {
   const maxIndex = cardData.length - cardsPerView;
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('friends');
-
+  const navigate = useNavigate();
   const currentData = mockData[activeTab];
   const sortedData = [...currentData].sort((a, b) => b.score - a.score);
 
@@ -26,7 +26,11 @@ export default function LandingPage() {
   ];
 
   const handleClickLoginButton = () => {
-    setLoginDialogOpen(true);
+    if (isLogin) {
+      navigate('/myqa'); // 이미 로그인된 경우 마이페이지로 이동
+    } else {
+      setLoginDialogOpen(true); // 로그인 안 됐으면 다이얼로그 열기
+    }
   };
 
   const handlePrev = () => {
@@ -99,13 +103,16 @@ export default function LandingPage() {
               <CardIcon>💼</CardIcon>
               <CardTitle>합격 전략</CardTitle>
               <CardDescription>
-                합격자들의 노하우를 바탕으로 한 합격 전략을 배웁니다
+                지원자들의 면접노트 공유하며
+                <br /> 정보 고립을 해결합니다.
               </CardDescription>
             </Card>
             <Card as={Card3}>
               <CardIcon>🧑‍⚖️</CardIcon>
               <CardTitle>실전 환경</CardTitle>
-              <CardDescription>AI 면접관으로 더 실감나게 연습해보세요</CardDescription>
+              <CardDescription>
+                AI 면접관과 함께 실전처럼 연습하고 결과를 저장하세요.
+              </CardDescription>
             </Card>
           </CardsWrapper>
         </HeroContainer>
@@ -458,12 +465,12 @@ const Card = styled.div`
   }
 `;
 const Card1 = styled(Card)`
-  top: 110px;
-  right: 140px;
+  top: 70px;
+  right: 200px;
   z-index: 2;
 `;
 const Card2 = styled(Card)`
-  top: 10px;
+  top: 40px;
   left: 280px;
   transform: translateX(-50%);
   z-index: 1;
