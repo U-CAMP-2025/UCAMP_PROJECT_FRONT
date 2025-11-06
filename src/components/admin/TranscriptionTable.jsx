@@ -45,6 +45,29 @@ const PaginationBar = styled.div`
     color: ${({ theme }) => theme.colors.gray[11]};
   }
 `;
+// 페이지 크기 선택 Select
+const PageSizeSelect = styled.select`
+  border: 1px solid ${({ theme }) => theme.colors.gray[6]};
+  border-radius: ${({ theme }) => theme.radius.md};
+  background: #fff;
+  padding: 6px 12px;
+  font-size: calc(${({ theme }) => theme.font.size[3]}); // 기존보다 2px 크게
+  color: ${({ theme }) => theme.colors.gray[12]};
+  cursor: pointer;
+  outline: none;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.primary[8]};
+    box-shadow: ${({ theme }) => theme.shadow.sm};
+  }
+
+  &:focus {
+    border-color: ${({ theme }) => theme.colors.primary[9]};
+    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary[4]};
+  }
+`;
+
 /**
  * TranscriptionTable
  * 공통 테이블 (닉네임, 이메일, 연습완료 시간, 변환 현황)
@@ -187,18 +210,17 @@ export default function TranscriptionTable() {
 
         {/* 페이지 크기 선택 */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 13, opacity: 0.9 }}>Rows</span>
-          <select
+          <PageSizeSelect
             value={size}
             onChange={(e) => {
               setPage(0);
               setSize(Number(e.target.value));
             }}
           >
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-          </select>
+            <option value={10}>10개</option>
+            <option value={20}>20개</option>
+            <option value={50}>50개</option>
+          </PageSizeSelect>
         </div>
       </div>
 
@@ -212,28 +234,28 @@ export default function TranscriptionTable() {
 
       {/* 페이지네이션 바 */}
       <PaginationBar>
-        <span>{`Total: ${totalElements}`}</span>
+        <span>{`전체: ${totalElements}개`}</span>
         <button disabled={number <= 0 || loading} onClick={() => setPage(0)}>
-          ≪ First
+          ≪ 처음
         </button>
         <button
           disabled={number <= 0 || loading}
           onClick={() => setPage((p) => Math.max(0, p - 1))}
         >
-          ‹ Prev
+          ‹ 이전
         </button>
         <span>{`${number + 1} / ${Math.max(totalPages, 1)}`}</span>
         <button
           disabled={number >= totalPages - 1 || loading}
           onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
         >
-          Next ›
+          다음 ›
         </button>
         <button
           disabled={number >= totalPages - 1 || loading}
           onClick={() => setPage(totalPages - 1)}
         >
-          Last ≫
+          마지막 ≫
         </button>
       </PaginationBar>
     </div>
