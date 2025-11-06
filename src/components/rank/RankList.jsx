@@ -2,6 +2,20 @@ import { PersonIcon } from '@radix-ui/react-icons';
 import React from 'react';
 import styled from 'styled-components';
 
+const TableWrapper = styled.div`
+  width: 100%;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+`;
+const EmptyMessage = styled.div`
+  text-align: center;
+  padding: 40px 0;
+  color: #999;
+  font-size: 16px;
+`;
 const Table = styled.table`
   width: 100%;
   background: white;
@@ -143,7 +157,13 @@ const RankingTable = ({ data, type, value }) => {
     ) : (
       <PlusCss>{position}.</PlusCss>
     );
-
+  if (!data || data.length === 0) {
+    return (
+      <TableWrapper>
+        <EmptyMessage>데이터가 존재하지 않습니다.</EmptyMessage>
+      </TableWrapper>
+    );
+  }
   return (
     <Table>
       <TableHeader>
