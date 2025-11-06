@@ -1,7 +1,6 @@
+import { useAuthStore } from '@store/auth/useAuthStore';
 import { useEffect, useState } from 'react';
-import SSE from 'sse-client';
-
-import { useAuthStore } from './path-to-your-auth-store';
+import { SSE } from 'sse.js';
 
 // 경로에 맞게 수정 필요
 
