@@ -136,14 +136,14 @@ export default function SimulationResultPage() {
                       </AnswerTextWrapper>
 
                       <AnswerLabel>
-                        나의 답변 <SmallHint>(최대 300자)</SmallHint>
+                        나의 답변 <SmallHint>(최대 500자)</SmallHint>
                       </AnswerLabel>
                       <EditableTextArea
                         value={qa.transContent ?? ''}
                         placeholder='STT로 인식된 답변을 필요에 맞게 수정하세요.'
                         onChange={(e) => handleTransContentChange(index, e.target.value)}
                         rows={6}
-                        maxLength={300}
+                        maxLength={500}
                       />
                       <CharCount>{(qa.transContent?.length ?? 0).toLocaleString()}/300자</CharCount>
                     </AnswerContainer>
