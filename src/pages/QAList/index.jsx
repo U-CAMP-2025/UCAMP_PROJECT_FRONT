@@ -1,6 +1,7 @@
 import { fetchJobList } from '@api/jobAPIS';
 import { scrollQaSet } from '@api/postAPIS';
 import { fetchUserMypage } from '@api/userAPIS';
+import { fetchUserStatus, patchUserStaus } from '@api/userAPIS';
 import { JobSelector } from '@components/common/JobSelector';
 import { SortSelector } from '@components/common/SortSelector';
 import Typography from '@components/common/Typography';
@@ -9,8 +10,10 @@ import QASetList from '@components/qaset/QASetList';
 import { QASetCardSkeleton } from '@components/qaset/SkeletonCard';
 import { PlusIcon } from '@radix-ui/react-icons';
 import { useAuthStore } from '@store/auth/useAuthStore';
+import theme from '@styles/theme';
 import React, { useEffect, useMemo, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import Joyride from 'react-joyride';
 import { Navigate, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -19,6 +22,66 @@ export default function QAListPage() {
   const [currentSort, setCurrentSort] = useState('bookcount_desc');
   const [selectedJobIds, setSelectedJobIds] = useState([]);
   const navigate = useNavigate();
+
+  // ========================== 면접노트 가이드투어 ============================
+  const [runQAListTour, setRunQAListTour] = useState(false);
+
+  const qaListTourSteps = [
+    {
+      target: '#tour-add-note-button',
+      content: (
+        <>
+          <b style={{ fontSize: '20px' }}>신규 노트</b>
+          <br />
+          <br />
+          이 버튼을 눌러 나만의 면접 노트를
+          <br />
+          만들 수 있습니다.
+        </>
+      ),
+      placement: 'bottom-end',
+      disableBeacon: true,
+    },
+  ];
+
+  useEffect(() => {
+    if (isLogin) {
+      fetchUserMypage().then((res) => {
+        setYourJob(res?.job?.jobId || null);
+      });
+
+      // 튜토리얼 진행 조건
+      fetchUserStatus().then((res) => {
+        // 상태 'NEW' && 헤더 튜토리얼 봤음
+        if (res?.status === 'NEW' && localStorage.getItem('seenHeaderTour') === 'true') {
+          // '신규 노트' 버튼이 렌더링될 시간
+          setTimeout(() => {
+            setRunQAListTour(true);
+          }, 500);
+        }
+      });
+    }
+  }, [isLogin]);
+
+  const handleQAListJoyrideCallback = (data) => {
+    const { status, action } = data;
+    const finishedStatuses = ['finished', 'skipped'];
+
+    if (finishedStatuses.includes(status) || action === 'close') {
+      setRunQAListTour(false);
+
+      patchUserStaus('ACTIVE')
+        .then(() => {
+          console.log("QAList 튜토리얼 완료: 유저 상태 'ACTIVE' 업데이트");
+          localStorage.removeItem('seenHeaderTour');
+        })
+        .catch((err) => {
+          console.error('유저 상태 업데이트 실패:', err);
+        });
+    }
+  };
+
+  // ========================== 가이드투어 끝 =============================
 
   // 무한 스크롤 상태
   const [displayList, setDisplayList] = useState([]);
@@ -51,13 +114,13 @@ export default function QAListPage() {
   };
 
   // 초기 직무 데이터 로드
-  useEffect(() => {
-    if (isLogin) {
-      fetchUserMypage().then((res) => {
-        setYourJob(res?.job?.jobId || null);
-      });
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (isLogin) {
+  //     fetchUserMypage().then((res) => {
+  //       setYourJob(res?.job?.jobId || null);
+  //     });
+  //   }
+  // }, []);
 
   // API 호출
   const fetchQAList = async (pageNum = 1) => {
@@ -114,7 +177,7 @@ export default function QAListPage() {
             면접 노트
           </Typography>
           {isLogin && (
-            <AddButton onClick={handleAddClick}>
+            <AddButton onClick={handleAddClick} id='tour-add-note-button'>
               <PlusIcon width={20} height={20} />
               신규 노트
             </AddButton>
@@ -154,6 +217,28 @@ export default function QAListPage() {
           </InfiniteScroll>
         )}
       </MainContentWrapper>
+      <Joyride
+        steps={qaListTourSteps}
+        run={runQAListTour}
+        callback={handleQAListJoyrideCallback}
+        continuous={true}
+        showProgress={false}
+        showSkipButton={false}
+        locale={{
+          next: '다음',
+          back: '이전',
+          skip: '건너뛰기',
+          last: '확인',
+        }}
+        styles={{
+          options: {
+            primaryColor: theme.colors.primary[9],
+            textColor: theme.colors.gray[12],
+            backgroundColor: theme.colors.gray[1],
+            arrowColor: theme.colors.gray[1],
+          },
+        }}
+      />
     </PageContainer>
   );
 }
