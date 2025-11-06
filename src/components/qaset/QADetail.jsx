@@ -1,5 +1,6 @@
 import { copyPost, delPost, getPost } from '@api/postAPIS';
 import Button from '@components/common/Button';
+// Button 그대로 사용함
 import { Overlay, Content, Title, Description } from '@components/common/Dialog';
 import Tag, { TagGroup } from '@components/common/Tag';
 import Typography from '@components/common/Typography';
@@ -12,7 +13,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-// ✅ 너가 준 다이얼로그 파일
+//  너가 준 다이얼로그 파일
 
 // TODO: 유저 자신의 QA셋인 경우에만 삭제 아이콘 노출
 export const QADetail = () => {
