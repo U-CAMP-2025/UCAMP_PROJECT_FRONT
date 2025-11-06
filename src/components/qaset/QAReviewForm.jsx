@@ -109,12 +109,14 @@ const Header = styled.div`
 const TextArea = styled.textarea`
   width: 100%;
   min-height: 140px;
-  resize: vertical;
+  resize: none;
   border: 1px solid ${({ theme }) => theme.colors.gray[6]};
   border-radius: ${({ theme }) => theme.radius.md};
   background: ${({ theme }) => theme.colors.gray[2]};
   padding: ${({ theme }) => theme.space[4]};
   outline: none;
+  font-size: 14px;
+  line-height: 1.6;
   &:focus {
     border-color: ${({ theme }) => theme.colors.primary[8]};
     box-shadow: 0 0 0 3px rgba(110, 86, 207, 0.15);
