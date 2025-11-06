@@ -18,7 +18,7 @@ export const HeaderContentWrapper = styled.div`
   justify-content: space-between;
   align-items: center;
   width: 90%;
-  max-width: 1200px;
+  max-width: 1140px;
 `;
 
 export const Logo = styled.button`

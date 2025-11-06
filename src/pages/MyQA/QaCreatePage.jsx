@@ -80,6 +80,20 @@ export default function QACreatePage() {
   });
 
   const defaultOpenItems = fields.map((item, index) => `item-${index}`);
+  const [openItems, setOpenItems] = React.useState(['item-0']);
+
+  const handleAddSet = () => {
+    if (fields.length >= 10) {
+      alert('질문은 최대 10개까지 등록할 수 있습니다.');
+      return;
+    }
+
+    const newIndex = fields.length;
+    append({ question: '', answer: '' });
+
+    // 새로 추가된 아이템만 열림 상태에 추가
+    setOpenItems((prev) => [...prev, `item-${newIndex}`]);
+  };
 
   const selectedJobIds = watch('jobIds');
   const onSubmit = (data) => {
@@ -138,7 +152,13 @@ export default function QACreatePage() {
                       setValue('jobIds', newJobIds, { shouldValidate: true })
                     }
                   />
-                  {errors.jobIds && <Typography color='error'>{errors.jobIds.message}</Typography>}
+                  {errors.jobIds && (
+                    <span
+                      style={{ color: 'red', fontSize: '14px', marginTop: '8px', display: 'block' }}
+                    >
+                      {errors.jobIds.message}
+                    </span>
+                  )}
                 </Section>
 
                 <Divider />
@@ -154,7 +174,13 @@ export default function QACreatePage() {
                     placeholder='면접 노트의 제목을 입력하세요.'
                     {...register('title', { required: '제목은 필수 입력입니다.' })}
                   />
-                  {errors.title && <Typography color='error'>{errors.title.message}</Typography>}
+                  {errors.title && (
+                    <span
+                      style={{ color: 'red', fontSize: '14px', marginTop: '8px', display: 'block' }}
+                    >
+                      {errors.title.message}
+                    </span>
+                  )}
                 </Section>
 
                 {/* 3. 세트 요약 */}
@@ -186,7 +212,11 @@ export default function QACreatePage() {
                       items={fields.map((field) => field.id)}
                       strategy={verticalListSortingStrategy}
                     >
-                      <Accordion.Root type='multiple' defaultValue={defaultOpenItems}>
+                      <Accordion.Root
+                        type='multiple'
+                        value={openItems}
+                        onValueChange={setOpenItems}
+                      >
                         <QASetListContainer>
                           {fields.map((item, index) => (
                             <QACreateInput

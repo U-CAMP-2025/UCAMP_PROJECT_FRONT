@@ -150,7 +150,10 @@ export const QADetail = () => {
           <Overlay />
           <Content>
             <Title>스크랩 완료</Title>
-            <Description>나의 면접 노트에 스크랩되었습니다.</Description>
+            <Description>
+              스크랩되었습니다. <br />
+              '나의 노트' 페이지에서 마음껏 수정해보세요!
+            </Description>
             <ButtonRow>
               <Dialog.Close asChild>
                 <ConfirmButton>확인</ConfirmButton>
@@ -328,7 +331,7 @@ const Placeholder = styled(Typography).attrs({
   weight: 'semiBold',
 })`
   background-color: ${({ theme }) => theme.colors.gray[3]};
-  padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[2]};
+  padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
   border-radius: ${({ theme }) => theme.radius.sm};
 
   display: inline-block;

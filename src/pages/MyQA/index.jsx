@@ -2,11 +2,103 @@ import { myPostAll } from '@api/postAPIS';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import QASetList from '@components/qaset/QASetList';
+import { QASetCardSkeleton } from '@components/qaset/SkeletonCard';
 // import { myQaList } from '@pages/List/MyQaList';
 import { PlusIcon } from '@radix-ui/react-icons';
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { css } from 'styled-components';
+
+// 탭 정의
+const TABS = {
+  ALL: '전체',
+  MINE: '내가 만든 노트',
+  BOOKMARKED: '스크랩한 노트',
+};
+
+const MAX_QASET = 10;
+
+export default function MyQAListPage() {
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState();
+  const [isLoading, setIsLoading] = useState(true);
+  const [myQaList, setMyQaList] = useState([]);
+
+  useEffect(() => {
+    setIsLoading(true);
+    myPostAll()
+      .then((resp) => {
+        setMyQaList(resp?.data ?? null);
+        setActiveTab(TABS.ALL);
+      })
+      .catch(setMyQaList([]))
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
+
+  // 💡 탭에 따라 목록 필터링
+  const filteredList = useMemo(() => {
+    switch (activeTab) {
+      case TABS.MINE:
+        // OTHER_WRITER가 null이거나 undefined인 경우 (내가 만든 글)
+        return myQaList.filter((item) => !item.otherWriter);
+      case TABS.BOOKMARKED:
+        // OTHER_WRITER 값이 있는 경우 (가져온 글)
+        return myQaList.filter((item) => !!item.otherWriter);
+      case TABS.ALL:
+      default:
+        return myQaList;
+    }
+  }, [activeTab]); // activeTab이 변경될 때만 재계산
+
+  const handleAddClick = () => {
+    // 질문답변 생성 페이지로 이동 (경로 수정 필요)
+    navigate('/qa/create');
+  };
+
+  return (
+    <PageContainer header footer>
+      <MainContentWrapper>
+        {/* 1. 페이지 헤더 (제목 + 추가하기 버튼) */}
+        <MyPageHeader>
+          <Typography as='h1' size={7} weight='bold'>
+            나의 면접 노트 목록
+          </Typography>
+          {myQaList.length < MAX_QASET && (
+            <AddButton onClick={handleAddClick}>
+              <PlusIcon width={20} height={20} />
+              신규 노트
+            </AddButton>
+          )}
+        </MyPageHeader>
+        {/* 2. 탭 네비게이션 */}
+        <TabContainer>
+          {Object.values(TABS).map((tabName) => (
+            <TabButton
+              key={tabName}
+              $isActive={activeTab === tabName}
+              onClick={() => setActiveTab(tabName)}
+            >
+              {tabName}
+            </TabButton>
+          ))}
+        </TabContainer>
+
+        {/* 3. 질문 답변 카드 목록 (필터링된 리스트 전달) */}
+        {isLoading ? (
+          <SkeletonGrid>
+            {Array.from({ length: 6 }).map((_, index) => (
+              <QASetCardSkeleton key={index} />
+            ))}
+          </SkeletonGrid>
+        ) : (
+          <QASetList qaList={filteredList} />
+        )}
+      </MainContentWrapper>
+    </PageContainer>
+  );
+}
 
 // 💡 추가하기 버튼용
 
@@ -90,81 +182,10 @@ const TabButton = styled.button`
       }
     `}
 `;
-
-// 탭 정의
-const TABS = {
-  ALL: '전체',
-  MINE: '내가 만든 노트',
-  BOOKMARKED: '스크랩한 노트',
-};
-
-const MAX_QASET = 10;
-
-export default function MyQAListPage() {
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState();
-
-  const [myQaList, setMyQaList] = useState([]);
-
-  useEffect(() => {
-    myPostAll()
-      .then((resp) => {
-        setMyQaList(resp?.data ?? null);
-        setActiveTab(TABS.ALL);
-      })
-      .catch(setMyQaList([]));
-  }, []);
-
-  // 💡 탭에 따라 목록 필터링
-  const filteredList = useMemo(() => {
-    switch (activeTab) {
-      case TABS.MINE:
-        // OTHER_WRITER가 null이거나 undefined인 경우 (내가 만든 글)
-        return myQaList.filter((item) => !item.otherWriter);
-      case TABS.BOOKMARKED:
-        // OTHER_WRITER 값이 있는 경우 (가져온 글)
-        return myQaList.filter((item) => !!item.otherWriter);
-      case TABS.ALL:
-      default:
-        return myQaList;
-    }
-  }, [activeTab]); // activeTab이 변경될 때만 재계산
-
-  const handleAddClick = () => {
-    // 질문답변 생성 페이지로 이동 (경로 수정 필요)
-    navigate('/qa/create');
-  };
-
-  return (
-    <PageContainer header footer>
-      <MainContentWrapper>
-        {/* 1. 페이지 헤더 (제목 + 추가하기 버튼) */}
-        <MyPageHeader>
-          <Typography as='h1' size={7} weight='bold'>
-            나의 면접 노트 목록
-          </Typography>
-          {myQaList.length < MAX_QASET && (
-            <AddButton onClick={handleAddClick}>
-              <PlusIcon width={20} height={20} />
-              작성하기
-            </AddButton>
-          )}
-        </MyPageHeader>
-        {/* 2. 탭 네비게이션 */}
-        <TabContainer>
-          {Object.values(TABS).map((tabName) => (
-            <TabButton
-              key={tabName}
-              $isActive={activeTab === tabName}
-              onClick={() => setActiveTab(tabName)}
-            >
-              {tabName}
-            </TabButton>
-          ))}
-        </TabContainer>
-        {/* 3. 질문 답변 카드 목록 (필터링된 리스트 전달) */}
-        <QASetList qaList={filteredList} />{' '}
-      </MainContentWrapper>{' '}
-    </PageContainer>
-  );
-}
+const SkeletonGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: ${({ theme }) => theme.space[6]};
+  width: 95%;
+  margin: 0 auto;
+`;

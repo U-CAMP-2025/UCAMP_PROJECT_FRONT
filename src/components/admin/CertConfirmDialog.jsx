@@ -114,7 +114,7 @@ export default function CertConfirmDialog({
                 </Button>
               )}
               <Button onClick={onConfirm} style={{ minWidth: '100px' }}>
-                {title.substr(0, 2)}
+                확인
               </Button>
             </div>
           </div>
