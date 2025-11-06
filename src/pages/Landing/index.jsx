@@ -518,6 +518,12 @@ const Container = styled.div`
   margin: 0 auto;
   padding: 20px 0px;
   text-align: center;
+  box-sizing: border-box;
+
+  @media (max-width: 968px) {
+    padding: 16px;
+    width: 95%;
+  }
 `;
 const Container2 = styled.div`
   width: 100%;
@@ -525,6 +531,12 @@ const Container2 = styled.div`
   margin: 0 auto;
   padding: 40px 20px;
   text-align: center;
+  box-sizing: border-box;
+
+  @media (max-width: 968px) {
+    padding: 24px 16px;
+    width: 100%;
+  }
 `;
 
 const Title = styled.h1`
@@ -566,8 +578,10 @@ const Title2 = styled.h1`
   color: #1a1a1a;
   margin-bottom: 40px;
 
-  @media (max-width: 768px) {
-    font-size: 1.8rem;
+  @media (max-width: 968px) {
+    font-size: 1.6rem;
+    margin-bottom: 24px;
+    text-align: center;
   }
 `;
 
@@ -590,6 +604,13 @@ const CardsWrapper2 = styled.div`
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
+  box-sizing: border-box;
+
+  @media (max-width: 968px) {
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    padding: 0 8px;
+  }
 `;
 
 const Cardd = styled.div`
