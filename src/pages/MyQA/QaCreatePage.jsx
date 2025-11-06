@@ -19,7 +19,7 @@ import {
 import * as Accordion from '@radix-ui/react-accordion';
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import { CheckIcon, PlusIcon } from '@radix-ui/react-icons';
-import { React, useState } from 'react';
+import { React, useState, useEffect } from 'react';
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -56,7 +56,7 @@ export default function QACreatePage() {
   } = methods;
 
   // --- 직무 선택 유효성 등록 ---
-  React.useEffect(() => {
+  useEffect(() => {
     register('jobIds', {
       validate: (value) => value.length > 0 || '직무를 최소 1개 이상 선택해야 합니다.',
     });
