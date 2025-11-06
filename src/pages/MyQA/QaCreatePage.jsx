@@ -1,6 +1,7 @@
 import { createPost } from '@api/postAPIS';
 import { JobSelector } from '@components/common/JobSelector';
 import Typography from '@components/common/Typography';
+import WarnDialog from '@components/common/WarnDialog';
 import { PageContainer } from '@components/layout/PageContainer';
 import {
   DndContext,
@@ -18,7 +19,7 @@ import {
 import * as Accordion from '@radix-ui/react-accordion';
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import { CheckIcon, PlusIcon } from '@radix-ui/react-icons';
-import React from 'react';
+import { React, useState } from 'react';
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -27,6 +28,9 @@ import { QACreateInput } from './QaCreateInput';
 
 export default function QACreatePage() {
   const navigate = useNavigate();
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertOpen, setAlertOpen] = useState(false);
+
   const methods = useForm({
     defaultValues: {
       jobIds: [],
@@ -37,6 +41,10 @@ export default function QACreatePage() {
     },
     mode: 'onChange', // 입력 즉시 유효성 체크
   });
+  const openAlert = (message) => {
+    setAlertMessage(message);
+    setAlertOpen(true);
+  };
 
   const {
     control,
@@ -176,7 +184,7 @@ export default function QACreatePage() {
                               onDelete={() =>
                                 fields.length > 1
                                   ? remove(index)
-                                  : alert('최소 1개의 질문 세트가 필요합니다.')
+                                  : openAlert('최소 1개의 질문 세트가 필요합니다.')
                               }
                             />
                           ))}
@@ -189,7 +197,7 @@ export default function QACreatePage() {
                     onClick={() =>
                       fields.length < 10
                         ? append({ question: '', answer: '' })
-                        : alert('질문은 최대 10개까지 등록할 수 있습니다.')
+                        : openAlert('질문은 최대 10개까지 등록할 수 있습니다.')
                     }
                   >
                     <PlusIcon width={30} height={30} />
@@ -234,6 +242,13 @@ export default function QACreatePage() {
           </FormProvider>
         </SettingsBox>
       </MainContentWrapper>
+      <WarnDialog
+        open={alertOpen}
+        onOpenChange={setAlertOpen}
+        title='알림'
+        message={alertMessage}
+        confirmText='확인'
+      />
     </PageContainer>
   );
 }
