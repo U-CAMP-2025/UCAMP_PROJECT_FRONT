@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import CertConfirmDialog from './CertConfirmDialog';
+import OcrResultDialog from './OcrResultDialog';
 
 const Overlay = styled(Dialog.Overlay)`
   position: fixed;
@@ -65,6 +66,7 @@ const RGItem = styled(RadioGroup.Item)`
     border-color: ${({ theme }) => theme.colors.primary[9]};
   }
 `;
+
 const RGLabel = styled(Typography).attrs({ as: 'span', size: 3, weight: 'bold' })``;
 const RGBlock = styled.label`
   display: flex;
@@ -83,6 +85,10 @@ const RGBlock = styled.label`
 export default function CertificateDialog({ open, onOpenChange, user, onConfirm }) {
   const [decision, setDecision] = useState('');
   const [verifyResult, setVerifyResult] = useState(null); // 검증 결과 저장
+
+  const [ocrText, setOcrText] = useState(''); // 🆕 OCR 원문 저장
+  const [textModalOpen, setTextModalOpen] = useState(false); // 🆕 OCR 텍스트 모달
+
   const [loading, setLoading] = useState(false); // 로딩 보여주기용
   const [confirmOpen, setConfirmOpen] = useState(false); // '승인할래?' 모달 열기/닫기
   const [confirmMessage, setConfirmMessage] = useState(''); // '승인할래? 메시지
@@ -109,6 +115,8 @@ export default function CertificateDialog({ open, onOpenChange, user, onConfirm 
     try {
       const res = await axiosInstance.post('/ocr', { imageUrl: fileUrl });
       const data = res.data;
+
+      setOcrText(data?.text || data?.rawText || '(인식된 텍스트가 없습니다)'); // 🆕 백엔드에서 resMap.put("text", text) 추가해둬야 함
 
       const bizStatus = data?.verfRes?.data?.[0]?.b_stt || null;
       const taxType = data?.verfRes?.data?.[0]?.tax_type || '';
@@ -155,7 +163,7 @@ export default function CertificateDialog({ open, onOpenChange, user, onConfirm 
         setConfirmMessage('(검증 성공) 합격자 신청을 승인하시겠습니까?');
       }
     } else if (type === 'REJECTED') {
-      setConfirmMessage('합격자 신청을 반려하시겠습니까?');
+      setConfirmMessage('합격자 신청을 거부하시겠습니까?');
     }
 
     setConfirmOpen(true);
@@ -185,7 +193,7 @@ export default function CertificateDialog({ open, onOpenChange, user, onConfirm 
               <Typography size={4} weight='semiBold'>
                 유저명
               </Typography>
-              <Value>{user?.nickName ?? '-'}</Value>
+              <Value style={{ whiteSpace: 'nowrap' }}>{user?.nickName ?? '-'}</Value>
             </Row>
             <Row>
               <Typography size={4} weight='semiBold'>
@@ -193,24 +201,38 @@ export default function CertificateDialog({ open, onOpenChange, user, onConfirm 
               </Typography>
               {user?.certficate?.certe_file_url ? (
                 <>
-                  <img
-                    src={`${import.meta.env.VITE_API_URL}${user.certficate.certe_file_url}`}
-                    alt='합격 인증 이미지'
-                    style={{
-                      maxWidth: '240px',
-                      maxHeight: '160px',
-                      objectFit: 'contain',
-                      border: '1px solid #ddd',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      transition: 'transform 0.2s ease',
-                    }}
-                    onClick={() =>
-                      handleImageClick(
-                        `${import.meta.env.VITE_API_URL}${user.certficate.certe_file_url}`,
-                      )
-                    }
-                  />
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <img
+                      src={`${import.meta.env.VITE_API_URL}${user.certficate.certe_file_url}`}
+                      alt='합격 인증 이미지'
+                      style={{
+                        maxWidth: '240px',
+                        maxHeight: '160px',
+                        objectFit: 'contain',
+                        border: '1px solid #ddd',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s ease',
+                      }}
+                      onClick={() =>
+                        handleImageClick(
+                          `${import.meta.env.VITE_API_URL}${user.certficate.certe_file_url}`,
+                        )
+                      }
+                    />
+                    <Typography
+                      as='span'
+                      size={2}
+                      style={{
+                        marginTop: '4px',
+                        color: '#666',
+                        fontSize: '13px',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      이미지 클릭 시 확대됩니다.
+                    </Typography>
+                  </div>
                 </>
               ) : (
                 <Value>-</Value>
@@ -232,6 +254,20 @@ export default function CertificateDialog({ open, onOpenChange, user, onConfirm 
               )
             ) : null}
 
+            {/* 🆕 추출된 텍스트 보기 버튼 */}
+            <Button
+              variant='ghost'
+              style={{
+                border: '1px solid #ccc',
+                borderRadius: '8px',
+                padding: '6px 12px',
+                fontSize: '14px',
+              }}
+              onClick={() => setTextModalOpen(true)}
+            >
+              추출된 텍스트 보기
+            </Button>
+
             {/* <RGRoot value={decision} onValueChange={setDecision}>
               <RGBlock>
                 <RGItem value='REJECTED' aria-label='반려'>
@@ -251,7 +287,7 @@ export default function CertificateDialog({ open, onOpenChange, user, onConfirm 
               </RGBlock>
             </RGRoot> */}
 
-            {/* ✅ 승인/반려 버튼만 표시 */}
+            {/* ✅ 승인/거부 버튼만 표시 */}
             <Actions style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
               <Button
                 onClick={() => handleDecision('REJECTED')}
@@ -263,7 +299,7 @@ export default function CertificateDialog({ open, onOpenChange, user, onConfirm 
                   padding: '10px 20px',
                 }}
               >
-                반려
+                거부
               </Button>
               <Button
                 onClick={() => handleDecision('APPROVED')}
@@ -285,7 +321,7 @@ export default function CertificateDialog({ open, onOpenChange, user, onConfirm 
       <CertConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        title={decision === 'REJECTED' ? '반려 확인' : '승인 확인'}
+        title={decision === 'REJECTED' ? '거부 확인' : '승인 확인'}
         message={confirmMessage}
         onConfirm={handleConfirmAction}
         status={
@@ -324,6 +360,7 @@ export default function CertificateDialog({ open, onOpenChange, user, onConfirm 
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>
+      <OcrResultDialog open={textModalOpen} onOpenChange={setTextModalOpen} text={ocrText} />
     </>
   );
 }

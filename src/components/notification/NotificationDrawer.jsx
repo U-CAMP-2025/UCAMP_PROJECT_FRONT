@@ -83,7 +83,8 @@ export default function NotificationDrawer({
                     <Typography as='p' size={2} style={{ whiteSpace: 'pre-wrap' }}>
                       {it.type === 'REVIEW' ? (
                         <StyledLink to={`/qa/${it.content.split(':::')[1]}`}>
-                          {it.content.split(':::')[0]} 질문셋에 리뷰가 달렸습니다.
+                          {it.content.split(':::')[0]}{' '}
+                          <Message>면접노트에 리뷰가 달렸습니다.</Message>
                         </StyledLink>
                       ) : (
                         <Message>{it.content}</Message>
@@ -271,10 +272,11 @@ const Time = styled.span`
   font-size: ${({ theme }) => theme.font.size[2]};
 `;
 const StyledLink = styled(Link)`
-  color: ${({ theme }) => theme.colors.text};
+  color: ${({ theme }) => theme.colors.primary[8]};
   text-decoration: none;
   font-weight: ${({ theme }) => theme.font.weight.semiBold};
   transition: color 0.2s ease;
+  font-size: ${({ theme }) => theme.font.size[3]};
 
   &:hover {
     color: ${({ theme }) => theme.colors.primary[11]};
@@ -285,4 +287,5 @@ const Message = styled.span`
   color: ${({ theme }) => theme.colors.text};
   text-decoration: none;
   font-weight: ${({ theme }) => theme.font.weight.semiBold};
+  font-size: ${({ theme }) => theme.font.size[2]};
 `;

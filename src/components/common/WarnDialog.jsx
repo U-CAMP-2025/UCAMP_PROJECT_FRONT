@@ -22,14 +22,14 @@ const Content = styled(Dialog.Content)`
 `;
 
 const Title = styled(Dialog.Title)`
-  font-size: 20px;
+  font-size: 18px;
   font-weight: ${({ theme }) => theme.font.weight.bold};
   color: ${({ theme }) => theme.colors.primary[9]};
   margin-bottom: 12px;
 `;
 
 const Description = styled(Dialog.Description)`
-  font-size: 16px;
+  font-size: 14px;
   color: ${({ theme }) => theme.colors.gray[11]};
   margin-bottom: 24px;
 `;
@@ -43,12 +43,12 @@ const CloseButton = styled.button`
   cursor: pointer;
 `;
 
-export default function SuccessDialog({ open, onOpenChange, message }) {
+export default function WarnDialog({ open, onOpenChange, message }) {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Overlay />
       <Content>
-        <Title>완료</Title>
+        <Title>알림</Title>
         <Description>{message}</Description>
         <CloseButton onClick={() => onOpenChange(false)}>확인</CloseButton>
       </Content>

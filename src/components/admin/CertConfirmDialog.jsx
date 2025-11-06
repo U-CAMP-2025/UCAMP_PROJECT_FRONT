@@ -1,7 +1,12 @@
 // ConfirmModal.jsx
 import Button from '@components/common/Button';
 import * as Dialog from '@radix-ui/react-dialog';
-import { CheckCircledIcon, CrossCircledIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
+import {
+  CheckCircledIcon,
+  Cross2Icon,
+  CrossCircledIcon,
+  ExclamationTriangleIcon,
+} from '@radix-ui/react-icons';
 import styled from 'styled-components';
 
 const Overlay = styled(Dialog.Overlay)`
@@ -26,6 +31,23 @@ const Content = styled(Dialog.Content)`
   gap: ${({ theme }) => theme.space[6]};
 `;
 
+const CloseButton = styled.button`
+  all: unset;
+  position: absolute;
+  right: ${({ theme }) => theme.space[5]};
+  top: ${({ theme }) => theme.space[5]};
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  &:hover {
+    background: ${({ theme }) => theme.colors.gray[3]};
+  }
+`;
+
 export default function CertConfirmDialog({
   open,
   onOpenChange,
@@ -42,11 +64,23 @@ export default function CertConfirmDialog({
   } else {
     icon = <CrossCircledIcon style={{ width: 64, height: 64, color: '#ef4444' }} />;
   }
+
+  // 승인 성공일 경우: 취소 버튼 숨기기 + 닫기 버튼 표시
+  const isSuccessApprove = status === 'success' && title.includes('승인');
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Overlay />
         <Content>
+          {/* 닫기 아이콘 (승인 성공일 때만 표시) */}
+          {isSuccessApprove && (
+            <Dialog.Close asChild>
+              <CloseButton aria-label='닫기'>
+                <Cross2Icon />
+              </CloseButton>
+            </Dialog.Close>
+          )}
           <div
             style={{
               display: 'flex',
@@ -69,15 +103,18 @@ export default function CertConfirmDialog({
                 width: '100%',
               }}
             >
-              <Button
-                variant='outline'
-                onClick={() => onOpenChange(false)}
-                style={{ minWidth: '100px' }}
-              >
-                취소
-              </Button>
+              {/* ✅ 성공 + 승인일 때는 취소 버튼 생략 */}
+              {!isSuccessApprove && (
+                <Button
+                  variant='outline'
+                  onClick={() => onOpenChange(false)}
+                  style={{ minWidth: '100px' }}
+                >
+                  취소
+                </Button>
+              )}
               <Button onClick={onConfirm} style={{ minWidth: '100px' }}>
-                {title.substr(0, 2)}
+                확인
               </Button>
             </div>
           </div>

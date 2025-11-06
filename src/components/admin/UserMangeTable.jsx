@@ -249,28 +249,28 @@ export const UserManageTable = () => {
 
       <DataTable columns={columns} rows={filteredRows} rowKey={(r) => r.id} />
       <PaginationBar>
-        <span>{`Total: ${totalElements}`}</span>
+        <span>{`전체: ${totalElements}개`}</span>
         <button disabled={number <= 0 || loading} onClick={() => setPage(0)}>
-          ≪ First
+          ≪ 처음
         </button>
         <button
           disabled={number <= 0 || loading}
           onClick={() => setPage((p) => Math.max(0, p - 1))}
         >
-          ‹ Prev
+          ‹ 이전
         </button>
         <span>{`${number + 1} / ${Math.max(totalPages, 1)}`}</span>
         <button
           disabled={number >= totalPages - 1 || loading}
           onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
         >
-          Next ›
+          다음 ›
         </button>
         <button
           disabled={number >= totalPages - 1 || loading}
           onClick={() => setPage(totalPages - 1)}
         >
-          Last ≫
+          마지막 ≫
         </button>
       </PaginationBar>
       <ErrorDialog open={errorOpen} onOpenChange={setErrorOpen} message={errorMsg} />

@@ -1,6 +1,7 @@
 import { createPost, editPost, getPost } from '@api/postAPIS';
 import { JobSelector } from '@components/common/JobSelector';
 import Typography from '@components/common/Typography';
+import WarnDialog from '@components/common/WarnDialog';
 import { PageContainer } from '@components/layout/PageContainer';
 import {
   DndContext,
@@ -19,7 +20,7 @@ import { Settings } from '@elevenlabs/elevenlabs-js/api/resources/voices/resourc
 import * as Accordion from '@radix-ui/react-accordion';
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import { CheckIcon, PlusIcon } from '@radix-ui/react-icons';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -28,24 +29,30 @@ import { QAUpdateInput } from './QaUpdateInput';
 
 export default function QAUpdatePage() {
   const location = useLocation();
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+
   const { qaId } = location.state || {};
   const navigate = useNavigate();
   const methods = useForm({
     defaultValues: {
-      jobIds: [1, 4, 6],
+      jobIds: [1, 4, 6], // 기본값
       title: '',
       summary: '',
       qaSets: [{ question: '', answer: '' }],
       status: 'Y',
     },
+    mode: 'onChange', // 필드가 변경될 때 유효성 검사 수행
   });
-
+  const openAlert = (message) => {
+    setAlertMessage(message);
+    setAlertOpen(true);
+  };
   const { reset } = methods;
 
   useEffect(() => {
     getPost(qaId)
       .then((resp) => {
-        console.log(resp);
         const data = resp?.data ?? null;
         reset({
           jobIds: data.jobIds,
@@ -67,13 +74,38 @@ export default function QAUpdatePage() {
     formState: { errors, isSubmitting },
   } = methods;
 
+  useEffect(() => {
+    register('jobIds', {
+      validate: (value) => value.length > 0 || '직무를 최소 1개 이상 선택해야 합니다.',
+    });
+  }, [register]);
+
   const { fields, append, remove, move } = useFieldArray({
     control,
     name: 'qaSets',
   });
 
+  const [openItems, setOpenItems] = useState(['item-0']);
+
+  const handleAddSet = () => {
+    if (fields.length >= 10) {
+      openAlert('질문은 최대 10개까지 등록할 수 있습니다.');
+      return;
+    }
+    const newIndex = fields.length;
+
+    append({ question: '', answer: '' });
+    setOpenItems((prevOpenItems) => [...prevOpenItems, `item-${newIndex}`]);
+  };
+
   const selectedJobIds = watch('jobIds');
+
   const onSubmit = (data) => {
+    // 직무가 1개 이상 선택되어 있을 때만 저장 가능
+    if (data.jobIds.length === 0) {
+      return; // 직무가 선택되지 않았다면 아무 작업도 하지 않음
+    }
+
     editPost(qaId, data)
       .then((response) => {
         navigate(`/qa/${response?.data}`);
@@ -86,24 +118,22 @@ export default function QAUpdatePage() {
     setValue('status', newStatus);
   };
 
-  // 💡 dnd-kit 센서 설정
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
-  ); // 💡 dnd-kit 드래그 종료 핸들러
+  );
 
   const onDragEnd = (event) => {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      // useFieldArray의 'id' (item.id)를 기준으로 인덱스 찾기
       const oldIndex = fields.findIndex((field) => field.id === active.id);
       const newIndex = fields.findIndex((field) => field.id === over.id);
 
       if (oldIndex !== -1 && newIndex !== -1) {
-        move(oldIndex, newIndex); // 💡 react-hook-form의 'move' 함수 호출
+        move(oldIndex, newIndex);
       }
     }
   };
@@ -120,19 +150,26 @@ export default function QAUpdatePage() {
           <FormProvider {...methods}>
             <FormWrapper>
               <form onSubmit={handleSubmit(onSubmit)}>
-                {/* 1. 직무 선택 */}
+                {/* 직무 선택 (최소 1개 선택 필수) */}
                 <Section>
                   <SectionTitle>직무 선택 (최대 3개)</SectionTitle>
                   <JobSelector
                     value={selectedJobIds}
-                    onChange={(newJobIds) =>
-                      setValue('jobIds', newJobIds, { shouldValidate: true })
-                    }
+                    onChange={(newJobIds) => {
+                      setValue('jobIds', newJobIds, { shouldValidate: true });
+                    }}
                   />
-                  {errors.jobIds && <Typography color='error'>{errors.jobIds.message}</Typography>}
+                  {errors.jobIds && (
+                    <span
+                      style={{ color: 'red', fontSize: '14px', marginTop: '8px', display: 'block' }}
+                    >
+                      {errors.jobIds.message}
+                    </span>
+                  )}
                 </Section>
                 <Divider />
-                {/* 2. 제목 */}
+
+                {/* 제목 */}
                 <Section>
                   <SectionTitle>
                     <span>
@@ -144,10 +181,15 @@ export default function QAUpdatePage() {
                     {...register('title', { required: '제목은 필수 입력입니다.' })}
                   />
                   {errors.title && (
-                    <Typography color='error'>{errors.title.message}</Typography>
-                  )}{' '}
+                    <span
+                      style={{ color: 'red', fontSize: '14px', marginTop: '8px', display: 'block' }}
+                    >
+                      {errors.title.message}
+                    </span>
+                  )}
                 </Section>
-                {/* 3. 세트 요약 */}
+
+                {/* 세트 요약 */}
                 <Section>
                   <SectionTitle>
                     <span>노트 요약</span>
@@ -156,10 +198,11 @@ export default function QAUpdatePage() {
                   <FormTextAreaSummary
                     placeholder='이 면접 노트에 대한 간단한 설명을 입력하세요.'
                     {...register('summary')}
-                  />{' '}
+                  />
                 </Section>
                 <Divider />
-                {/* 4. 질문답변 세트 목록 (dnd-kit 적용) */}{' '}
+
+                {/* 질문답변 세트 목록 */}
                 <Section>
                   <SectionTitle>
                     <span>면접 노트</span>
@@ -170,45 +213,38 @@ export default function QAUpdatePage() {
                     collisionDetection={closestCenter}
                     onDragEnd={onDragEnd}
                   >
-                    {/* 💡 Droppable 대신 SortableContext 사용 */}
                     <SortableContext
-                      items={fields.map((field) => field.id)} // 💡 고유 ID 배열 전달
+                      items={fields.map((field) => field.id)}
                       strategy={verticalListSortingStrategy}
                     >
-                      {' '}
-                      <Accordion.Root type='multiple'>
-                        {' '}
+                      <Accordion.Root
+                        type='multiple'
+                        value={openItems}
+                        onValueChange={setOpenItems}
+                      >
                         <QASetListContainer>
-                          {' '}
                           {fields.map((item, index) => (
-                            // 💡 Draggable 대신 QACreateInput이 useSortable 훅을 사용
                             <QAUpdateInput
                               key={item.id}
-                              id={item.id} // 💡 dnd-kit에 ID 전달
+                              id={item.id}
                               index={index}
                               onDelete={() =>
                                 fields.length > 1
                                   ? remove(index)
-                                  : alert('최소 1개의 질문 세트가 필요합니다.')
+                                  : openAlert('최소 1개의 질문 세트가 필요합니다.')
                               }
                             />
-                          ))}{' '}
-                        </QASetListContainer>{' '}
+                          ))}
+                        </QASetListContainer>
                       </Accordion.Root>
                     </SortableContext>
-                  </DndContext>{' '}
-                  <AddSetButton
-                    type='button'
-                    onClick={() =>
-                      fields.length < 10
-                        ? append({ question: '', answer: '' })
-                        : alert('질문은 최대 10개까지 등록할 수 있습니다.')
-                    }
-                  >
-                    <PlusIcon width={30} height={30} />{' '}
-                  </AddSetButton>{' '}
+                  </DndContext>
+                  <AddSetButton type='button' onClick={handleAddSet}>
+                    <PlusIcon width={30} height={30} />
+                  </AddSetButton>
                 </Section>
-                {/* 5. 공개 설정 및 저장 */}
+
+                {/* 공개 설정 및 저장 */}
                 <FormFooter>
                   <CheckboxLabel htmlFor='status-public'>
                     <CheckboxRoot
@@ -244,6 +280,13 @@ export default function QAUpdatePage() {
           </FormProvider>
         </SettingsBox>
       </MainContentWrapper>
+      <WarnDialog
+        open={alertOpen}
+        onOpenChange={setAlertOpen}
+        title='알림'
+        message={alertMessage}
+        confirmText='확인'
+      />
     </PageContainer>
   );
 }

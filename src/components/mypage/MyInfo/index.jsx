@@ -128,39 +128,41 @@ const MyInfo = () => {
         <FieldCard>
           <FieldLeft>
             <FieldLabel htmlFor='nick'>닉네임</FieldLabel>
-            <ReadonlyInput
+            {/* <ReadonlyInput
               id='nick'
               style={{
                 width: '300px',
                 marginLeft: 'auto',
-                justifyContent: 'flex-start',
+                justifyContent: 'flex-end',
               }}
-            >
-              {user?.nickname}
-            </ReadonlyInput>
+            > */}
+            {/* {user?.nickname}
+            </ReadonlyInput> */}
+            <FieldValue>{user?.nickname}</FieldValue>
           </FieldLeft>
         </FieldCard>
         {/* 이메일 (수정 불가) */}
         <FieldCard>
           <FieldLeft>
             <FieldLabel htmlFor='email'>이메일</FieldLabel>
-            <ReadonlyInput
+            {/* <ReadonlyInput
               id='nick'
               style={{
                 width: '300px',
                 marginLeft: 'auto',
-                justifyContent: 'flex-start',
+                justifyContent: 'flex-end',
               }}
             >
               {user?.email}
-            </ReadonlyInput>
+            </ReadonlyInput> */}
+            <FieldValue>{user?.email}</FieldValue>
           </FieldLeft>
         </FieldCard>
 
         {/* 관심 직무 */}
         <FieldCard>
           <FieldLeft>
-            <FieldLabel>관심직무</FieldLabel>
+            <FieldLabel>관심 직무</FieldLabel>
             {editingJob ? (
               <div
                 style={{
@@ -209,7 +211,7 @@ const MyInfo = () => {
             <FieldLabel>합격 여부</FieldLabel>
             {user?.passStatus === 'Y' ? (
               <>
-                <FieldValue style={{ flex: 1, textAlign: 'right' }}>합격자입니다</FieldValue>
+                <FieldValue style={{ flex: 1, textAlign: 'right' }}>합격자입니다.</FieldValue>
                 <FieldActions>
                   {/* {fileName && (
                     <Typography as='div' size={3}>
@@ -217,10 +219,11 @@ const MyInfo = () => {
                     </Typography>
                   )} */}
                   <button
-                    // disabled
+                    disabled
                     style={{
                       ...pillStyle,
                       background: theme.colors.primary[4],
+                      opacity: 0.5,
                     }}
                     onClick={() => setOpenPhotoModal(true)}
                   >
