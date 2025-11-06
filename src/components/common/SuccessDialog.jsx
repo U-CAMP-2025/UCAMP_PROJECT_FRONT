@@ -22,14 +22,14 @@ const Content = styled(Dialog.Content)`
 `;
 
 const Title = styled(Dialog.Title)`
-  font-size: 18px;
+  font-size: 20px;
   font-weight: ${({ theme }) => theme.font.weight.bold};
   color: ${({ theme }) => theme.colors.primary[9]};
   margin-bottom: 12px;
 `;
 
 const Description = styled(Dialog.Description)`
-  font-size: 14px;
+  font-size: 16px;
   color: ${({ theme }) => theme.colors.gray[11]};
   margin-bottom: 24px;
 `;
