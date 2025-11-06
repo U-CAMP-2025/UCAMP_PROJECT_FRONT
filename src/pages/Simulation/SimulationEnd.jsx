@@ -1,4 +1,4 @@
-import { transCheckimulation } from '@api/simulationAPIS';
+import { transCheckimulation, fetchSimulationResult } from '@api/simulationAPIS';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import React, { useEffect } from 'react';
@@ -29,23 +29,55 @@ export default function SimulationEndPage() {
   const initialBlob = location.state?.recordedBlob ?? null;
 
   useEffect(() => {
-    const run = async () => {
-      try {
-        const result = await transCheckimulation(simulationId);
-        console.log('transCheckimulation result:', result);
+    let cancelled = false;
 
-        if (result?.data) {
+    const isReady = (qaList = []) =>
+      qaList.length > 0 && qaList.every((q) => (q.feedback ?? '').trim().length > 0);
+
+    const waitReadyAndGo = async () => {
+      try {
+        // 1) 서버에 종료/체크 트리거 (기존 로직)
+        await transCheckimulation(simulationId);
+
+        // 2) 결과 준비까지 폴링 (최대 20초, 400ms 간격)
+        const deadline = Date.now() + 20_000;
+        while (!cancelled && Date.now() < deadline) {
+          const res = await fetchSimulationResult(simulationId, { params: { t: Date.now() } }); // 캐시 버스터
+          const qaList = res?.data?.post?.qaList ?? [];
+          if (isReady(qaList)) {
+            if (!cancelled) {
+              navigate(`/simulation/${simulationId}/result`, {
+                state: { initialBlob },
+                replace: true,
+              });
+            }
+            return;
+          }
+          await new Promise((r) => setTimeout(r, 400));
+        }
+
+        // 타임아웃: 부분 완료라도 결과 페이지로 이동
+        if (!cancelled) {
           navigate(`/simulation/${simulationId}/result`, {
             state: { initialBlob },
             replace: true,
           });
         }
       } catch (err) {
-        console.error('transCheckimulation failed:', err);
+        console.error('transCheckimulation/polling failed:', err);
+        if (!cancelled) {
+          navigate(`/simulation/${simulationId}/result`, {
+            state: { initialBlob },
+            replace: true,
+          });
+        }
       }
     };
 
-    run(); // ✅ 실제 실행
+    waitReadyAndGo();
+    return () => {
+      cancelled = true;
+    };
   }, [simulationId, initialBlob, navigate]);
 
   return (
