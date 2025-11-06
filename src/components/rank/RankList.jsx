@@ -5,30 +5,35 @@ import styled from 'styled-components';
 const Table = styled.table`
   width: 100%;
   background: white;
-  border-radius: 8px;
+  border: 1px solid #d9d9d9;
+  border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border-collapse: collapse;
+  border-spacing: 0;
 `;
-
 const TableHeader = styled.thead`
-  background: #f5f5f5;
+  background: #f4f0fe;
+  /* underline the thead with matching color */
+  tr {
+    border-bottom: 1px solid #d9d9d9;
+  }
 `;
 const HeaderRow = styled.tr`
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid #d9d9d9;
 `;
 const Th = styled.th`
-  padding: 12px 16px;
+  padding: 16px 20px; /* tighter padding to remove small white gaps */
   text-align: left;
-  font-size: 12px;
-  font-weight: 600;
-  color: #666;
+  font-size: 13px;
+  font-weight: 700;
+  color: #202020;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  border-bottom: 1px solid #d9d9d9; /* underline for thead cells */
 `;
 const TableBody = styled.tbody``;
 const Row = styled.tr`
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #d9d9d9; /* tbody underline color */
   &:hover {
     background: #fafafa;
   }
@@ -37,11 +42,11 @@ const Row = styled.tr`
   }
 `;
 const Td = styled.td`
-  padding: 16px;
+  padding: 16px 20px; /* match Th for tighter layout */
   font-size: 14px;
   color: #333;
+  border-bottom: 1px solid #d9d9d9; /* underline between rows */
 `;
-
 const PositionCell = styled(Td)`
   width: 60px;
   font-weight: 600;
@@ -62,14 +67,16 @@ const PassCell = styled(Td)`
   text-align: center;
 `;
 const PassBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
   padding: 4px 12px;
-  border-radius: 12px;
+  border-radius: 999px;
   font-size: 12px;
-  font-weight: 500;
-  background: ${(props) => (props.passed ? '#e8f5e9' : '#fef3e9')};
-  color: ${(props) => (props.passed ? '#2e7d32' : '#f57c00')};
+  font-weight: 700;
+  background: ${(props) => (props.passed ? '#E7F8ED' : '#F0F0F0')};
+  color: ${(props) => (props.passed ? '#18794E' : '#667588')};
 `;
-
 const Avatar = styled.div`
   width: 32px;
   height: 32px;
@@ -86,7 +93,6 @@ const Avatar = styled.div`
     border-radius: 50%;
   }
 `;
-
 const PlayerWrapper = styled.div`
   display: flex;
   align-items: center;
@@ -100,11 +106,7 @@ const PlayerName = styled.div`
   font-weight: 500;
   color: #0066cc;
   cursor: pointer;
-  &:hover {
-    text-decoration: underline;
-  }
 `;
-
 const RankBadge = styled.div`
   width: 24px;
   height: 24px;
@@ -121,7 +123,7 @@ const PlusCss = styled.span`
   margin-left: 6px;
 `;
 
-const RankingTable = ({ data, type }) => {
+const RankingTable = ({ data, type, value }) => {
   const getMedalColor = (position) => {
     switch (position) {
       case 1:
@@ -149,21 +151,21 @@ const RankingTable = ({ data, type }) => {
           <Th>순위</Th>
           <Th>닉네임</Th>
           <Th>직무</Th>
-          <Th style={{ textAlign: 'center' }}>{type === 'practice' ? '연습횟수' : '북마크수'}</Th>
-          <Th style={{ textAlign: 'center' }}>합격자여부</Th>
+          <Th style={{ textAlign: 'center' }}>{type === 'practice' ? '연습 횟수' : '북마크 수'}</Th>
+          <Th style={{ textAlign: 'center' }}>합격자 여부</Th>
         </HeaderRow>
       </TableHeader>
       <TableBody>
-        {data.map((player, index) => (
-          <Row key={`${player.userId}`}>
+        {data.map((user, index) => (
+          <Row key={`${user.userId}`}>
             <PositionCell>{getRankBadge(index + 1)}</PositionCell>
             <PlayerCell>
               <PlayerWrapper>
                 <Avatar aria-hidden>
-                  {player.profileImageUrl && player.profileImageUrl.startsWith('http') ? (
+                  {user.profileImageUrl && user.profileImageUrl.startsWith('http') ? (
                     <img
-                      src={player.profileImageUrl}
-                      alt={`${player.nickname} 프로필 이미지`}
+                      src={user.profileImageUrl}
+                      alt={`${user.nickname} 프로필 이미지`}
                       onError={(e) => (e.currentTarget.style.display = 'none')}
                     />
                   ) : (
@@ -171,15 +173,15 @@ const RankingTable = ({ data, type }) => {
                   )}
                 </Avatar>
                 <PlayerInfo>
-                  <PlayerName>{player.nickname}</PlayerName>
+                  <PlayerName>{user.nickname}</PlayerName>
                 </PlayerInfo>
               </PlayerWrapper>
             </PlayerCell>
-            <TitleCell>{player.jobName}</TitleCell>
-            <BookmarkCell>{player.cnt}</BookmarkCell>
+            <TitleCell>{user.jobName}</TitleCell>
+            <BookmarkCell>{user.cnt}</BookmarkCell>
             <PassCell>
-              <PassBadge passed={player.passStatus === 'Y'}>
-                {player.passStatus === 'Y' ? '합격' : '불합격'}
+              <PassBadge passed={user.passStatus === 'Y'}>
+                {user.passStatus === 'Y' ? '합격자' : '구직자'}
               </PassBadge>
             </PassCell>
           </Row>

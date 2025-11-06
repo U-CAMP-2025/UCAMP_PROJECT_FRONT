@@ -3,7 +3,8 @@ import { Header } from '@components/layout/Header';
 import { PageContainer } from '@components/layout/PageContainer';
 import { KakaoLoginDialog } from '@components/signup/KakaoLoginDialog';
 import { useAuthStore } from '@store/auth/useAuthStore';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 
 export default function LandingPage() {
@@ -45,7 +46,25 @@ export default function LandingPage() {
     }
   }, []);
 
-  const offset = -currentIndex * (100 / cardsPerView) - currentIndex * (20 / cardsPerView);
+  // slider pixel-based calculation
+  const containerRef = useRef(null);
+  const [cardWidthPx, setCardWidthPx] = useState(0);
+  const cardGap = 20; // px
+
+  useLayoutEffect(() => {
+    function update() {
+      if (!containerRef.current) return;
+      const w = containerRef.current.clientWidth;
+      const cardW = (w - cardGap * (cardsPerView - 1)) / cardsPerView;
+      setCardWidthPx(cardW);
+    }
+
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, [cardsPerView]);
+
+  const offsetPx = cardWidthPx ? -currentIndex * (cardWidthPx + cardGap) : 0;
 
   return (
     <>
@@ -151,22 +170,27 @@ export default function LandingPage() {
               </svg>
             </ArrowButton>
 
-            <CardContainer2>
-              {cardData.map((card, index) => (
-                <CardWrapper key={card.id} $offset={offset}>
-                  <Cards>
-                    <Title3>{card.title}</Title3>
-                    <ReviewSection>
-                      💬
-                      {card.reviews.map((review, idx) => (
-                        <ReviewItem key={idx}>
-                          <ReviewText>`{review.text}`</ReviewText>
-                        </ReviewItem>
-                      ))}
-                    </ReviewSection>
-                  </Cards>
-                </CardWrapper>
-              ))}
+            <CardContainer2 ref={containerRef}>
+              <Track $translatePx={offsetPx}>
+                {cardData.map((card) => (
+                  <CardWrapper
+                    key={card.id}
+                    style={{ minWidth: cardWidthPx ? `${cardWidthPx}px` : undefined }}
+                  >
+                    <Cards>
+                      <Title3>{card.title}</Title3>
+                      <ReviewSection>
+                        💬
+                        {card.reviews.map((review, idx) => (
+                          <ReviewItem key={idx}>
+                            <ReviewText>`{review.text}`</ReviewText>
+                          </ReviewItem>
+                        ))}
+                      </ReviewSection>
+                    </Cards>
+                  </CardWrapper>
+                ))}
+              </Track>
             </CardContainer2>
 
             <ArrowButton2
@@ -624,7 +648,7 @@ const CardContainer2 = styled.div`
 const CardWrapper = styled.div`
   min-width: calc(33.333% - 14px);
   transition: transform 0.5s ease-in-out;
-  transform: translateX(${(props) => props.$offset}%);
+  /* translate handled by Track wrapper */
 
   @media (max-width: 1024px) {
     min-width: calc(50% - 10px);
@@ -642,6 +666,13 @@ const Cards = styled.div`
   padding: 10px 28px 22px 28px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   height: 100%;
+`;
+
+const Track = styled.div`
+  display: flex;
+  gap: 20px;
+  transition: transform 0.35s ease;
+  transform: translateX(${(props) => (props.$translatePx ? `${props.$translatePx}px` : '0px')});
 `;
 
 const Title3 = styled.h3`
@@ -769,7 +800,7 @@ const HeaderR = styled.div`
 const TitleR = styled.h1`
   font-size: 28px;
   font-weight: 600;
-  margin: 0;
+  margin: 10px 0px 0px 10px;
 `;
 
 const Tabs = styled.div`
@@ -931,19 +962,16 @@ const CTASection = styled.div`
     padding: 60px 30px;
   }
 `;
-
 const Content = styled.div`
   position: relative;
   z-index: 1;
 `;
-
 const SubText = styled.p`
   font-size: 16px;
   color: rgba(255, 255, 255, 0.9);
   margin-bottom: 16px;
   font-weight: 400;
 `;
-
 const MainText = styled.h2`
   font-size: 42px;
   font-weight: 700;
@@ -969,7 +997,6 @@ const ButtonGroup2 = styled.div`
     max-width: 320px;
   }
 `;
-
 const PrimaryButton2 = styled(Button)`
   background: white;
   color: #4a9fe5;
@@ -995,33 +1022,6 @@ const PrimaryButton2 = styled(Button)`
     justify-content: center;
   }
 `;
-
-const SecondaryButton2 = styled(Button)`
-  background: transparent;
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.9);
-  border-radius: 50px;
-  padding: 12px 32px;
-  font-size: 16px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: white;
-  }
-
-  @media (max-width: 640px) {
-    width: 100%;
-    justify-content: center;
-  }
-`;
-
 const ArrowIcon = styled.span`
   display: flex;
   align-items: center;
@@ -1035,29 +1035,6 @@ const ArrowIcon = styled.span`
 
   ${PrimaryButton}:hover & {
     transform: translateX(4px);
-  }
-
-  svg {
-    width: 14px;
-    height: 14px;
-    stroke: white;
-    stroke-width: 2.5;
-  }
-`;
-const ArrowIconSecondary = styled.span`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 50%;
-  flex-shrink: 0;
-  transition: all 0.3s ease;
-
-  ${SecondaryButton}:hover & {
-    transform: translateX(4px);
-    background: rgba(255, 255, 255, 0.35);
   }
 
   svg {
