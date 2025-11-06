@@ -4,6 +4,7 @@ import ConfirmDialog from '@components/common/ConfirmDialog';
 import ErrorDialog from '@components/common/ErrorDialog';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
+import { feedback } from '@elevenlabs/elevenlabs-js/api/resources/conversationalAi/resources/conversations';
 import * as Accordion from '@radix-ui/react-accordion';
 import * as Checkbox from '@radix-ui/react-checkbox';
 import { CaretDownIcon } from '@radix-ui/react-icons';
@@ -57,12 +58,20 @@ export default function SimulationResultPage() {
   useEffect(() => {
     fetchSimulationResult(simulationId)
       .then((response) => {
-        const list = response.data.post.qaList ?? [];
+        const raw = response.data.post?.qaList ?? [];
+
+        // 피드백 정규화: 문자열 1개로 보장
+        const list = raw.map((q) => ({
+          ...q,
+          // 1) 새 백엔드: q.feedback 사용
+          feedback: (q.feedback ?? '').trim(),
+        }));
+        console.log(feedback);
         setQaList(list);
         setSelectedKeys(new Set(list.map((qa, i) => keyOf(i, qa))));
         setData(response.data);
       })
-      .catch((e) => {
+      .catch(() => {
         setError('결과를 불러오지 못했습니다.');
       })
       .finally(() => {
@@ -209,6 +218,23 @@ export default function SimulationResultPage() {
                         maxLength={500}
                       />
                       <CharCount>{(qa.transContent?.length ?? 0).toLocaleString()}/500자</CharCount>
+                      {/* 여기에 피드백 좋았던점 아쉬웠던점 추천 답변을 대입 */}
+                      {(qa.feedback ?? '').trim().length > 0 ? (
+                        <FeedbackBox>
+                          <Typography as='h4' size={3} weight='semiBold'>
+                            AI 피드백
+                          </Typography>
+                          <AnswerTextWrapper style={{ marginTop: 8 }}>
+                            <Typography
+                              as='p'
+                              size={3}
+                              style={{ lineHeight: '1.6', whiteSpace: 'pre-wrap' }}
+                            >
+                              {qa.feedback}
+                            </Typography>
+                          </AnswerTextWrapper>
+                        </FeedbackBox>
+                      ) : null}
                     </AnswerContainer>
                   </StyledAccordionContent>
                 </StyledAccordionItem>
@@ -496,4 +522,35 @@ const CancelButton = styled(BaseButton)`
   &:focus {
     box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.gray[6]};
   }
+`;
+const FeedbackBox = styled.div`
+  margin-top: ${({ theme }) => theme.space[4]};
+  border: 1px solid ${({ theme }) => theme.colors.gray[4]};
+  border-radius: ${({ theme }) => theme.radius.md};
+  background: ${({ theme }) => theme.colors.gray[1]};
+  padding: ${({ theme }) => theme.space[4]};
+`;
+
+const Section = styled.div`
+  margin-top: ${({ theme }) => theme.space[3]};
+`;
+
+const List = styled.ul`
+  margin-top: ${({ theme }) => theme.space[2]};
+  padding-left: 1rem;
+  display: grid;
+  gap: 4px;
+`;
+
+const Empty = styled.span`
+  color: ${({ theme }) => theme.colors.gray[8]};
+`;
+
+const Suggested = styled.div`
+  margin-top: ${({ theme }) => theme.space[2]};
+  white-space: pre-wrap;
+  background: ${({ theme }) => theme.colors.gray[2]};
+  border: 1px solid ${({ theme }) => theme.colors.gray[4]};
+  border-radius: ${({ theme }) => theme.radius.md};
+  padding: ${({ theme }) => theme.space[3]};
 `;
