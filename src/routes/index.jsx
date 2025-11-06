@@ -16,7 +16,6 @@ import SimulationEndPage from '@pages/Simulation/SimulationEnd';
 import SimulationGO from '@pages/Simulation/SimulationGo';
 import SimulationRecordPage from '@pages/Simulation/SimulationRecord';
 import SimulationResultPage from '@pages/Simulation/SimulationResult';
-import TestPage from '@pages/Test';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
 
 import { RequireAdmin } from './RequireAdmin';
