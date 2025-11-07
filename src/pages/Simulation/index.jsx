@@ -124,6 +124,7 @@ export default function SimulationPresetPage() {
           console.log('최종 튜토리얼 완료: 유저 상태 active 업데이트');
           localStorage.removeItem('seenHeaderTour');
           localStorage.removeItem('seenQAListTour');
+          localStorage.removeItem('seenSimTour');
         })
         .catch((err) => {
           console.error('유저 상태 업데이트 실패: ', err);
