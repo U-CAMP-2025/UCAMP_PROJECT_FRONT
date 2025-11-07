@@ -1,20 +1,26 @@
 // SimulationRecordPage.jsx
 import { axiosInstance } from '@api/axios';
+import Button from '@components/common/Button';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import { CheckCircledIcon, CaretRightIcon } from '@radix-ui/react-icons';
 import * as Tabs from '@radix-ui/react-tabs';
-import React from 'react';
+import theme from '@styles/theme';
+import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 export default function SimulationRecordPage() {
   const navigate = useNavigate();
-  const [records, setRecords] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
+  const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  React.useEffect(() => {
+  const handleClickButton = () => {
+    navigate('/simulation');
+  };
+
+  useEffect(() => {
     (async () => {
       try {
         const res = await axiosInstance.get('/simulation/records');
@@ -77,9 +83,17 @@ export default function SimulationRecordPage() {
               records.map(renderRecordItem)
             ) : (
               <EmptyState>
-                <Typography size={4} muted>
-                  아직 연습 기록이 없습니다.
+                <Typography size={4} color={theme.colors.gray[10]} weight='semiBold'>
+                  아직 면접 연습 기록이 없습니다.
                 </Typography>
+                <Button
+                  style={{
+                    margin: '30px 0',
+                  }}
+                  onClick={handleClickButton}
+                >
+                  연습하러 가기
+                </Button>
               </EmptyState>
             ))}
         </RecordListContainer>
