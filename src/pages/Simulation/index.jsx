@@ -390,9 +390,18 @@ export default function SimulationPresetPage() {
               </SelectConfigSection> */}
 
               {/* 시작하기 */}
-              <StartButton id='tour-sim-start' type='submit' disabled={loading || submitting}>
-                {submitting ? '시작 중…' : '시작하기'}
-              </StartButton>
+              <StartButtonContainer>
+                <Typography
+                  size={3}
+                  color='gray.9'
+                  style={{ textAlign: 'center', whiteSpace: 'nowrap' }}
+                >
+                  AI 면접관은 랜덤으로 배정됩니다.
+                </Typography>
+                <StartButton id='tour-sim-start' type='submit' disabled={loading || submitting}>
+                  {submitting ? '시작 중…' : '시작하기'}
+                </StartButton>
+              </StartButtonContainer>
             </SettingsBox>
           </PresetForm>
         </FormProvider>
@@ -640,7 +649,7 @@ const StartButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: ${({ theme }) => theme.space[10]} auto 0;
+  // margin: ${({ theme }) => theme.space[10]} auto 0;
   padding: ${({ theme }) => theme.space[3]} 0;
   background-color: ${({ theme }) => theme.colors.primary[9]};
   color: white;
@@ -680,4 +689,14 @@ const JobChip = styled.div`
   border-radius: ${({ theme }) => theme.radius.lg};
   font-size: ${({ theme }) => theme.font.size[2]};
   font-weight: ${({ theme }) => theme.font.weight.semiBold};
+`;
+
+const StartButtonContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[3]};
+  margin: ${({ theme }) => theme.space[10]} auto 0;
+  width: 100%;
+  max-width: 120px;
 `;
