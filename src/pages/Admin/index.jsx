@@ -24,7 +24,7 @@ export default function AdminPage() {
     },
     {
       value: 'transcription',
-      label: '답변 변환 현황',
+      label: '연습 변환 현황',
       content: <AdminTranscriptionPage />,
     },
   ];

@@ -10,6 +10,35 @@ import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import styled from 'styled-components';
 
+/* ---------- 유틸: 오늘이면 시간, 하루 지나면 날짜 ---------- */
+const isSameLocalDate = (a, b) =>
+  a.getFullYear() === b.getFullYear() &&
+  a.getMonth() === b.getMonth() &&
+  a.getDate() === b.getDate();
+
+const formatCompletedAt = (isoLike) => {
+  if (!isoLike) return '완료 기록 없음';
+  const d = new Date(isoLike);
+  if (isNaN(d)) return '완료 기록 없음';
+
+  const now = new Date();
+  if (isSameLocalDate(d, now)) {
+    // 오늘 → 시간만
+    return d.toLocaleTimeString('ko-KR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit', // 초가 필요 없으면 제거해도 됩니다.
+      hour12: false,
+    });
+  }
+  // 어제 이전 → 날짜만
+  return d.toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+};
+
 export default function SimulationRecordPage() {
   const navigate = useNavigate();
   const [records, setRecords] = useState([]);
@@ -39,9 +68,7 @@ export default function SimulationRecordPage() {
     const post = record?.post ?? {};
     const jobs = Array.isArray(post?.job) ? post.job : [];
     const title = post?.title || '(제목 없음)';
-    const completedAt = record?.completedAt
-      ? new Date(record.completedAt).toLocaleDateString()
-      : '완료 기록 없음';
+    const completedAt = formatCompletedAt(record?.completedAt); // ✅ 변경된 부분
     const count = record?.count ?? 0;
 
     return (

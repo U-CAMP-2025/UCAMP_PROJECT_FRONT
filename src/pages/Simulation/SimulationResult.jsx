@@ -115,6 +115,32 @@ export default function SimulationResultPage() {
         setSaving(false);
       });
   };
+  const extractFeedbackSections = (raw) => {
+    const text = (raw ?? '').trim();
+    const sections = { good: '', bad: '', suggest: '' };
+
+    const goodMatch = text.match(
+      /좋았던\s*점\s*[:\-]?\s*([\s\S]*?)(?=아쉬웠던\s*점|추천\s*답변|$)/i,
+    );
+    const badMatch = text.match(
+      /아쉬웠던\s*점\s*[:\-]?\s*([\s\S]*?)(?=좋았던\s*점|추천\s*답변|$)/i,
+    );
+    const suggMatch = text.match(/추천\s*답변\s*[:\-]?\s*([\s\S]*?)$/i);
+
+    sections.good = goodMatch?.[1]?.trim() ?? '';
+    sections.bad = badMatch?.[1]?.trim() ?? '';
+    sections.suggest = suggMatch?.[1]?.trim() ?? '';
+
+    return sections;
+  };
+
+  const breakByPeriod = (s) => (s ?? '').replace(/([.?!])\s*/g, '$1\n').trim();
+
+  const toLines = (s) =>
+    breakByPeriod(s)
+      .split('\n')
+      .map((v) => v.trim())
+      .filter(Boolean);
 
   const handleCancelClick = () => navigate('/simulation/record');
 
@@ -219,22 +245,55 @@ export default function SimulationResultPage() {
                       />
                       <CharCount>{(qa.transContent?.length ?? 0).toLocaleString()}/500자</CharCount>
                       {/* 여기에 피드백 좋았던점 아쉬웠던점 추천 답변을 대입 */}
-                      {(qa.feedback ?? '').trim().length > 0 ? (
+                      {(qa.feedback ?? '').trim().length > 0 && (
                         <FeedbackBox>
                           <Typography as='h4' size={3} weight='semiBold'>
                             AI 피드백
                           </Typography>
-                          <AnswerTextWrapper style={{ marginTop: 8 }}>
-                            <Typography
-                              as='p'
-                              size={3}
-                              style={{ lineHeight: '1.6', whiteSpace: 'pre-wrap' }}
-                            >
-                              {qa.feedback}
-                            </Typography>
-                          </AnswerTextWrapper>
+
+                          {(() => {
+                            const f = extractFeedbackSections(qa.feedback);
+                            const goodLines = toLines(f.good);
+                            const badLines = toLines(f.bad);
+                            const suggestText = breakByPeriod(f.suggest);
+
+                            return (
+                              <>
+                                <Section>
+                                  <Typography as='h5' size={3} weight='semiBold'>
+                                    좋았던 점
+                                  </Typography>
+                                  {goodLines.length > 0 ? (
+                                    <Suggested>{goodLines.join('\n')}</Suggested>
+                                  ) : (
+                                    <Empty>내용 없음</Empty>
+                                  )}
+                                </Section>
+                                <Section>
+                                  <Typography as='h5' size={3} weight='semiBold'>
+                                    아쉬웠던 점
+                                  </Typography>
+                                  {badLines.length > 0 ? (
+                                    <Suggested>{badLines.join('\n')}</Suggested>
+                                  ) : (
+                                    <Empty>내용 없음</Empty>
+                                  )}
+                                </Section>
+                                <Section>
+                                  <Typography as='h5' size={3} weight='semiBold'>
+                                    추천 답변
+                                  </Typography>
+                                  {suggestText ? (
+                                    <Suggested>{suggestText}</Suggested>
+                                  ) : (
+                                    <Empty>내용 없음</Empty>
+                                  )}
+                                </Section>
+                              </>
+                            );
+                          })()}
                         </FeedbackBox>
-                      ) : null}
+                      )}
                     </AnswerContainer>
                   </StyledAccordionContent>
                 </StyledAccordionItem>
