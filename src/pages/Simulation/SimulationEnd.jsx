@@ -53,7 +53,7 @@ export default function SimulationEndPage() {
             }
             return;
           }
-          await new Promise((r) => setTimeout(r, 400));
+          // await new Promise((r) => setTimeout(r, 400));
         }
 
         // 타임아웃: 부분 완료라도 결과 페이지로 이동
