@@ -229,7 +229,7 @@ export const Header = () => {
 
           <H.NavItem
             onClick={() => handleProtectedLink('/myqa')}
-            $isActive={pathname === 'myqa'}
+            $isActive={pathname === '/myqa'}
             id='tour-nav-myqa'
           >
             나의 노트
@@ -237,7 +237,7 @@ export const Header = () => {
 
           <H.NavItem
             onClick={() => handleProtectedLink('/simulation')}
-            $isActive={pathname === 'simulation'}
+            $isActive={pathname.startsWith('/simulation')}
             id='tour-nav-simulation'
           >
             면접 연습
