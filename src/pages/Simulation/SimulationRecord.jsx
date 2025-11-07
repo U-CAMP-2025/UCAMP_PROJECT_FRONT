@@ -38,7 +38,11 @@ export default function SimulationRecordPage() {
     const simId = record?.simulationId;
     const post = record?.post ?? {};
     const jobs = Array.isArray(post?.job) ? post.job : [];
-    const title = post?.title || post?.postTitle || '(제목 없음)';
+    const title = post?.title || '(제목 없음)';
+    const completedAt = record?.completedAt
+      ? new Date(record.completedAt).toLocaleDateString()
+      : '완료 기록 없음';
+    const count = record?.count ?? 0;
 
     return (
       <RecordItemLink to={`/simulation/${simId}/result`} key={simId}>
@@ -48,10 +52,16 @@ export default function SimulationRecordPage() {
               <JobChip key={`${simId}-job-${i}`}>{jobName}</JobChip>
             ))}
           </TagGroup>
+
           <Typography as='h3' size={4} weight='semiBold'>
             {title}
           </Typography>
+
+          <InfoText size={3} muted>
+            최근 완료: {completedAt} &nbsp;|&nbsp; 반복 횟수: {count}회
+          </InfoText>
         </RecordItemLeft>
+
         <RecordItemRight>
           <ViewResultText>
             <CheckCircledIcon width={16} height={16} />
@@ -140,6 +150,11 @@ const StyledTabsTrigger = styled(Tabs.Trigger)`
     height: 3px;
     background-color: ${({ theme }) => theme.colors.primary[9]};
   }
+`;
+const InfoText = styled(Typography).attrs({ size: 3 })`
+  color: ${({ theme }) => theme.colors.gray[8]};
+  font-weight: 500;
+  margin-top: ${({ theme }) => theme.space[1]};
 `;
 
 const RecordItemRight = styled.div`
