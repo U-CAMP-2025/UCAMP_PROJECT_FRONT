@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { QADetailSkeleton } from './QADetailSkeleton';
 export const QADetail = () => {
   const params = useParams();
   const qaId = params.qaId;
@@ -50,7 +51,7 @@ export const QADetail = () => {
       .catch();
   };
 
-  if (!qaData) return null;
+  if (!qaData) return <QADetailSkeleton />;
   const {
     job = [],
     title,
@@ -191,7 +192,7 @@ export const QADetail = () => {
           onClick={onPractice}
           style={{ alignSelf: 'flex-end', padding: '0 16px' }}
         >
-          연습 하기
+          연습하기
         </Button>
       )}
     </Wrap>
