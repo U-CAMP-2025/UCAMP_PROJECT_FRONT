@@ -27,17 +27,17 @@ const footerLinks = [
   {
     title: '회사 정보',
     links: [
-      { name: '회사 소개', href: '/about' },
-      { name: '채용 정보', href: '/careers' },
-      { name: '제휴 문의', href: '/contact/partner' },
+      { name: '회사 소개', href: '/' },
+      { name: '채용 정보', href: '/' },
+      { name: '제휴 문의', href: '/' },
     ],
   },
   {
     title: '지원',
     links: [
-      { name: '자주 묻는 질문', href: '/faq' },
-      { name: '이용 약관', href: '/terms' },
-      { name: '개인정보 처리방침', href: '/privacy' },
+      { name: '자주 묻는 질문', href: '/' },
+      { name: '이용 약관', href: '/' },
+      { name: '개인정보 처리방침', href: '/' },
     ],
   },
 ];

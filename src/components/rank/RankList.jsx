@@ -171,7 +171,7 @@ const RankingTable = ({ data, type, value }) => {
           <Th>순위</Th>
           <Th>닉네임</Th>
           <Th>직무</Th>
-          <Th style={{ textAlign: 'center' }}>{type === 'practice' ? '연습 횟수' : '북마크 수'}</Th>
+          <Th style={{ textAlign: 'center' }}>{type === 'practice' ? '연습 횟수' : '스크랩 수'}</Th>
           <Th style={{ textAlign: 'center' }}>합격자 여부</Th>
         </HeaderRow>
       </TableHeader>
