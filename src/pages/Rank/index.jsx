@@ -75,7 +75,7 @@ const TabButton = styled.button`
 const TABS = {
   WEEKPRACTICE: '주간연습횟수',
   MONTHPRACTICE: '월간연습횟수',
-  BOOKMARKS: '북마크수',
+  BOOKMARKS: '스크랩수',
 };
 
 const MonthlyRanking = () => {

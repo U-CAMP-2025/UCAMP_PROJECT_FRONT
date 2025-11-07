@@ -3,6 +3,7 @@ import SearchableSelect from '@components/common/SearchableSelect';
 import Typography from '@components/common/Typography';
 import { useAuthStore } from '@store/auth/useAuthStore';
 import theme from '@styles/theme';
+import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -17,6 +18,7 @@ export const SignupForm = () => {
     register,
     handleSubmit,
     control,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm({
     defaultValues: { nickname: '', email: '', jobId: undefined },
@@ -24,6 +26,14 @@ export const SignupForm = () => {
   });
   const navigate = useNavigate();
   const { login, setAccessToken } = useAuthStore.getState();
+
+  const [isNicknameValid, setIsNicknameValid] = useState(false);
+  const nicknameValue = watch('nickname');
+
+  useEffect(() => {
+    // 닉네임이 변경되면 다시 검증하도록 초기화
+    setIsNicknameValid(false);
+  }, [nicknameValue]);
 
   const handleSubmitForm = (data) => {
     const { nickname, jobId } = data;
@@ -57,6 +67,7 @@ export const SignupForm = () => {
           id='nickname'
           type='text'
           placeholder='닉네임을 입력하세요'
+          $valid={isNicknameValid && !errors.nickname}
           {...register('nickname', {
             required: '닉네임을 입력해주세요',
             minLength: { value: 2, message: '닉네임은 2자 이상이어야 합니다' },
@@ -70,14 +81,23 @@ export const SignupForm = () => {
               if (!v) return '닉네임을 입력해주세요';
               try {
                 const res = await getCheckNickname(v);
-                return res.available || '이미 사용 중인 닉네임입니다';
+                if (res.available) {
+                  setIsNicknameValid(true);
+                  return true;
+                }
+                setIsNicknameValid(false);
+                return '이미 사용 중인 닉네임입니다';
               } catch (e) {
+                setIsNicknameValid(false);
                 return '닉네임 확인 중 오류가 발생했습니다';
               }
             },
           })}
         />
         {errors.nickname && <ErrorText>{errors.nickname.message}</ErrorText>}
+        {!errors.nickname && isNicknameValid && (
+          <SuccessText>사용 가능한 닉네임입니다.</SuccessText>
+        )}
       </Field>
 
       {/* 관심 직무 */}
@@ -137,20 +157,35 @@ const Label = styled.label`
   color: ${({ theme }) => theme.colors.gray[11]};
 `;
 
-const Input = styled.input`
+const Input = styled.input.withConfig({
+  shouldForwardProp: (prop) => prop !== '$valid',
+})`
   height: 44px;
   padding: 0 ${({ theme }) => theme.space[3]};
   border: 1px solid ${({ theme }) => theme.colors.gray[6]};
   border-radius: ${({ theme }) => theme.radius.md};
   outline: none;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
   &:focus {
     border-color: ${({ theme }) => theme.colors.primary[8]};
     box-shadow: 0 0 0 3px rgba(110, 86, 207, 0.15);
   }
+  ${({ $valid, theme }) =>
+    $valid &&
+    `
+      border-color: ${theme.colors.primary[9]};
+      box-shadow: 0 0 0 3px rgba(110, 86, 207, 0.25);
+    `}
 `;
 
 const ErrorText = styled(Typography).attrs({ as: 'div', size: 2 })`
   color: ${({ theme }) => theme.colors.error};
+`;
+
+const SuccessText = styled(Typography).attrs({ as: 'div', size: 2 })`
+  color: ${({ theme }) => theme.colors.primary[9]};
 `;
 
 const Submit = styled.button`

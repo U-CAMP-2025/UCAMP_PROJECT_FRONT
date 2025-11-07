@@ -25,7 +25,7 @@ export default function QASetCard({ item }) {
     otherWriter,
   } = item || {};
 
-  // OTHER_WRITER 값이 있으면 true (북마크된 게시글)
+  // OTHER_WRITER 값이 있으면 true (스크랩 게시글)
   const isBookmarked = !!otherWriter;
 
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
@@ -89,7 +89,7 @@ export default function QASetCard({ item }) {
         <Divider />
 
         <Footer>
-          <IconStat aria-label='북마크 수'>
+          <IconStat aria-label='스크랩 수'>
             <BookmarkIcon />
             <Typography as='span' size={3}>
               {bookCount}

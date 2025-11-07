@@ -141,7 +141,7 @@ export default function LandingPage() {
                   활동순
                 </Tab>
                 <Tab active={activeTab === 'world'} onClick={() => setActiveTab('world')}>
-                  북마크순
+                  스크랩순
                 </Tab>
               </Tabs>
             </HeaderR>

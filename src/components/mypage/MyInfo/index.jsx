@@ -7,7 +7,6 @@ import {
 } from '@api/userAPIS';
 import Button from '@components/common/Button';
 import ErrorDialog from '@components/common/ErrorDialog';
-import ReadonlyInput from '@components/common/ReadOnlyInput';
 import SearchableSelect from '@components/common/SearchableSelect';
 import SuccessDialog from '@components/common/SuccessDialog';
 import Typography from '@components/common/Typography';
@@ -15,12 +14,11 @@ import theme from '@styles/theme';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { FieldCard, FieldLeft, FieldLabel, FieldValue, FieldActions, FieldRight } from './FieldRow';
+import { FieldCard, FieldLeft, FieldLabel, FieldValue, FieldActions } from './FieldRow';
 import PhotoSubmitDialog from './PhotoSubmitDialog';
 import { WithdrawlDialog } from './WithdrawlDialog';
 
 const MyInfo = () => {
-  const [confirmOpen, setConfirmOpen] = useState(false);
   const [errorOpen, setErrorOpen] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successOpen, setSuccessOpen] = useState(false);
@@ -31,7 +29,7 @@ const MyInfo = () => {
 
   const [openPhotoModal, setOpenPhotoModal] = useState(false);
   const [editingJob, setEditingJob] = useState(false);
-  const [fileName, setFileName] = useState('');
+  const [, setFileName] = useState('');
 
   const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
 
@@ -101,12 +99,10 @@ const MyInfo = () => {
       await patchUserJob(user.userId, selectedJobId); // 서버 PATCH 요청
       setEditingJob(false); // 수정 모드 종료
       setUser((prev) => ({ ...prev, jobId: selectedJobId })); // 로컬 상태 갱신
-      // alert('관심 직무가 수정되었습니다.');
       setSuccessMsg('관심 직무가 수정되었습니다.');
       setSuccessOpen(true);
     } catch (err) {
       console.error('직무 수정 실패:', err);
-      // alert('직무 수정 중 오류가 발생했습니다.');
       setErrorMsg('직무 수정 중 오류가 발생했습니다.');
       setErrorOpen(true);
     }
@@ -128,16 +124,6 @@ const MyInfo = () => {
         <FieldCard>
           <FieldLeft>
             <FieldLabel htmlFor='nick'>닉네임</FieldLabel>
-            {/* <ReadonlyInput
-              id='nick'
-              style={{
-                width: '300px',
-                marginLeft: 'auto',
-                justifyContent: 'flex-end',
-              }}
-            > */}
-            {/* {user?.nickname}
-            </ReadonlyInput> */}
             <FieldValue>{user?.nickname}</FieldValue>
           </FieldLeft>
         </FieldCard>
@@ -145,16 +131,6 @@ const MyInfo = () => {
         <FieldCard>
           <FieldLeft>
             <FieldLabel htmlFor='email'>이메일</FieldLabel>
-            {/* <ReadonlyInput
-              id='nick'
-              style={{
-                width: '300px',
-                marginLeft: 'auto',
-                justifyContent: 'flex-end',
-              }}
-            >
-              {user?.email}
-            </ReadonlyInput> */}
             <FieldValue>{user?.email}</FieldValue>
           </FieldLeft>
         </FieldCard>
@@ -195,11 +171,11 @@ const MyInfo = () => {
                   {jobs.find((j) => j.jobId === selectedJobId)?.name}
                 </FieldValue>
                 <FieldActions>
-                  <button style={pillStyle} onClick={() => setEditingJob(true)}>
-                    <Typography as='span' size={2} weight='semiBold'>
+                  <Button variant='primary' size='sm' onClick={() => setEditingJob(true)}>
+                    <Typography as='span' size={2} weight='semiBold' color='white'>
                       수정
                     </Typography>
-                  </button>
+                  </Button>
                 </FieldActions>
               </>
             )}
@@ -218,13 +194,11 @@ const MyInfo = () => {
                       {fileName}
                     </Typography>
                   )} */}
-                  <button
+                  <Button
+                    variant='outline'
+                    size='sm'
                     disabled
-                    style={{
-                      ...pillStyle,
-                      background: theme.colors.primary[4],
-                      opacity: 0.5,
-                    }}
+                    style={{ opacity: 0.6 }}
                     onClick={() => setOpenPhotoModal(true)}
                   >
                     <Typography
@@ -235,13 +209,15 @@ const MyInfo = () => {
                     >
                       신청
                     </Typography>
-                  </button>
+                  </Button>
                 </FieldActions>
               </>
             ) : (
               <>
                 <FieldValue style={{ flex: '1', textAlign: 'right' }}>
-                  일반 사용자입니다.
+                  <Typography as='span' size={2} color={theme.colors.gray[10]}>
+                    (합격자 증명 신청이 가능합니다)
+                  </Typography>
                 </FieldValue>
                 <FieldActions>
                   {/* {fileName && (
@@ -249,11 +225,11 @@ const MyInfo = () => {
                       {fileName}
                     </Typography>
                   )} */}
-                  <button style={pillStyle} onClick={() => setOpenPhotoModal(true)}>
-                    <Typography as='span' size={2} weight='semiBold'>
+                  <Button variant='primary' size='sm' onClick={() => setOpenPhotoModal(true)}>
+                    <Typography as='span' size={2} weight='semiBold' color='white'>
                       신청
                     </Typography>
-                  </button>
+                  </Button>
                 </FieldActions>
               </>
             )}
@@ -296,16 +272,6 @@ const Footer = styled.div`
   justify-content: center;
   margin-top: ${({ theme }) => theme.space[8]};
 `;
-
-const pillStyle = {
-  borderRadius: '10px',
-  background: 'rgba(170,153,236,0.3)',
-  padding: '0 12px',
-  height: '32px',
-  display: 'inline-flex',
-  alignItems: 'center',
-  border: '0',
-};
 
 // 페이지 상단 헤더
 const MyPageHeader = styled.div`
