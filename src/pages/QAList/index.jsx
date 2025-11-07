@@ -36,7 +36,7 @@ export default function QAListPage() {
           <br />
           이 버튼을 눌러 나만의 면접 노트를
           <br />
-          만들 수 있습니다.
+          만들 수 있습니다. 면접 연습을 시작해보세요!
         </>
       ),
       placement: 'bottom-end',
