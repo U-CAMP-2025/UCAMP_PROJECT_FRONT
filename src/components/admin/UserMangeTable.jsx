@@ -148,12 +148,12 @@ export const UserManageTable = () => {
     { header: '이메일', key: 'email', width: '200px' },
     { header: '닉네임', key: 'nickName', width: '140px' },
     { header: '직무', key: 'job', width: '120px' },
-    {
-      header: '연습 상태',
-      render: (row) => <Typography size={2}>{row.simulationStatus || '-'}</Typography>,
-      width: '140px',
-      align: 'center',
-    },
+    // {
+    //   header: '연습 상태',
+    //   render: (row) => <Typography size={2}>{row.simulationStatus || '-'}</Typography>,
+    //   width: '140px',
+    //   align: 'center',
+    // },
     {
       header: '합격 여부',
       render: (row) => (
