@@ -317,6 +317,19 @@ export default function SimulationGO() {
     });
   };
 
+  // 종료 버튼 누를 시 api 호출
+  const handleStopAndNavigate = async () => {
+    try {
+      await axiosInstance.patch(`/simulation/${simulationId}/-1`);
+      console.log('stopSimulation API 호출 성공');
+    } catch (err) {
+      console.error('stopSimulation API 호출 실패:', err);
+    }
+
+    // PATCH 완료 후 다른 경로로 이동 (예: 결과 페이지)
+    navigate(`/simulation`);
+  };
+
   // ===== 5) 질문 녹음 =====
   const startAnswer = async () => {
     if (!isSessionStarted || isQuestionRecording) return;
@@ -395,15 +408,14 @@ export default function SimulationGO() {
               </S.QuestionCounter>
             </S.TopInfoBar>
             <S.SidebarButton
-              onClick={
-                isSessionStarted
-                  ? () => {
-                      // 아직 남은 질문이 있으면 경고 모달
-                      if (currentIdx < totalQuestions - 1) setEndConfirmOpen(true);
-                      else stopSession();
-                    }
-                  : startSession
-              }
+              onClick={() => {
+                if (isSessionStarted) {
+                  // 세션 중이면 확인 모달 열기
+                  setEndConfirmOpen(true);
+                } else {
+                  startSession();
+                }
+              }}
               $variant={isSessionStarted ? 'danger' : 'default'}
             >
               {isSessionStarted ? <StopIcon /> : <PlayIcon />}
@@ -493,10 +505,7 @@ export default function SimulationGO() {
         onOpenChange={setEndConfirmOpen}
         title='면접 종료'
         messages={['지금 종료하면 면접 연습 결과가 저장되지 않습니다.', '종료하시겠어요?']}
-        onConfirm={async () => {
-          await stopSession(); // 확인 → 진짜 종료
-          // stopSession 안에서 라우팅하므로 setEndConfirmOpen(false)는 생략 가능
-        }}
+        onConfirm={handleStopAndNavigate}
       />
       <ConfirmDialog
         open={leaveConfirmOpen}

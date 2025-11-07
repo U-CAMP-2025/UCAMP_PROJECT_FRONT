@@ -188,14 +188,16 @@ export const QADetail = () => {
           <Pre>{item.answer || '-'}</Pre>
         </QABox>
       ))}
-      <Button
-        type='button'
-        size='sm'
-        onClick={onPractice}
-        style={{ alignSelf: 'flex-end', padding: '0 16px' }}
-      >
-        연습 하기
-      </Button>
+      {me && (
+        <Button
+          type='button'
+          size='sm'
+          onClick={onPractice}
+          style={{ alignSelf: 'flex-end', padding: '0 16px' }}
+        >
+          연습 하기
+        </Button>
+      )}
     </Wrap>
   );
 };
