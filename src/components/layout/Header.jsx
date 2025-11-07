@@ -1,5 +1,5 @@
 import { getNoti, notiDel, notiDelAll, notiRead, notiReadAll } from '@api/notificationsAPIS';
-import { fetchUserRole, fetchUserStatus, patchUserStaus } from '@api/userAPIS';
+import { fetchUserRole, fetchUserStatus } from '@api/userAPIS';
 import Button from '@components/common/Button';
 import { Overlay, Content, Title, Description } from '@components/common/Dialog';
 import * as H from '@components/common/HeaderStyles';
@@ -12,7 +12,7 @@ import { ChevronDownIcon, PersonIcon, BellIcon } from '@radix-ui/react-icons';
 import { useAuthStore } from '@store/auth/useAuthStore';
 import theme from '@styles/theme';
 import { useState } from 'react';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import Joyride from 'react-joyride';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -160,16 +160,17 @@ export const Header = () => {
   };
   // ========================== 유저 가이드투어 ================================
 
-  const handleClickLogoButton = () => {
-    navigate('/');
+  const handleProtectedLink = (path) => {
+    // 면접 노트와 랭킹은 비로그인도 접근 가능
+    if (!isLogin && path !== '/qalist' && path !== '/rank') {
+      setLoginAlertOpen(true);
+      return;
+    }
+    navigate(path);
   };
 
-  const handleProtectedLink = (path) => {
-    if (isLogin) {
-      navigate(path);
-    } else {
-      setLoginAlertOpen(true); // 로그인 안 했으면 안내 모달
-    }
+  const handleClickLogoButton = () => {
+    navigate('/');
   };
 
   const handleClickLoginButton = () => {
@@ -220,7 +221,7 @@ export const Header = () => {
         </H.LeftSection>
         <H.Nav>
           <H.NavItem
-            onClick={() => navigate('/qalist')}
+            onClick={() => handleProtectedLink('/qalist')}
             $isActive={pathname === '/qalist'}
             id='tour-nav-qalist'
           >
@@ -244,7 +245,7 @@ export const Header = () => {
           </H.NavItem>
 
           <H.NavItem
-            onClick={() => navigate('/rank')}
+            onClick={() => handleProtectedLink('/rank')}
             $isActive={pathname === '/rank'}
             id='tour-nav-ranking'
           >
@@ -307,7 +308,7 @@ export const Header = () => {
                   // 예시: 클릭 시 읽음 처리
                   if (!item.read) {
                     notiRead(item.notiId)
-                      .then((response) => {
+                      .then(() => {
                         setNotifications((prev) =>
                           prev.map((n) => (n.notiId === item.notiId ? { ...n, read: true } : n)),
                         );
@@ -315,7 +316,7 @@ export const Header = () => {
                       .catch(() => setNotifications(null));
                   } else {
                     notiDel(item.notiId)
-                      .then((response) => {
+                      .then(() => {
                         setNotifications((prev) => prev.filter((n) => n.notiId !== item.notiId));
                       })
                       .catch(() => setNotifications(null));
@@ -324,13 +325,13 @@ export const Header = () => {
                 onMarkAllRead={() => {
                   if (unreadDerived !== 0) {
                     notiReadAll()
-                      .then((response) => {
+                      .then(() => {
                         setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
                       })
                       .catch(() => setNotifications(null));
                   } else {
                     notiDelAll()
-                      .then((response) => {
+                      .then(() => {
                         setNotifications([]);
                       })
                       .catch(() => setNotifications(null));
@@ -463,9 +464,25 @@ const KakaoButton = styled.button`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
+  width: 220px;
+  height: 44px;
+  border-radius: 8px;
+  background: #fee500;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
   img {
-    width: 150px;
+    width: 140px;
     height: auto;
+    display: block;
+  }
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.14);
+  }
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   }
 `;
