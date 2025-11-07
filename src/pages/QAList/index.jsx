@@ -50,11 +50,12 @@ export default function QAListPage() {
         setYourJob(res?.job?.jobId || null);
       });
 
-      // 튜토리얼 진행 조건
       fetchUserStatus().then((res) => {
-        // 상태 'NEW' && 헤더 튜토리얼 봤음
-        if (res?.status === 'NEW' && localStorage.getItem('seenHeaderTour') === 'true') {
-          // '신규 노트' 버튼이 렌더링될 시간
+        // 튜토리얼 진행 조건
+        const hasSeenHeaderTour = localStorage.getItem('seenHeaderTour') === 'true';
+        const hasNotSeenQAListTour = !localStorage.getItem('seenQAListTour');
+        // status가 new이면서 header의 투어를 봤고 qa 투어는 안 본 사람에게만 진행
+        if (res?.status === 'NEW' && hasSeenHeaderTour && hasNotSeenQAListTour) {
           setTimeout(() => {
             setRunQAListTour(true);
           }, 500);
@@ -70,14 +71,18 @@ export default function QAListPage() {
     if (finishedStatuses.includes(status) || action === 'close') {
       setRunQAListTour(false);
 
-      patchUserStaus('ACTIVE')
-        .then(() => {
-          console.log("QAList 튜토리얼 완료: 유저 상태 'ACTIVE' 업데이트");
-          localStorage.removeItem('seenHeaderTour');
-        })
-        .catch((err) => {
-          console.error('유저 상태 업데이트 실패:', err);
-        });
+      // 로컬에 저장
+      localStorage.setItem('seenQAListTour', 'true');
+      console.log('QAList 튜토리얼 완료');
+
+      // patchUserStaus('ACTIVE')
+      //   .then(() => {
+      //     console.log("QAList 튜토리얼 완료: 유저 상태 'ACTIVE' 업데이트");
+      //     localStorage.removeItem('seenHeaderTour');
+      //   })
+      //   .catch((err) => {
+      //     console.error('유저 상태 업데이트 실패:', err);
+      //   });
     }
   };
 
