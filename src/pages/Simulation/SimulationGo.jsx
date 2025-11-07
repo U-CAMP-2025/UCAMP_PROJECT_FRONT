@@ -504,7 +504,11 @@ export default function SimulationGO() {
         open={endConfirmOpen}
         onOpenChange={setEndConfirmOpen}
         title='면접 종료'
-        messages={['지금 종료하면 면접 연습 결과가 저장되지 않습니다.', '종료하시겠어요?']}
+        messages={[
+          '면접이 진행 중입니다.',
+          '지금 종료하면 면접 연습 결과가 저장되지 않습니다.',
+          '그래도 이동하시겠어요?',
+        ]}
         onConfirm={handleStopAndNavigate}
       />
       <ConfirmDialog
@@ -518,7 +522,8 @@ export default function SimulationGO() {
         }}
         title='페이지를 떠나시겠어요?'
         messages={[
-          '면접이 진행 중입니다. 지금 종료하면 면접 연습 결과가 저장되지 않습니다.',
+          '면접이 진행 중입니다.',
+          '지금 종료하면 면접 연습 결과가 저장되지 않습니다.',
           '그래도 이동하시겠어요?',
         ]}
         onConfirm={() => {

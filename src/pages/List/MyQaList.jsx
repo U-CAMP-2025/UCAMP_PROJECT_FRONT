@@ -13,7 +13,7 @@ export const myQaList = [
   {
     postId: 2,
     nickname: '댄싱다람쥐', // (내 닉네임)
-    OTHER_WRITER: '개발자K', // 💡 가져온 글 (북마크)
+    OTHER_WRITER: '개발자K', // 💡 가져온 글 (스크랩)
     job: ['웹개발', '백엔드 개발'],
     title: 'Java Spring 핵심 질문 50선',
     description: '객체지향과 설계 패턴 위주로 정리했습니다.',

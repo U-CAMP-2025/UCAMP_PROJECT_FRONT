@@ -4,7 +4,6 @@ import { Overlay, Content, Title, Description } from '@components/common/Dialog'
 import Tag, { TagGroup } from '@components/common/Tag';
 import Typography from '@components/common/Typography';
 import { BookmarkIcon } from '@components/common/icons';
-// 🧩 다이얼로그 관련 import
 import * as Dialog from '@radix-ui/react-dialog';
 import { Pencil1Icon, TrashIcon } from '@radix-ui/react-icons';
 import theme from '@styles/theme';
@@ -13,10 +12,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { QADetailSkeleton } from './QADetailSkeleton';
-
-// ✅ 너가 준 다이얼로그 파일
-
-// TODO: 유저 자신의 QA셋인 경우에만 삭제 아이콘 노출
 export const QADetail = () => {
   const params = useParams();
   const qaId = params.qaId;
@@ -109,7 +104,7 @@ export const QADetail = () => {
         <div>
           {!me && (
             <IconButton1
-              aria-label='북마크'
+              aria-label='스크랩'
               onClick={onCopy}
               title='현재 면접 노트를 나의 면접 노트로 스크랩합니다.'
             >
@@ -154,7 +149,7 @@ export const QADetail = () => {
             <Title>스크랩 완료</Title>
             <Description>
               스크랩되었습니다. <br />
-              '나의 노트' 페이지에서 마음껏 수정해보세요!
+              &apos;나의 노트&apos; 페이지에서 마음껏 수정해보세요!
             </Description>
             <ButtonRow>
               <Dialog.Close asChild>
