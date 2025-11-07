@@ -12,6 +12,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { QADetailSkeleton } from './QADetailSkeleton';
+
 // ✅ 너가 준 다이얼로그 파일
 
 // TODO: 유저 자신의 QA셋인 경우에만 삭제 아이콘 노출
@@ -54,7 +56,7 @@ export const QADetail = () => {
       .catch();
   };
 
-  if (!qaData) return null;
+  if (!qaData) return <QADetailSkeleton />;
   const {
     job = [],
     title,
@@ -195,7 +197,7 @@ export const QADetail = () => {
           onClick={onPractice}
           style={{ alignSelf: 'flex-end', padding: '0 16px' }}
         >
-          연습 하기
+          연습하기
         </Button>
       )}
     </Wrap>
