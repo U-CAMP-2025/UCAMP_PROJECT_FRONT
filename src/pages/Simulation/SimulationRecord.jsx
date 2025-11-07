@@ -57,15 +57,14 @@ export default function SimulationRecordPage() {
             {title}
           </Typography>
 
-          <InfoText size={3} muted>
-            최근 완료: {completedAt} &nbsp;|&nbsp; 반복 횟수: {count}회
+          <InfoText size={3}>
+            최근 완료: {completedAt} &nbsp;|&nbsp; 반복 횟수: <span>{count}</span>회
           </InfoText>
         </RecordItemLeft>
 
         <RecordItemRight>
           <ViewResultText>
-            <CheckCircledIcon width={16} height={16} />
-            확인하기 <CaretRightIcon width={16} height={16} />
+            <CaretRightIcon width={48} height={48} />
           </ViewResultText>
         </RecordItemRight>
       </RecordItemLink>
@@ -152,9 +151,12 @@ const StyledTabsTrigger = styled(Tabs.Trigger)`
   }
 `;
 const InfoText = styled(Typography).attrs({ size: 3 })`
-  color: ${({ theme }) => theme.colors.gray[8]};
+  color: ${({ theme }) => theme.colors.gray[11]};
   font-weight: 500;
   margin-top: ${({ theme }) => theme.space[1]};
+  span {
+    color: ${({ theme }) => theme.colors.primary[10]};
+  }
 `;
 
 const RecordItemRight = styled.div`
