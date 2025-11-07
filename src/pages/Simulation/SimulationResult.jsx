@@ -254,7 +254,7 @@ export default function SimulationResultPage() {
         open={saveConfirmOpen}
         onOpenChange={setSaveConfirmOpen}
         title='면접 결과 저장'
-        messages={['저장하면 현재 수정된 답변으로 결과가 덮어씌워집니다.', '저장하시겠어요?']}
+        messages={['저장하면 현재 나의 노트에 반영됩니다.', '저장하시겠어요?']}
         onConfirm={handleSaveConfirm}
       />
       <ErrorDialog

@@ -112,10 +112,10 @@ export const TimerPill = styled.div`
   font-weight: 700;
   min-width: 100px;
   text-align: center;
-  font-size: ${({ theme }) => theme.font.size[5]}; /* 💡 4 -> 5 (20px)로 키움 */
+  font-size: ${({ theme }) => theme.font.size[3]}; /* 💡 4 -> 5 (20px)로 키움 */
 `;
 
-export const QuestionCounter = styled(Typography).attrs({ size: 4, weight: 'medium' })`
+export const QuestionCounter = styled(Typography).attrs({ size: 3, weight: 'medium' })`
   color: ${({ theme }) => theme.colors.gray[1]};
   margin-left: auto;
 `;
@@ -156,7 +156,7 @@ export const LiveIndicator = styled(Typography).attrs({ size: 2, weight: 'bold' 
 // InterviewerImage -> InterviewerVideo (기존 InterviewerImage 스타일 재사용)
 export const InterviewerVideo = styled.div`
   position: relative; /* 오버레이 기준점 */
-  width: 100%;
+  width: 90%;
   aspect-ratio: 16 / 9;
   border-radius: ${({ theme }) => theme.radius.lg};
   background-color: ${({ theme }) => theme.colors.gray[3]};
@@ -256,6 +256,7 @@ export const VideoRecorderWrapper = styled.div`
 
 // 3. 스크립트 패널
 export const ScriptPanel = styled.div`
+  width: 90%;
   border: 1px solid ${({ theme }) => theme.colors.gray[4]};
   border-radius: ${({ theme }) => theme.radius.md};
   padding: ${({ theme }) => theme.space[5]};
