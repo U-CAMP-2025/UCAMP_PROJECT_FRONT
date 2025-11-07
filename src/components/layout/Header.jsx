@@ -27,6 +27,7 @@ export const Header = () => {
   const unreadDerived = notifications?.filter((n) => !n.read).length;
 
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const [loginAlertOpen, setLoginAlertOpen] = useState(false);
   const [welcomeModalOpen, setWelcomeModalOpen] = useState(false);
 
   const [userRole, setUserRole] = useState('USER');
@@ -163,6 +164,14 @@ export const Header = () => {
     navigate('/');
   };
 
+  const handleProtectedLink = (path) => {
+    if (isLogin) {
+      navigate(path);
+    } else {
+      setLoginAlertOpen(true); // 로그인 안 했으면 안내 모달
+    }
+  };
+
   const handleClickLoginButton = () => {
     setLoginDialogOpen(true);
   };
@@ -219,16 +228,16 @@ export const Header = () => {
           </H.NavItem>
 
           <H.NavItem
-            onClick={() => navigate('/myqa')}
-            $isActive={pathname === '/myqa'}
+            onClick={() => handleProtectedLink('/myqa')}
+            $isActive={pathname === 'myqa'}
             id='tour-nav-myqa'
           >
             나의 노트
           </H.NavItem>
 
           <H.NavItem
-            onClick={() => navigate('/simulation')}
-            $isActive={pathname.startsWith('/simulation')}
+            onClick={() => handleProtectedLink('/simulation')}
+            $isActive={pathname === 'simulation'}
             id='tour-nav-simulation'
           >
             면접 연습
@@ -368,27 +377,42 @@ export const Header = () => {
           </Content>
         </Dialog.Portal>
       </Dialog.Root>
+      <Dialog.Root open={loginAlertOpen} onOpenChange={setLoginAlertOpen}>
+        <Dialog.Portal>
+          <Overlay />
+          <Content style={{ maxWidth: '350px' }}>
+            <Title>🔒 로그인 필요</Title>
+            <Description>
+              로그인 후 이용 가능한 페이지입니다.
+              <br />
+              지금 로그인하고 서비스를 이용해보세요!
+            </Description>
+            <ButtonArea style={{ justifyContent: 'center', marginTop: '24px' }}>
+              <KakaoButton
+                type='button'
+                onClick={() => {
+                  window.location.href = import.meta.env.VITE_API_KAKAO_LOGIN;
+                }}
+              >
+                <img src='/images/kakao_login.png' alt='카카오 로그인' />
+              </KakaoButton>
+            </ButtonArea>
+          </Content>
+        </Dialog.Portal>
+      </Dialog.Root>
       <Joyride
-        // 튜토리얼 단계
         steps={tourSteps}
-        // 튜토리얼 실행 여부 (state와 연결)
         run={runTour}
-        // 튜토리얼 완료/스킵/닫기 시 호출될 함수
         callback={handleJoyrideCallback}
-        // '다음' 버튼 클릭 시 다음 단계로 자동 이동
         continuous={true}
-        // 진행률 표시 (예: 2/6)
         showProgress={false}
-        // '건너뛰기' 버튼 표시
         showSkipButton={true}
-        // 버튼 텍스트 한글화
         locale={{
           next: '다음',
           back: '이전',
           skip: '건너뛰기',
           last: '확인',
         }}
-        // 스타일 커스터마이징
         styles={{
           options: {
             primaryColor: theme.colors.primary[9],
@@ -431,4 +455,17 @@ const ModalButton = styled.button`
       }
     `;
   }}
+`;
+
+const KakaoButton = styled.button`
+  all: unset;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  img {
+    width: 150px;
+    height: auto;
+  }
 `;
