@@ -198,9 +198,9 @@ export const Header = () => {
     if (isLogin) {
       getNoti()
         .then((response) => {
-          setNotifications(response?.data ?? null);
+          setNotifications(response?.data ?? []);
         })
-        .catch(() => setNotifications(null));
+        .catch(() => setNotifications([]));
     }
   }, [isLogin]);
 
@@ -212,9 +212,9 @@ export const Header = () => {
             if (response?.data === null) {
               return;
             }
-            setNotifications((prevNotifications) => [...prevNotifications, response?.data ?? null]);
+            setNotifications((prevNotifications) => [...prevNotifications, response?.data ?? []]);
           })
-          .catch(() => setNotifications(null));
+          .catch(() => setNotifications([]));
       }, 10);
     }
   }, [alertTrigger]);
@@ -336,13 +336,13 @@ export const Header = () => {
                           prev.map((n) => (n.notiId === item.notiId ? { ...n, read: true } : n)),
                         );
                       })
-                      .catch(() => setNotifications(null));
+                      .catch(() => setNotifications([]));
                   } else {
                     notiDel(item.notiId)
                       .then(() => {
                         setNotifications((prev) => prev?.filter((n) => n.notiId !== item.notiId));
                       })
-                      .catch(() => setNotifications(null));
+                      .catch(() => setNotifications([]));
                   }
                 }}
                 onMarkAllRead={() => {
@@ -351,13 +351,13 @@ export const Header = () => {
                       .then(() => {
                         setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
                       })
-                      .catch(() => setNotifications(null));
+                      .catch(() => setNotifications([]));
                   } else {
                     notiDelAll()
                       .then(() => {
                         setNotifications([]);
                       })
-                      .catch(() => setNotifications(null));
+                      .catch(() => setNotifications([]));
                   }
                 }}
               />
