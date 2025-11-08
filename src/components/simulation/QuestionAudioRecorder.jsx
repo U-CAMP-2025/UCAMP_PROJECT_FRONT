@@ -125,15 +125,6 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
 
         // 로컬 프리뷰 URL (업로드 실패 시 폴백)
         const localPreviewUrl = URL.createObjectURL(blob);
-        // if (blob.size < 10_000) {
-        //   // 거의 무음 → 업로드 생략
-        //   recRef.current.reset();
-        //   recRef.current.destroy();
-        //   recRef.current = null;
-        //   cleanupStream();
-        //   setIsRecording(false);
-        //   return { url: null, qaId, qIdx };
-        // }
 
         if (!silent && (qaId || qIdx != null)) {
           try {
