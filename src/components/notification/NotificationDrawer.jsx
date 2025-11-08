@@ -14,6 +14,7 @@ import { useSSE } from './useSSE';
  *  - items: Array<{ notiId:number|string, content:string, type:'TRANSCRIPTION'|'REVIEW'|'CERTIFICATE'|string, read:boolean, createdAt:string }>
  *  - onItemClick?: (item) => void
  *  - onMarkAllRead?: () => void1
+ *
  */
 
 export default function NotificationDrawer({
