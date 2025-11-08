@@ -91,7 +91,7 @@ export default function SimulationResultPage() {
   };
 
   const handleSaveConfirm = () => {
-    const selected = qaList.filter((q, i) => isSelected(keyOf(i, q)));
+    const selected = qaList?.filter((q, i) => isSelected(keyOf(i, q)));
     if (selected.length === 0) {
       openAlert('저장할 항목을 선택해주세요.');
       setSaveConfirmOpen(false);

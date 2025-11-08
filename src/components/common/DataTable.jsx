@@ -152,7 +152,7 @@ export default function DataTable({
   };
   const toggleOne = (row, checked) => {
     row.__selected = checked;
-    const selected = rows.filter((r) => r.__selected).map(rowKey);
+    const selected = rows?.filter((r) => r.__selected).map(rowKey);
     onSelectionChange?.(selected);
   };
 
