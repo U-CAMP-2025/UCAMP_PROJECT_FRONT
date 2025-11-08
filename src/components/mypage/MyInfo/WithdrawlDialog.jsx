@@ -2,6 +2,7 @@ import { deleteUser } from '@api/authAPIS';
 import Button from '@components/common/Button';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useAuthStore } from '@store/auth/useAuthStore';
+import { useTutorialStore } from '@store/tutorial/useTutorialStore';
 import { useState } from 'react';
 import styled from 'styled-components';
 
@@ -9,6 +10,7 @@ export const WithdrawlDialog = ({ open, onOpenChange }) => {
   const { withdraw } = useAuthStore();
   const [confirmText, setConfirmText] = useState(''); // 입력 상태
   const [isValid, setIsValid] = useState(false);
+  const { setTutorial } = useTutorialStore();
   const handleClickCancelButton = () => {
     onOpenChange(false);
   };
@@ -22,6 +24,11 @@ export const WithdrawlDialog = ({ open, onOpenChange }) => {
     deleteUser()
       .then(() => {
         withdraw();
+        setTutorial({
+          seenHeaderTour: false,
+          seenSimTour: false,
+          seenQAListTour: false,
+        });
       })
       .then(() => {
         window.location.href = '/';
@@ -37,11 +44,6 @@ export const WithdrawlDialog = ({ open, onOpenChange }) => {
               <Dialog.Title asChild>
                 <Title>알림</Title>
               </Dialog.Title>
-              {/* <Dialog.Close asChild>
-                <CloseButton aria-label='닫기'>
-                  <Cross2Icon />
-                </CloseButton>
-              </Dialog.Close> */}
             </Header>
             <Body>
               <ContentText>

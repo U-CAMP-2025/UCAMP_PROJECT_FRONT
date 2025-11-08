@@ -1,3 +1,4 @@
+import { postLogout } from '@api/authAPIS';
 import {
   getNoti,
   getNotiLast,
@@ -6,7 +7,7 @@ import {
   notiRead,
   notiReadAll,
 } from '@api/notificationsAPIS';
-import { fetchUserRole, fetchUserStatus } from '@api/userAPIS';
+import { fetchUserRole, fetchUserStatus, patchUserStatus } from '@api/userAPIS';
 import Button from '@components/common/Button';
 import { Overlay, Content, Title, Description } from '@components/common/Dialog';
 import * as H from '@components/common/HeaderStyles';
@@ -17,6 +18,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { ChevronDownIcon, PersonIcon, BellIcon } from '@radix-ui/react-icons';
 import { useAuthStore } from '@store/auth/useAuthStore';
+import { useTutorialStore } from '@store/tutorial/useTutorialStore';
 import theme from '@styles/theme';
 import { useState } from 'react';
 import { useEffect } from 'react';
@@ -26,6 +28,8 @@ import styled from 'styled-components';
 
 export const Header = () => {
   const { isLogin, logout, user } = useAuthStore();
+  const { setTutorial } = useTutorialStore();
+  const { seenHeaderTour, setHeaderTour } = useTutorialStore();
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
@@ -113,21 +117,17 @@ export const Header = () => {
 
   useEffect(() => {
     if (isLogin) {
-      fetchUserStatus()
-        .then((response) => {
-          if (response?.status === 'NEW' && !localStorage.getItem('seenHeaderTour')) {
-            setWelcomeModalOpen(true); // 튜토리얼 모달 열기
-          }
-        })
-        .catch((err) => {
-          console.error('유저 상태 조회에 실패했습니다:', err);
-        });
+      fetchUserStatus().then((response) => {
+        if (response?.status === 'NEW' && !seenHeaderTour) {
+          setWelcomeModalOpen(true); // 튜토리얼 모달 열기
+        }
+      });
     }
-  }, [isLogin]);
+  }, []);
 
   const handleStartTutorial = () => {
     setWelcomeModalOpen(false);
-    localStorage.setItem('seenHeaderTour', true);
+    setHeaderTour(true);
     setTimeout(() => {
       setRunTour(true);
     }, 100);
@@ -135,35 +135,25 @@ export const Header = () => {
 
   const handleSkipAndClose = () => {
     setWelcomeModalOpen(false);
-    localStorage.setItem('seenHeaderTour', true);
+    setHeaderTour(true);
     setRunTour(false);
 
-    // // 튜토리얼을 보지 않았으므로 상태를 'ACTIVE'로 업데이트
-    // patchUserStaus('ACTIVE')
-    //   .then(() => {
-    //     console.log("튜토리얼 건너뜀: 유저 상태가 'ACTIVE'로 업데이트되었습니다.");
-    //   })
-    //   .catch((err) => {
-    //     console.error('유저 상태 업데이트에 실패했습니다:', err);
-    //   });
+    // 튜토리얼을 보지 않았으므로 상태를 'ACTIVE'로 업데이트
+    patchUserStatus('ACTIVE');
   };
 
   const handleJoyrideCallback = (data) => {
-    const { status, action } = data;
+    const { status, action, index } = data;
     const finishedStatuses = ['finished', 'skipped'];
 
     if (finishedStatuses.includes(status) || action === 'close') {
       setRunTour(false);
-      localStorage.setItem('seenHeaderTour', 'true');
+      setHeaderTour(true);
+      patchUserStatus('ACTIVE');
+    }
 
-      // // 서버에 유저 상태를 'ACTIVE'로 업데이트
-      // patchUserStaus('ACTIVE')
-      //   .then(() => {
-      //     console.log("튜토리얼 완료: 유저 상태가 'ACTIVE'로 업데이트되었습니다.");
-      //   })
-      //   .catch((err) => {
-      //     console.error('유저 상태 업데이트에 실패했습니다:', err);
-      //   });
+    if (index === tourSteps.length - 1 && action === 'next') {
+      navigate('/qalist');
     }
   };
   // ========================== 유저 가이드투어 ================================
@@ -186,7 +176,15 @@ export const Header = () => {
   };
 
   const handleClickLogout = () => {
-    logout();
+    postLogout().then(() => {
+      setTutorial({
+        seenHeaderTour: false,
+        seenSimTour: false,
+        seenQAListTour: false,
+      });
+      logout();
+    });
+
     window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/logout`;
   };
 

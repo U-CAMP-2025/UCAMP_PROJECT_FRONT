@@ -42,7 +42,6 @@ export const uploadCertificateImage = async (file) => {
 
 /**
  * DELETE: 회원 탈퇴
- * TODO: 인증 - userId를 어디서 받아오는지?
  * @param {number} userId
  * @returns {Promise<Object>} response
  */
@@ -81,7 +80,7 @@ export const fetchUserStatus = async () => {
  * Patch: 유저 status 업데이트
  * status: 신규면 NEW, 아니면 ACTIVE
  */
-export const patchUserStaus = async (status) => {
+export const patchUserStatus = async (status) => {
   const { data } = await axiosInstance.patch('/users/status', {
     status,
   });

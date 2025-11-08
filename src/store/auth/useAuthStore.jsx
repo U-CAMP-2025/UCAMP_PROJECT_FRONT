@@ -28,9 +28,6 @@ export const useAuthStore = create(
         } catch (e) {
           // ignore
         } finally {
-          localStorage.removeItem('seenHeaderTour');
-          localStorage.removeItem('seenQAListTour');
-          localStorage.removeItem('seenSimTour');
           set({ ...initialState });
         }
       },
