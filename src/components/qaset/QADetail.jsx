@@ -12,12 +12,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { QADetailSkeleton } from './QADetailSkeleton';
+
 export const QADetail = () => {
   const params = useParams();
   const qaId = params.qaId;
   const [qaData, setQaData] = useState(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
+  const [copyId, setCopyId] = useState(0);
   const navigate = useNavigate();
   const onPractice = () => {
     navigate('/simulation');
@@ -36,7 +38,8 @@ export const QADetail = () => {
 
   const onCopy = () => {
     copyPost(qaId)
-      .then(() => {
+      .then((response) => {
+        setCopyId(response?.data ?? 0);
         setIsCopyModalOpen(true);
       })
       .catch();
@@ -142,7 +145,15 @@ export const QADetail = () => {
           </Content>
         </Dialog.Portal>
       </Dialog.Root>
-      <Dialog.Root open={isCopyModalOpen} onOpenChange={setIsCopyModalOpen}>
+      <Dialog.Root
+        open={isCopyModalOpen}
+        onOpenChange={(open) => {
+          setIsCopyModalOpen(open);
+          if (!open) {
+            navigate(`/qa/${copyId}`);
+          }
+        }}
+      >
         <Dialog.Portal>
           <Overlay />
           <Content>
