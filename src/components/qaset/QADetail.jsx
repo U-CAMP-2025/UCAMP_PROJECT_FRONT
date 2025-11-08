@@ -12,6 +12,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { QADetailSkeleton } from './QADetailSkeleton';
+
 export const QADetail = () => {
   const params = useParams();
   const qaId = params.qaId;
@@ -62,6 +63,7 @@ export const QADetail = () => {
     qa = [],
     me,
     otherWriter,
+    bookCount = 0,
   } = qaData;
   const dateOnly = createAt ? createAt.split('T')[0] : '';
 
@@ -86,6 +88,18 @@ export const QADetail = () => {
             <Typography size={3} style={{ color: theme.colors.primary[11] }}>
               {dateOnly}
             </Typography>
+            {typeof bookCount === 'number' && (
+              <>
+                <Dot>•</Dot>
+                <Typography size={3} weight='semiBold' style={{ color: theme.colors.gray[12] }}>
+                  스크랩{' '}
+                  <Typography as='span' style={{ color: theme.colors.primary[11] }}>
+                    {bookCount}
+                  </Typography>
+                  개
+                </Typography>
+              </>
+            )}
             {isPassed && <PassBadge>합격자</PassBadge>}
             {!isPassed && <FailBadge>구직자</FailBadge>}
           </Meta>
