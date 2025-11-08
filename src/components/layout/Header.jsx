@@ -340,7 +340,7 @@ export const Header = () => {
                   } else {
                     notiDel(item.notiId)
                       .then(() => {
-                        setNotifications((prev) => prev.filter((n) => n.notiId !== item.notiId));
+                        setNotifications((prev) => prev?.filter((n) => n.notiId !== item.notiId));
                       })
                       .catch(() => setNotifications(null));
                   }

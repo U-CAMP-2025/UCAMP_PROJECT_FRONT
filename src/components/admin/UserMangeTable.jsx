@@ -66,9 +66,9 @@ export const UserManageTable = () => {
   const [open, setOpen] = useState(false);
   const [target, setTarget] = useState(null);
   const [filter, setFilter] = useState('all'); // 'all' | 'pending' | 'others'
-  const pendingCount = rows.filter((r) => r.certficate?.certe_status === 'PENDING').length;
+  const pendingCount = rows?.filter((r) => r.certficate?.certe_status === 'PENDING').length;
   const othersCount = rows.length - pendingCount;
-  const filteredRows = rows.filter((r) => {
+  const filteredRows = rows?.filter((r) => {
     if (filter === 'pending') return r.certficate?.certe_status === 'PENDING';
     if (filter === 'others') return r.certficate?.certe_status !== 'PENDING';
     return true; // all

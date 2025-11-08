@@ -25,7 +25,7 @@ export default function NotificationDrawer({
   onItemClick,
   onMarkAllRead,
 }) {
-  const unreadCount = items.filter((i) => !i.read).length;
+  const unreadCount = items?.filter((i) => !i.read).length;
   const sortedItems = [...items].sort((a, b) => {
     if (a.read !== b.read) return a.read ? 1 : -1;
     const at = new Date(a.createdAt).getTime();

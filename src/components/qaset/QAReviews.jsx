@@ -110,7 +110,7 @@ export const QAReviews = () => {
 
     try {
       await deleteReview(postId, pendingReviewId);
-      setReviews((prevReviews) => prevReviews.filter((r) => r.reviewId !== pendingReviewId));
+      setReviews((prevReviews) => prevReviews?.filter((r) => r.reviewId !== pendingReviewId));
       // setSuccessMsg('리뷰가 삭제되었습니다.');
       // setSuccessOpen(true);
     } catch (error) {
