@@ -365,22 +365,6 @@ const MainHeading2 = styled.h1`
   }
 `;
 
-const SubHeading = styled.h2`
-  font-size: 32px;
-  font-weight: 700;
-  color: white;
-  margin: 0 0 32px 0;
-  line-height: 1.4;
-
-  @media (max-width: 968px) {
-    font-size: 24px;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 20px;
-  }
-`;
-
 const Description = styled.p`
   font-size: 20px;
   color: rgba(255, 255, 255, 0.9);
@@ -389,16 +373,6 @@ const Description = styled.p`
 
   @media (max-width: 480px) {
     font-size: 18px;
-  }
-`;
-
-const CtaText = styled.p`
-  font-size: 18px;
-  color: rgba(255, 255, 255, 0.85);
-  margin: 0 0 32px 0;
-
-  @media (max-width: 480px) {
-    font-size: 16px;
   }
 `;
 
@@ -441,17 +415,6 @@ const PrimaryButton = styled(Button)`
   }
 `;
 
-const SecondaryButton = styled(Button)`
-  background: transparent;
-  color: white;
-  border: 2px solid white;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-2px);
-  }
-`;
-
 const CardsWrapper = styled.div`
   position: relative;
   z-index: 0;
@@ -483,7 +446,6 @@ const Card = styled.div`
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   width: 240px;
   height: 180px;
-  align-item: center;
   @media (max-width: 968px) {
     position: absolute;
     max-width: 100%;
@@ -532,12 +494,6 @@ const CardDescription = styled.p`
   line-height: 1.6;
 `;
 
-const Section = styled.section`
-  padding: 80px 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-`;
-
 const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
@@ -564,27 +520,6 @@ const Container2 = styled.div`
   }
 `;
 
-const Title = styled.h1`
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin-bottom: 16px;
-
-  @media (max-width: 768px) {
-    font-size: 2rem;
-  }
-`;
-
-const Subtitle = styled.p`
-  font-size: 1.1rem;
-  color: #666;
-  margin-bottom: 60px;
-
-  @media (max-width: 768px) {
-    font-size: 1rem;
-  }
-`;
-
 const AvatarWrapper = styled.div`
   width: 100px;
   height: 100px;
@@ -607,17 +542,6 @@ const Title2 = styled.h1`
     font-size: 1.6rem;
     margin-bottom: 24px;
     text-align: center;
-  }
-`;
-
-const Subtitle2 = styled.p`
-  font-size: 1.1rem;
-  color: #777;
-  margin-bottom: 20px;
-
-  @media (max-width: 768px) {
-    font-size: 1rem;
-    margin-bottom: 60px;
   }
 `;
 
@@ -685,7 +609,6 @@ const CardDescription2 = styled.p`
   color: #444;
   line-height: 1.7;
 `;
-//
 
 const SliderWrapper = styled.div`
   position: relative;
@@ -830,7 +753,7 @@ const ArrowButton2 = styled.button`
     stroke-width: 2;
   }
 `;
-//////////////////////
+
 const ContainerR = styled.div`
   max-width: 800px;
   margin: 0 auto;
@@ -896,11 +819,6 @@ const Crown = styled.div`
   position: absolute;
   top: -30px;
   font-size: 24px;
-`;
-
-const AvatarWrapperR = styled.div`
-  position: relative;
-  margin-bottom: 12px;
 `;
 
 const Avatar = styled.div`
@@ -971,14 +889,6 @@ const Pedestal = styled.div`
   font-weight: 700;
   color: #999;
 `;
-// const Container2 = styled.div`
-//   display: flex;
-//   justify-content: center;
-//   align-items: center;
-//   padding: 40px 20px;
-//   background: linear-gradient(135deg, #4a9fe5 0%, #5bc5ba 100%);
-//   min-height: 200px;
-// `;
 
 const CTASection = styled.div`
   width: 80%;
@@ -1145,13 +1055,6 @@ const cardData = [
     ],
   },
 ];
-
-const SubNote = styled.p`
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.45);
-  margin: 4px 0 0 12px;
-  line-height: 1.2;
-`;
 
 const VideoWrapper = styled.div`
   border-radius: 20px;
