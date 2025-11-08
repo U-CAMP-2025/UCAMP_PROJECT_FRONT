@@ -20,7 +20,7 @@ import {
 import * as Accordion from '@radix-ui/react-accordion';
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import { CheckIcon, PlusIcon } from '@radix-ui/react-icons';
-import { React, useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -32,6 +32,8 @@ export default function QACreatePage() {
   const [alertMessage, setAlertMessage] = useState('');
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertOnClose, setAlertOnClose] = useState(null);
+
+  const jobSectionRef = useRef(null);
 
   const methods = useForm({
     defaultValues: {
@@ -105,6 +107,15 @@ export default function QACreatePage() {
       .catch();
   };
 
+  const onInvalid = (errors) => {
+    if (errors.jobIds && jobSectionRef.current) {
+      jobSectionRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }
+  };
+
   const status = watch('status');
   const handleStatusChange = (newStatus) => {
     setValue('status', newStatus);
@@ -155,9 +166,9 @@ export default function QACreatePage() {
         <SettingsBox>
           <FormProvider {...methods}>
             <FormWrapper>
-              <form onSubmit={handleSubmit(onSubmit)}>
+              <form onSubmit={handleSubmit(onSubmit, onInvalid)}>
                 {/* 1. 직무 선택 */}
-                <Section>
+                <Section ref={jobSectionRef}>
                   <SectionTitle>관련 직무 선택 (최대 3개)</SectionTitle>
                   <JobSelector
                     value={selectedJobIds}
