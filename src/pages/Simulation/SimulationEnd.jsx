@@ -41,20 +41,20 @@ export default function SimulationEndPage() {
 
         // 2) 결과 준비까지 폴링 (최대 20초, 400ms 간격)
         const deadline = Date.now() + 20_000;
-        while (!cancelled && Date.now() < deadline) {
-          const res = await fetchSimulationResult(simulationId, { params: { t: Date.now() } }); // 캐시 버스터
-          const qaList = res?.data?.post?.qaList ?? [];
-          if (isReady(qaList)) {
-            if (!cancelled) {
-              navigate(`/simulation/${simulationId}/result`, {
-                state: { initialBlob },
-                replace: true,
-              });
-            }
-            return;
+        // while (!cancelled && Date.now() < deadline) {
+        const res = await fetchSimulationResult(simulationId, { params: { t: Date.now() } }); // 캐시 버스터
+        const qaList = res?.data?.post?.qaList ?? [];
+        if (isReady(qaList)) {
+          if (!cancelled) {
+            navigate(`/simulation/${simulationId}/result`, {
+              state: { initialBlob },
+              replace: true,
+            });
           }
-          // await new Promise((r) => setTimeout(r, 400));
+          return;
         }
+        // await new Promise((r) => setTimeout(r, 400));
+        // }
 
         // 타임아웃: 부분 완료라도 결과 페이지로 이동
         if (!cancelled) {
