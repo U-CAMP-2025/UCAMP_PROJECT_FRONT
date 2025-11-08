@@ -1,6 +1,5 @@
 import { axiosInstance } from '@api/axios';
 import { fetchSimulationRecords } from '@api/simulationAPIS';
-import { fetchUserStatus, patchUserStaus } from '@api/userAPIS';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import { CaretDownIcon, CheckIcon } from '@radix-ui/react-icons';
@@ -8,6 +7,7 @@ import * as RadioGroup from '@radix-ui/react-radio-group';
 import * as Select from '@radix-ui/react-select';
 import * as Tabs from '@radix-ui/react-tabs';
 import { useAuthStore } from '@store/auth/useAuthStore';
+import { useTutorialStore } from '@store/tutorial/useTutorialStore';
 import theme from '@styles/theme';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useForm, FormProvider, Controller } from 'react-hook-form';
@@ -18,13 +18,16 @@ import styled from 'styled-components';
 // --- [컴포넌트 로직] ---
 
 export default function SimulationPresetPage() {
+  const { seenSimTour, setSimTour } = useTutorialStore();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [questionSets, setQuestionSets] = useState([]);
-  const [interviewers, setInterviewers] = useState([]);
+  const [, setInterviewers] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const { isLogin } = useAuthStore();
+
+  const MODEL_COUNT = 6; // 면접관 모델 수
 
   // ================== 면접 연습 가이드투어 ========================
   const [runSimTour, setRunSimTour] = useState(false);
@@ -88,26 +91,13 @@ export default function SimulationPresetPage() {
 
   useEffect(() => {
     if (isLogin) {
-      const hasSeenHeaderTour = localStorage.getItem('seenHeaderTour') === 'true';
-      const hasSeenQAListTour = localStorage.getItem('seenQAListTour') === 'true';
-      const hasNotSeenSimTour = !localStorage.getItem('seenSimTour');
-
-      if (hasSeenHeaderTour && hasSeenQAListTour && hasNotSeenSimTour) {
-        Promise.all([fetchUserStatus(), fetchSimulationRecords()])
-          .then(([statusRes, recordsRes]) => {
-            const isNewUser = statusRes?.status === 'NEW';
-            const recordCount = recordsRes?.data?.length ?? 0;
-
-            if (isNewUser && recordCount === 0) {
-              setTimeout(() => {
-                setRunSimTour(true);
-              }, 500);
-            }
-          })
-          .catch((err) => {
-            console.error('튜토리얼 조건 확인 중 오류: ', err);
-          });
-      }
+      fetchSimulationRecords().then((response) => {
+        if (response?.data?.length === 0 && !seenSimTour) {
+          setTimeout(() => {
+            setRunSimTour(true);
+          }, 500);
+        }
+      });
     }
   }, [isLogin]);
 
@@ -117,18 +107,7 @@ export default function SimulationPresetPage() {
 
     if (finishedStatuses.includes(status) || action === 'close') {
       setRunSimTour(false);
-      localStorage.setItem('seenSimTour', 'true');
-
-      patchUserStaus('ACTIVE')
-        .then(() => {
-          console.log('최종 튜토리얼 완료: 유저 상태 active 업데이트');
-          localStorage.removeItem('seenHeaderTour');
-          localStorage.removeItem('seenQAListTour');
-          localStorage.removeItem('seenSimTour');
-        })
-        .catch((err) => {
-          console.error('유저 상태 업데이트 실패: ', err);
-        });
+      setSimTour(true);
     }
   };
   // ================== 가이드투어 종료 =========================
@@ -194,7 +173,7 @@ export default function SimulationPresetPage() {
     const simulationRandom = formData.questionOrder === 'random' ? 'Y' : 'N';
     const postId = Number(formData.selectedSetId) || formData.selectedSetId;
     // const interviewerId = Number(formData.selectedInterviewerId) || formData.selectedInterviewerId;
-    const interviewerId = Math.floor(Math.random() * 10) + 1;
+    const interviewerId = Math.floor(Math.random() * MODEL_COUNT) + 1;
 
     setSubmitting(true);
     try {

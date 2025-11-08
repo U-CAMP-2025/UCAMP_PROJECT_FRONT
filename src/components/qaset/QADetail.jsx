@@ -12,12 +12,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { QADetailSkeleton } from './QADetailSkeleton';
+
 export const QADetail = () => {
   const params = useParams();
   const qaId = params.qaId;
   const [qaData, setQaData] = useState(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
+  const [copyId, setCopyId] = useState(0);
   const navigate = useNavigate();
   const onPractice = () => {
     navigate('/simulation');
@@ -36,7 +38,8 @@ export const QADetail = () => {
 
   const onCopy = () => {
     copyPost(qaId)
-      .then(() => {
+      .then((response) => {
+        setCopyId(response?.data ?? 0);
         setIsCopyModalOpen(true);
       })
       .catch();
@@ -62,6 +65,7 @@ export const QADetail = () => {
     qa = [],
     me,
     otherWriter,
+    bookCount = 0,
   } = qaData;
   const dateOnly = createAt ? createAt.split('T')[0] : '';
 
@@ -86,6 +90,18 @@ export const QADetail = () => {
             <Typography size={3} style={{ color: theme.colors.primary[11] }}>
               {dateOnly}
             </Typography>
+            {typeof bookCount === 'number' && (
+              <>
+                <Dot>•</Dot>
+                <Typography size={3} weight='semiBold' style={{ color: theme.colors.gray[12] }}>
+                  스크랩{' '}
+                  <Typography as='span' style={{ color: theme.colors.primary[11] }}>
+                    {bookCount}
+                  </Typography>
+                  개
+                </Typography>
+              </>
+            )}
             {isPassed && <PassBadge>합격자</PassBadge>}
             {!isPassed && <FailBadge>구직자</FailBadge>}
           </Meta>
@@ -142,7 +158,15 @@ export const QADetail = () => {
           </Content>
         </Dialog.Portal>
       </Dialog.Root>
-      <Dialog.Root open={isCopyModalOpen} onOpenChange={setIsCopyModalOpen}>
+      <Dialog.Root
+        open={isCopyModalOpen}
+        onOpenChange={(open) => {
+          setIsCopyModalOpen(open);
+          if (!open) {
+            navigate(`/qa/${copyId}`);
+          }
+        }}
+      >
         <Dialog.Portal>
           <Overlay />
           <Content>

@@ -5,6 +5,7 @@ import WarnDialog from '@components/common/WarnDialog';
 import { PageContainer } from '@components/layout/PageContainer';
 import {
   DndContext,
+  DragOverlay,
   closestCenter,
   KeyboardSensor,
   PointerSensor,
@@ -19,7 +20,7 @@ import {
 import * as Accordion from '@radix-ui/react-accordion';
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import { CheckIcon, PlusIcon } from '@radix-ui/react-icons';
-import { React, useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -31,6 +32,8 @@ export default function QACreatePage() {
   const [alertMessage, setAlertMessage] = useState('');
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertOnClose, setAlertOnClose] = useState(null);
+
+  const jobSectionRef = useRef(null);
 
   const methods = useForm({
     defaultValues: {
@@ -67,7 +70,7 @@ export default function QACreatePage() {
 
   useEffect(() => {
     countPost().then((response) => {
-      if (response?.data >= 5) {
+      if (response?.data >= 10) {
         openAlert('면접 노트는 최대 10개까지 작성할 수 있습니다.', () => {
           navigate(-1);
         });
@@ -81,6 +84,7 @@ export default function QACreatePage() {
   });
 
   const [openItems, setOpenItems] = useState(['item-0']);
+  const [activeId, setActiveId] = useState(null);
 
   const handleAddSet = () => {
     if (fields.length >= 10) {
@@ -94,12 +98,22 @@ export default function QACreatePage() {
   };
 
   const selectedJobIds = watch('jobIds');
+  const watchedQaSets = watch('qaSets');
   const onSubmit = (data) => {
     createPost(data)
       .then((response) => {
         navigate(`/qa/${response?.data}`);
       })
       .catch();
+  };
+
+  const onInvalid = (errors) => {
+    if (errors.jobIds && jobSectionRef.current) {
+      jobSectionRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }
   };
 
   const status = watch('status');
@@ -115,7 +129,13 @@ export default function QACreatePage() {
     }),
   );
 
-  // 💡 dnd-kit 드래그 종료 핸들러
+  const onDragStart = (event) => {
+    const { active } = event;
+    if (active?.id) {
+      setActiveId(active.id);
+    }
+  };
+
   const onDragEnd = (event) => {
     const { active, over } = event;
 
@@ -127,6 +147,12 @@ export default function QACreatePage() {
         move(oldIndex, newIndex);
       }
     }
+
+    setActiveId(null);
+  };
+
+  const onDragCancel = () => {
+    setActiveId(null);
   };
 
   return (
@@ -140,9 +166,9 @@ export default function QACreatePage() {
         <SettingsBox>
           <FormProvider {...methods}>
             <FormWrapper>
-              <form onSubmit={handleSubmit(onSubmit)}>
+              <form onSubmit={handleSubmit(onSubmit, onInvalid)}>
                 {/* 1. 직무 선택 */}
-                <Section>
+                <Section ref={jobSectionRef}>
                   <SectionTitle>관련 직무 선택 (최대 3개)</SectionTitle>
                   <JobSelector
                     value={selectedJobIds}
@@ -204,7 +230,9 @@ export default function QACreatePage() {
                   <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
+                    onDragStart={onDragStart}
                     onDragEnd={onDragEnd}
+                    onDragCancel={onDragCancel}
                   >
                     <SortableContext
                       items={fields.map((field) => field.id)}
@@ -231,6 +259,24 @@ export default function QACreatePage() {
                         </QASetListContainer>
                       </Accordion.Root>
                     </SortableContext>
+                    <DragOverlay>
+                      {activeId
+                        ? (() => {
+                            const activeIndex = fields.findIndex((field) => field.id === activeId);
+                            if (activeIndex === -1) return null;
+
+                            const activeQuestion =
+                              watchedQaSets?.[activeIndex]?.question?.trim() ?? '';
+
+                            return (
+                              <OverlayWrapper>
+                                <OverlayBadge>질문 {activeIndex + 1}</OverlayBadge>
+                                <OverlayQuestion>{activeQuestion}</OverlayQuestion>
+                              </OverlayWrapper>
+                            );
+                          })()
+                        : null}
+                    </DragOverlay>
                   </DndContext>
                   <AddSetButton type='button' onClick={handleAddSet}>
                     <PlusIcon width={30} height={30} />
@@ -462,4 +508,41 @@ const Divider = styled.hr`
   border: 0;
   border-top: 1px solid ${({ theme }) => theme.colors.gray[5]};
   margin: ${({ theme }) => theme.space[10]} 0;
+`;
+
+const OverlayWrapper = styled.div`
+  transform: none !important;
+  padding: ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[4]};
+  border-radius: ${({ theme }) => theme.radius.sm};
+  box-shadow: ${({ theme }) => theme.shadow.md};
+  background-color: #fff;
+  border: 1px solid ${({ theme }) => theme.colors.gray[4]};
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[2]};
+  min-width: 260px;
+  max-width: 560px;
+  box-sizing: border-box;
+  pointer-events: none;
+`;
+
+const OverlayBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: ${({ theme }) => theme.font.size[1]};
+  font-weight: ${({ theme }) => theme.font.weight.medium};
+  color: ${({ theme }) => theme.colors.primary[11]};
+  background-color: ${({ theme }) => theme.colors.primary[2]};
+  width: fit-content;
+`;
+
+const OverlayQuestion = styled.div`
+  font-size: ${({ theme }) => theme.font.size[3]};
+  font-weight: ${({ theme }) => theme.font.weight.semiBold};
+  color: ${({ theme }) => theme.colors.gray[12]};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;

@@ -341,6 +341,10 @@ export default function SimulationGO() {
   const finishAnswer = async () => {
     if (!audioRef.current?.finish) return;
     await audioRef.current.finish();
+    if (currentIdx >= totalQuestions - 1) {
+      stopSession();
+      return;
+    }
     goNextQuestionGuarded();
   };
 
@@ -357,6 +361,10 @@ export default function SimulationGO() {
   const handleRecordingChange = (rec) => setIsQuestionRecording(rec);
 
   const handleAutoFinish = (qaId, url) => {
+    if (currentIdx >= totalQuestions - 1) {
+      stopSession();
+      return;
+    }
     goNextQuestionGuarded();
   };
 
@@ -391,7 +399,7 @@ export default function SimulationGO() {
       <S.MainContentWrapper>
         {!!interviewerId && isSessionStarted && currentQuestion && (
           <TextToSpeech
-            voiceModel={VoiceModel[(parseInt(interviewerId, 10) || interviewerId) - 1]}
+            voiceModel={VoiceModel[((Number(interviewerId) || 1) - 1) % VoiceModel.length]}
             currentQuestion={currentQuestion}
             enabled={isSessionStarted}
             onSpeakingChange={setTtsSpeaking}

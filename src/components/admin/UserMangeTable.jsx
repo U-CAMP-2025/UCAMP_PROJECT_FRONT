@@ -115,6 +115,8 @@ export const UserManageTable = () => {
         setNumber(data.number ?? 0);
       } catch (e) {
         console.error('유저 데이터 로드 실패:', e);
+      } finally {
+        setLoading(false);
       }
     };
     loadData();
@@ -247,7 +249,7 @@ export const UserManageTable = () => {
         }}
       />
 
-      <DataTable columns={columns} rows={filteredRows} rowKey={(r) => r.id} />
+      <DataTable loading={loading} columns={columns} rows={filteredRows} rowKey={(r) => r.id} />
       <PaginationBar>
         <span>{`전체: ${totalElements}개`}</span>
         <button disabled={number <= 0 || loading} onClick={() => setPage(0)}>

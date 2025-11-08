@@ -1,16 +1,14 @@
 import Typography from '@components/common/Typography';
-// 💡 dnd-kit 임포트
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import * as Accordion from '@radix-ui/react-accordion';
-import { Pencil1Icon, TrashIcon, CaretDownIcon, DragHandleDots2Icon } from '@radix-ui/react-icons';
+import { TrashIcon, CaretDownIcon, DragHandleDots2Icon } from '@radix-ui/react-icons';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import styled, { keyframes } from 'styled-components';
 
 // --- 스타일 정의 ---
 
-// 💡 FormItemContainer에 transform, transition 추가 (dnd-kit용)
 export const FormItemContainer = styled(Accordion.Item)`
   background-color: white;
   border: 1px solid ${({ theme }) => theme.colors.gray[5]};
@@ -18,12 +16,10 @@ export const FormItemContainer = styled(Accordion.Item)`
   overflow: hidden;
   box-shadow: ${({ theme }) => theme.shadow.sm};
 
-  /* 💡 dnd-kit이 아이템을 움직일 때 사용할 스타일 */
   transform: ${({ style }) =>
     style?.transform ? CSS.Transform.toString(style.transform) : 'none'};
   transition: ${({ style }) => style?.transition || 'none'};
 
-  /* 💡 드래그 중일 때의 스타일 (그림자 강조) */
   &[data-dragging='true'] {
     box-shadow: ${({ theme }) => theme.shadow.lg};
     z-index: 10;
@@ -33,7 +29,10 @@ export const FormItemContainer = styled(Accordion.Item)`
 export const FormHeader = styled(Accordion.Header)`
   display: flex;
   align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
   width: 100%;
+  padding-right: ${({ theme }) => theme.space[2]};
+  box-sizing: border-box;
 `;
 
 export const DragHandle = styled.button`
@@ -56,20 +55,20 @@ export const DragHandle = styled.button`
 
 export const AccordionTriggerStyled = styled(Accordion.Trigger)`
   all: unset;
-  flex-grow: 1;
+  flex: 1;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[4]};
+  justify-content: space-between;
+  padding: ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[3]};
   cursor: pointer;
-  border-bottom: 1px solid transparent;
-
-  &[data-state='open'] {
-    border-bottom-color: ${({ theme }) => theme.colors.gray[4]};
+  border-radius: ${({ theme }) => theme.radius.sm};
+  transition: background-color 0.15s ease;
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.gray[2]};
   }
   &:focus {
     outline: none;
-    box-shadow: inset 0 0 0 2px ${({ theme }) => theme.colors.primary[6]};
+    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary[6]};
   }
 `;
 
@@ -100,32 +99,28 @@ export const QuestionTitleText = styled(Typography).attrs({ size: 3, weight: 'se
   max-width: 300px;
 `;
 
-export const ControlIconGroup = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.space[2]};
-`;
-
 const BaseIconButton = styled.button`
   all: unset;
   cursor: pointer;
-  padding: ${({ theme }) => theme.space[1]};
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: ${({ theme }) => theme.radius.sm};
-  color: ${({ theme }) => theme.colors.gray[10]};
-
+  color: ${({ theme }) => theme.colors.gray[9]};
+  flex-shrink: 0;
   &:hover {
     background-color: ${({ theme }) => theme.colors.gray[3]};
-    color: ${({ theme }) => theme.colors.gray[11]};
+    color: ${({ theme }) => theme.colors.gray[12]};
   }
 `;
-export const EditButton = styled(BaseIconButton)``;
 export const DeleteButton = styled(BaseIconButton)``;
 
 export const CaretIcon = styled(CaretDownIcon)`
-  color: ${({ theme }) => theme.colors.gray[8]};
-  transition: transform 300ms cubic-bezier(0.87, 0, 0.13, 1);
-
-  ${AccordionTriggerStyled}[data-state='open'] & {
+  color: ${({ theme }) => theme.colors.gray[10]};
+  transition: transform 200ms ease;
+  [data-state='open'] & {
     transform: rotate(-180deg);
   }
 `;
@@ -221,26 +216,24 @@ export const QAUpdateInput = ({ id, index, onDelete }) => {
       data-dragging={isDragging}
     >
       <FormHeader>
-        {/* 💡 드래그 핸들에 listeners와 attributes 적용 */}
+        {/* 드래그 핸들 */}
         <DragHandle type='button' {...attributes} {...listeners} title='드래그하여 순서 변경'>
-          <DragHandleDots2Icon width={20} height={20} />
+          <DragHandleDots2Icon width={18} height={18} />
         </DragHandle>
 
-        <AccordionTriggerStyled asChild>
-          <div className='accordion-header'>
-            <HeaderLeft>
-              <QuestionNumberBadge>{index + 1}</QuestionNumberBadge>
-              <QuestionTitleText>{currentQuestion || `질문 ${index + 1}`}</QuestionTitleText>
-            </HeaderLeft>
-
-            <ControlIconGroup>
-              <DeleteButton type='button' title='삭제' onClick={onDelete}>
-                <TrashIcon width={20} height={20} />
-              </DeleteButton>
-              <CaretIcon aria-hidden />
-            </ControlIconGroup>
-          </div>
+        {/* 접기/펼치기 트리거: 질문 번호 + 제목 + 화살표 */}
+        <AccordionTriggerStyled>
+          <HeaderLeft>
+            <QuestionNumberBadge>{index + 1}</QuestionNumberBadge>
+            <QuestionTitleText>{currentQuestion}</QuestionTitleText>
+          </HeaderLeft>
+          <CaretIcon aria-hidden width={20} height={20} />
         </AccordionTriggerStyled>
+
+        {/* 휴지통 아이콘: 트리거 밖, 우측 정렬 */}
+        <DeleteButton type='button' title='삭제' onClick={onDelete} aria-label='질문 삭제'>
+          <TrashIcon width={20} height={20} />
+        </DeleteButton>
       </FormHeader>
 
       <FormContent>
