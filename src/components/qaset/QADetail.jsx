@@ -6,6 +6,7 @@ import Typography from '@components/common/Typography';
 import { BookmarkIcon } from '@components/common/icons';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Pencil1Icon, TrashIcon } from '@radix-ui/react-icons';
+import { useAuthStore } from '@store/auth/useAuthStore';
 import theme from '@styles/theme';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -21,6 +22,7 @@ export const QADetail = () => {
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const [copyId, setCopyId] = useState(0);
   const navigate = useNavigate();
+  const { isLogin } = useAuthStore();
   const onPractice = () => {
     navigate('/simulation');
   };
@@ -34,6 +36,14 @@ export const QADetail = () => {
 
   const onUpdate = () => {
     navigate('/qa/update', { state: { qaId } });
+  };
+
+  const handleCardClick = (userId) => {
+    if (isLogin) {
+      navigate(`/user/${userId}`);
+    } else {
+      navigate('/login');
+    }
   };
 
   const onCopy = () => {
@@ -57,6 +67,7 @@ export const QADetail = () => {
   if (!qaData) return <QADetailSkeleton />;
   const {
     job = [],
+    userId,
     title,
     nickname,
     description,
@@ -80,7 +91,11 @@ export const QADetail = () => {
             <Typography size={3} weight='semiBold' style={{ color: theme.colors.gray[12] }}>
               만든 유저
             </Typography>
-            <Typography size={3} style={{ color: theme.colors.gray[12] }}>
+            <Typography
+              size={3}
+              style={{ color: theme.colors.gray[12] }}
+              onClick={() => handleCardClick(userId)}
+            >
               {nickname}
             </Typography>
             <Dot>•</Dot>

@@ -1,9 +1,9 @@
 import { bookmark, practice } from '@api/rankAPIS';
-import Typography from '@components/common/Typography';
+// removed unused imports
 import { Header } from '@components/layout/Header';
+import { RankCardSkeleton } from '@components/qaset/SkeletonRankCard';
 import RankingTable from '@components/rank/RankList';
-import { date } from '@elevenlabs/elevenlabs-js/core/schemas';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
 
 const Container = styled.div`
@@ -72,19 +72,29 @@ const TabButton = styled.button`
       }
     `}
 `;
+const SkeletonGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: ${({ theme }) => theme.space[6]};
+  width: 95%;
+  margin: 0 auto;
+`;
+
 const TABS = {
   WEEKPRACTICE: '주간연습횟수',
   MONTHPRACTICE: '월간연습횟수',
   BOOKMARKS: '스크랩수',
 };
 
-const MonthlyRanking = () => {
+const RankPage = () => {
   // 기본 탭을 주간 연습으로 설정
   const [activeTab, setActiveTab] = useState(TABS.WEEKPRACTICE);
   const [dateRange, setDateRange] = useState('thisweek');
   const [RankList, setRankList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         let resp;
         if (activeTab === TABS.WEEKPRACTICE || activeTab === TABS.MONTHPRACTICE) {
@@ -104,6 +114,8 @@ const MonthlyRanking = () => {
       } catch (e) {
         console.error('API 호출 에러:', e);
         setRankList([]);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -149,16 +161,25 @@ const MonthlyRanking = () => {
         </TabContainer>
 
         {/* 탭별 테이블 표시 */}
-        {activeTab === TABS.WEEKPRACTICE && (
-          <RankingTable data={RankList} type='practice' value={dateRange} />
+        {isLoading ? (
+          <SkeletonGrid>
+            {/* RankCardSkeleton already renders 6 skeleton rows to mimic the table */}
+            <RankCardSkeleton />
+          </SkeletonGrid>
+        ) : (
+          <>
+            {activeTab === TABS.WEEKPRACTICE && (
+              <RankingTable data={RankList} type='practice' value={dateRange} />
+            )}
+            {activeTab === TABS.MONTHPRACTICE && (
+              <RankingTable data={RankList} type='practice' value={dateRange} />
+            )}
+            {activeTab === TABS.BOOKMARKS && <RankingTable data={RankList} type='bookmark' />}
+          </>
         )}
-        {activeTab === TABS.MONTHPRACTICE && (
-          <RankingTable data={RankList} type='practice' value={dateRange} />
-        )}
-        {activeTab === TABS.BOOKMARKS && <RankingTable data={RankList} type='bookmark' />}
       </Container>
     </>
   );
 };
 
-export default MonthlyRanking;
+export default RankPage;
