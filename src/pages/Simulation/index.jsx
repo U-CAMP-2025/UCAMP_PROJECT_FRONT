@@ -26,6 +26,8 @@ export default function SimulationPresetPage() {
   const [submitting, setSubmitting] = useState(false);
   const { isLogin } = useAuthStore();
 
+  const MODEL_COUNT = 6; // 면접관 모델 수
+
   // ================== 면접 연습 가이드투어 ========================
   const [runSimTour, setRunSimTour] = useState(false);
   const SimTourSteps = [
@@ -194,7 +196,7 @@ export default function SimulationPresetPage() {
     const simulationRandom = formData.questionOrder === 'random' ? 'Y' : 'N';
     const postId = Number(formData.selectedSetId) || formData.selectedSetId;
     // const interviewerId = Number(formData.selectedInterviewerId) || formData.selectedInterviewerId;
-    const interviewerId = Math.floor(Math.random() * 10) + 1;
+    const interviewerId = Math.floor(Math.random() * MODEL_COUNT) + 1;
 
     setSubmitting(true);
     try {
