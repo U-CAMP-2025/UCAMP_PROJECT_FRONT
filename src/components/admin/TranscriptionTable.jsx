@@ -157,8 +157,8 @@ export default function TranscriptionTable() {
 
   const filteredRows = useMemo(() => {
     if (filter === 'inprogress')
-      return content.filter((r) => normalizeStatus(r.status) === 'inprogress');
-    if (filter === 'done') return content.filter((r) => normalizeStatus(r.status) === 'done');
+      return content?.filter((r) => normalizeStatus(r.status) === 'inprogress');
+    if (filter === 'done') return content?.filter((r) => normalizeStatus(r.status) === 'done');
     return content;
   }, [content, filter]);
 

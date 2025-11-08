@@ -66,9 +66,9 @@ export const UserManageTable = () => {
   const [open, setOpen] = useState(false);
   const [target, setTarget] = useState(null);
   const [filter, setFilter] = useState('all'); // 'all' | 'pending' | 'others'
-  const pendingCount = rows.filter((r) => r.certficate?.certe_status === 'PENDING').length;
+  const pendingCount = rows?.filter((r) => r.certficate?.certe_status === 'PENDING').length;
   const othersCount = rows.length - pendingCount;
-  const filteredRows = rows.filter((r) => {
+  const filteredRows = rows?.filter((r) => {
     if (filter === 'pending') return r.certficate?.certe_status === 'PENDING';
     if (filter === 'others') return r.certficate?.certe_status !== 'PENDING';
     return true; // all
@@ -115,6 +115,8 @@ export const UserManageTable = () => {
         setNumber(data.number ?? 0);
       } catch (e) {
         console.error('유저 데이터 로드 실패:', e);
+      } finally {
+        setLoading(false);
       }
     };
     loadData();
@@ -148,12 +150,12 @@ export const UserManageTable = () => {
     { header: '이메일', key: 'email', width: '200px' },
     { header: '닉네임', key: 'nickName', width: '140px' },
     { header: '직무', key: 'job', width: '120px' },
-    {
-      header: '연습 상태',
-      render: (row) => <Typography size={2}>{row.simulationStatus || '-'}</Typography>,
-      width: '140px',
-      align: 'center',
-    },
+    // {
+    //   header: '연습 상태',
+    //   render: (row) => <Typography size={2}>{row.simulationStatus || '-'}</Typography>,
+    //   width: '140px',
+    //   align: 'center',
+    // },
     {
       header: '합격 여부',
       render: (row) => (
@@ -247,7 +249,7 @@ export const UserManageTable = () => {
         }}
       />
 
-      <DataTable columns={columns} rows={filteredRows} rowKey={(r) => r.id} />
+      <DataTable loading={loading} columns={columns} rows={filteredRows} rowKey={(r) => r.id} />
       <PaginationBar>
         <span>{`전체: ${totalElements}개`}</span>
         <button disabled={number <= 0 || loading} onClick={() => setPage(0)}>

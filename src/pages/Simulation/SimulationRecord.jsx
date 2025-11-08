@@ -1,20 +1,55 @@
 // SimulationRecordPage.jsx
 import { axiosInstance } from '@api/axios';
+import Button from '@components/common/Button';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import { CheckCircledIcon, CaretRightIcon } from '@radix-ui/react-icons';
 import * as Tabs from '@radix-ui/react-tabs';
-import React from 'react';
+import theme from '@styles/theme';
+import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
+
+/* ---------- 유틸: 오늘이면 시간, 하루 지나면 날짜 ---------- */
+const isSameLocalDate = (a, b) =>
+  a.getFullYear() === b.getFullYear() &&
+  a.getMonth() === b.getMonth() &&
+  a.getDate() === b.getDate();
+
+const formatCompletedAt = (isoLike) => {
+  if (!isoLike) return '완료 기록 없음';
+  const d = new Date(isoLike);
+  if (isNaN(d)) return '완료 기록 없음';
+
+  const now = new Date();
+  if (isSameLocalDate(d, now)) {
+    // 오늘 → 시간만
+    return d.toLocaleTimeString('ko-KR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit', // 초가 필요 없으면 제거해도 됩니다.
+      hour12: false,
+    });
+  }
+  // 어제 이전 → 날짜만
+  return d.toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+};
 
 export default function SimulationRecordPage() {
   const navigate = useNavigate();
-  const [records, setRecords] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
+  const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  React.useEffect(() => {
+  const handleClickButton = () => {
+    navigate('/simulation');
+  };
+
+  useEffect(() => {
     (async () => {
       try {
         const res = await axiosInstance.get('/simulation/records');
@@ -32,7 +67,9 @@ export default function SimulationRecordPage() {
     const simId = record?.simulationId;
     const post = record?.post ?? {};
     const jobs = Array.isArray(post?.job) ? post.job : [];
-    const title = post?.title || post?.postTitle || '(제목 없음)';
+    const title = post?.title || '(제목 없음)';
+    const completedAt = formatCompletedAt(record?.completedAt); // ✅ 변경된 부분
+    const count = record?.count ?? 0;
 
     return (
       <RecordItemLink to={`/simulation/${simId}/result`} key={simId}>
@@ -42,14 +79,19 @@ export default function SimulationRecordPage() {
               <JobChip key={`${simId}-job-${i}`}>{jobName}</JobChip>
             ))}
           </TagGroup>
+
           <Typography as='h3' size={4} weight='semiBold'>
             {title}
           </Typography>
+
+          <InfoText size={3}>
+            최근 완료: {completedAt} &nbsp;|&nbsp; 반복 횟수: <span>{count}</span>회
+          </InfoText>
         </RecordItemLeft>
+
         <RecordItemRight>
           <ViewResultText>
-            <CheckCircledIcon width={16} height={16} />
-            확인하기 <CaretRightIcon width={16} height={16} />
+            <CaretRightIcon width={48} height={48} />
           </ViewResultText>
         </RecordItemRight>
       </RecordItemLink>
@@ -64,7 +106,7 @@ export default function SimulationRecordPage() {
           onValueChange={(value) => navigate(value)}
         >
           <StyledTabsList>
-            <StyledTabsTrigger value='/simulation'>면접 시뮬레이션 시작</StyledTabsTrigger>
+            <StyledTabsTrigger value='/simulation'>면접 연습 시작</StyledTabsTrigger>
             <StyledTabsTrigger value='/simulation/record'>면접 연습 기록</StyledTabsTrigger>
           </StyledTabsList>
         </StyledTabsRoot>
@@ -77,9 +119,17 @@ export default function SimulationRecordPage() {
               records.map(renderRecordItem)
             ) : (
               <EmptyState>
-                <Typography size={4} muted>
-                  아직 연습 기록이 없습니다.
+                <Typography size={4} color={theme.colors.gray[10]} weight='semiBold'>
+                  아직 면접 연습 기록이 없습니다.
                 </Typography>
+                <Button
+                  style={{
+                    margin: '30px 0',
+                  }}
+                  onClick={handleClickButton}
+                >
+                  연습하러 가기
+                </Button>
               </EmptyState>
             ))}
         </RecordListContainer>
@@ -125,6 +175,14 @@ const StyledTabsTrigger = styled(Tabs.Trigger)`
     right: 0;
     height: 3px;
     background-color: ${({ theme }) => theme.colors.primary[9]};
+  }
+`;
+const InfoText = styled(Typography).attrs({ size: 3 })`
+  color: ${({ theme }) => theme.colors.gray[11]};
+  font-weight: 500;
+  margin-top: ${({ theme }) => theme.space[1]};
+  span {
+    color: ${({ theme }) => theme.colors.primary[10]};
   }
 `;
 

@@ -79,14 +79,10 @@ export default function LandingPage() {
           <BackgroundCircle />
           <ContentWrapper>
             <MainHeading>
-              면접 강화 툴<br />
-              면접톡!
+              면접의 광장,
+              <MainHeading2>면접톡!</MainHeading2>
             </MainHeading>
-            <SubHeading>
-              합격은 면접톡이 <br />
-              책임진다
-            </SubHeading>
-            <Description>면접 연습&피드백 루틴을 경험해보세요!</Description>
+            <Description>면접 연습&피드백 루틴을 공유해보세요!</Description>
             <ButtonGroup>
               <PrimaryButton onClick={handleClickLoginButton}>지금 시작하기</PrimaryButton>
               <KakaoLoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
@@ -98,27 +94,36 @@ export default function LandingPage() {
               <CardIcon>📝</CardIcon>
               <CardTitle>AI 면접 분석</CardTitle>
               <CardDescription>연습 후 답변을 분석하고 개선점을 알려드립니다</CardDescription>
-            </Card>
-            <Card as={Card2}>
-              <CardIcon>💼</CardIcon>
-              <CardTitle>합격 전략</CardTitle>
-              <CardDescription>
-                지원자들의 면접노트 공유하며
-                <br /> 정보 고립을 해결합니다.
-              </CardDescription>
-            </Card>
-            <Card as={Card3}>
-              <CardIcon>🧑‍⚖️</CardIcon>
-              <CardTitle>실전 환경</CardTitle>
-              <CardDescription>
-                AI 면접관과 함께 실전처럼 연습하고 결과를 저장하세요.
-              </CardDescription>
+              <Card as={Card2}>
+                <CardIcon>💼</CardIcon>
+                <CardTitle>합격 전략</CardTitle>
+                <CardDescription>
+                  지원자들의 면접노트 공유하며
+                  <br /> 정보 고립을 해결합니다.
+                </CardDescription>
+                <Card as={Card3}>
+                  <CardIcon>🧑‍⚖️</CardIcon>
+                  <CardTitle>실전 환경</CardTitle>
+                  <CardDescription>
+                    AI 면접관과 함께 실전처럼 연습하고 결과를 저장하세요.
+                  </CardDescription>
+                </Card>
+              </Card>
             </Card>
           </CardsWrapper>
         </HeroContainer>
+        <VideoWrapper>
+          <iframe
+            src='https://www.youtube.com/embed/2MJbpywFSX0'
+            title='YouTube video player'
+            frameBorder='0'
+            allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+            allowFullScreen
+          />
+        </VideoWrapper>
         {/* Course Section */}
         <Container>
-          <Title2>면접 준비, 혼자 하려니 막막하지 않나요?</Title2>
+          <Title2>면접, 혼자 준비하려니 막막하지 않나요?</Title2>
           <CardsWrapper2>
             {cards.map((card) => (
               <Cardd key={card.id} bgColor={card.bgColor}>
@@ -131,45 +136,8 @@ export default function LandingPage() {
         </Container>
         {/* Testimonial Section */}
         <Container>
-          <Title2>이젠 다른 사람들과 협력해보세요!</Title2>
+          <Title2>이젠 다른 사람들과 공유해보세요!</Title2>
           {/* Ranking */}
-          <ContainerR>
-            <HeaderR>
-              <TitleR>주간랭킹</TitleR>
-              <Tabs>
-                <Tab active={activeTab === 'friends'} onClick={() => setActiveTab('friends')}>
-                  활동순
-                </Tab>
-                <Tab active={activeTab === 'world'} onClick={() => setActiveTab('world')}>
-                  북마크순
-                </Tab>
-              </Tabs>
-            </HeaderR>
-
-            <PodiumContainer>
-              {podiumOrder.map((user, index) => {
-                const actualRank = user.rank;
-                const pedestalHeights = [80, 120, 60]; // heights for 2nd, 1st, 3rd
-
-                return (
-                  <PodiumItem key={user.id}>
-                    {actualRank === 1 && <Crown>👑</Crown>}
-                    <AvatarWrapper>
-                      <Avatar bg={actualRank === 1 ? '#fff8e1' : '#f5f5f5'} rank={actualRank}>
-                        {user.avatar}
-                      </Avatar>
-                      <RankBadge rank={actualRank}>{actualRank}</RankBadge>
-                    </AvatarWrapper>
-                    <Username>{user.username}</Username>
-                    <Score>{user.score.toLocaleString()}</Score>
-                    <ScoreLabel>---</ScoreLabel>
-                    <Pedestal height={pedestalHeights[index]} />
-                  </PodiumItem>
-                );
-              })}
-            </PodiumContainer>
-          </ContainerR>
-          {/* ////////////////////////////////////////////////// */}
           <SliderWrapper>
             <ArrowButton $direction='left' onClick={handlePrev} disabled={currentIndex === 0}>
               <svg viewBox='0 0 24 24' fill='none'>
@@ -210,12 +178,50 @@ export default function LandingPage() {
               </svg>
             </ArrowButton2>
           </SliderWrapper>
+          <Title2>다른 유저들과 자웅을 겨뤄볼 수도 있어요.</Title2>
+          <ContainerR>
+            <HeaderR>
+              <TitleR>주간랭킹</TitleR>
+              <Tabs>
+                <Tab active={activeTab === 'friends'} onClick={() => setActiveTab('friends')}>
+                  활동순
+                </Tab>
+                <Tab active={activeTab === 'world'} onClick={() => setActiveTab('world')}>
+                  북마크순
+                </Tab>
+              </Tabs>
+            </HeaderR>
+
+            <PodiumContainer>
+              {podiumOrder.map((user, index) => {
+                const actualRank = user.rank;
+                const pedestalHeights = [80, 120, 60]; // heights for 2nd, 1st, 3rd
+
+                return (
+                  <PodiumItem key={user.id}>
+                    {actualRank === 1 && <Crown>👑</Crown>}
+                    <AvatarWrapper>
+                      <Avatar bg={actualRank === 1 ? '#fff8e1' : '#f5f5f5'} rank={actualRank}>
+                        {user.avatar}
+                      </Avatar>
+                      <RankBadge rank={actualRank}>{actualRank}</RankBadge>
+                    </AvatarWrapper>
+                    <Username>{user.username}</Username>
+                    <Score>{user.score.toLocaleString()}</Score>
+                    <ScoreLabel>---</ScoreLabel>
+                    <Pedestal height={pedestalHeights[index]} />
+                  </PodiumItem>
+                );
+              })}
+            </PodiumContainer>
+          </ContainerR>
+          {/* ////////////////////////////////////////////////// */}
         </Container>
         {/* CTA Section */}
         <Container2>
           <CTASection>
             <Content>
-              <SubText>면접 준비, 지금부터 시작해보세요.</SubText>
+              <SubText>면접 준비, 함께하면 어렵지 않아요.</SubText>
               <MainText>면접톡과 함께 시작할 준비가 되셨나요?</MainText>
               <ButtonGroup2>
                 <PrimaryButton2 onClick={handleClickLoginButton}>
@@ -316,7 +322,7 @@ const BackgroundCircle = styled.div`
 
 const ContentWrapper = styled.div`
   position: relative;
-  z-index: 10;
+  z-index: 0;
   max-width: 600px;
   animation: ${fadeInUp} 0.8s ease-out;
 
@@ -326,7 +332,23 @@ const ContentWrapper = styled.div`
   }
 `;
 
-const MainHeading = styled.h1`
+const MainHeading = styled.h2`
+  font-size: 48px;
+  font-weight: 800;
+  color: white;
+  margin: 0 0 24px 0;
+  line-height: 1.2;
+  letter-spacing: -1px;
+
+  @media (max-width: 968px) {
+    font-size: 36px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 24px;
+  }
+`;
+const MainHeading2 = styled.h1`
   font-size: 64px;
   font-weight: 900;
   color: white;
@@ -343,22 +365,6 @@ const MainHeading = styled.h1`
   }
 `;
 
-const SubHeading = styled.h2`
-  font-size: 32px;
-  font-weight: 700;
-  color: white;
-  margin: 0 0 32px 0;
-  line-height: 1.4;
-
-  @media (max-width: 968px) {
-    font-size: 24px;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 20px;
-  }
-`;
-
 const Description = styled.p`
   font-size: 20px;
   color: rgba(255, 255, 255, 0.9);
@@ -367,16 +373,6 @@ const Description = styled.p`
 
   @media (max-width: 480px) {
     font-size: 18px;
-  }
-`;
-
-const CtaText = styled.p`
-  font-size: 18px;
-  color: rgba(255, 255, 255, 0.85);
-  margin: 0 0 32px 0;
-
-  @media (max-width: 480px) {
-    font-size: 16px;
   }
 `;
 
@@ -419,26 +415,16 @@ const PrimaryButton = styled(Button)`
   }
 `;
 
-const SecondaryButton = styled(Button)`
-  background: transparent;
-  color: white;
-  border: 2px solid white;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-2px);
-  }
-`;
-
 const CardsWrapper = styled.div`
   position: relative;
-  z-index: 10;
+  z-index: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   flex: 1 1 auto;
   min-width: 400px;
   height: 400px;
+  transform-origin: center;
 
   @media (max-width: 968px) {
     position: relative;
@@ -448,6 +434,7 @@ const CardsWrapper = styled.div`
     align-items: center;
     width: 100%;
     min-width: unset;
+    min-width: 840px;
   }
 `;
 
@@ -460,25 +447,25 @@ const Card = styled.div`
   width: 240px;
   height: 180px;
   @media (max-width: 968px) {
-    position: relative;
+    position: absolute;
     max-width: 100%;
   }
 `;
 const Card1 = styled(Card)`
-  top: 70px;
-  right: 200px;
-  z-index: 2;
+  top: 170px;
+  right: 320px;
+  z-index: 1;
 `;
 const Card2 = styled(Card)`
-  top: 40px;
+  top: -150px;
   left: 280px;
   transform: translateX(-50%);
-  z-index: 1;
+  z-index: 3;
 `;
 const Card3 = styled(Card)`
   bottom: 10px;
-  right: 360px;
-  z-index: 3;
+  right: 300px;
+  z-index: 2;
 `;
 
 const CardIcon = styled.div`
@@ -507,12 +494,6 @@ const CardDescription = styled.p`
   line-height: 1.6;
 `;
 
-const Section = styled.section`
-  padding: 80px 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-`;
-
 const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
@@ -522,7 +503,7 @@ const Container = styled.div`
 
   @media (max-width: 968px) {
     padding: 16px;
-    width: 95%;
+    width: 80%;
   }
 `;
 const Container2 = styled.div`
@@ -536,27 +517,6 @@ const Container2 = styled.div`
   @media (max-width: 968px) {
     padding: 24px 16px;
     width: 100%;
-  }
-`;
-
-const Title = styled.h1`
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin-bottom: 16px;
-
-  @media (max-width: 768px) {
-    font-size: 2rem;
-  }
-`;
-
-const Subtitle = styled.p`
-  font-size: 1.1rem;
-  color: #666;
-  margin-bottom: 60px;
-
-  @media (max-width: 768px) {
-    font-size: 1rem;
   }
 `;
 
@@ -582,17 +542,6 @@ const Title2 = styled.h1`
     font-size: 1.6rem;
     margin-bottom: 24px;
     text-align: center;
-  }
-`;
-
-const Subtitle2 = styled.p`
-  font-size: 1.1rem;
-  color: #777;
-  margin-bottom: 20px;
-
-  @media (max-width: 768px) {
-    font-size: 1rem;
-    margin-bottom: 60px;
   }
 `;
 
@@ -660,11 +609,11 @@ const CardDescription2 = styled.p`
   color: #444;
   line-height: 1.7;
 `;
-//
 
 const SliderWrapper = styled.div`
   position: relative;
   padding: 0 60px;
+  margin-bottom: 50px;
 `;
 
 const CardContainer2 = styled.div`
@@ -804,7 +753,7 @@ const ArrowButton2 = styled.button`
     stroke-width: 2;
   }
 `;
-//////////////////////
+
 const ContainerR = styled.div`
   max-width: 800px;
   margin: 0 auto;
@@ -870,11 +819,6 @@ const Crown = styled.div`
   position: absolute;
   top: -30px;
   font-size: 24px;
-`;
-
-const AvatarWrapperR = styled.div`
-  position: relative;
-  margin-bottom: 12px;
 `;
 
 const Avatar = styled.div`
@@ -945,14 +889,6 @@ const Pedestal = styled.div`
   font-weight: 700;
   color: #999;
 `;
-// const Container2 = styled.div`
-//   display: flex;
-//   justify-content: center;
-//   align-items: center;
-//   padding: 40px 20px;
-//   background: linear-gradient(135deg, #4a9fe5 0%, #5bc5ba 100%);
-//   min-height: 200px;
-// `;
 
 const CTASection = styled.div`
   width: 80%;
@@ -1119,6 +1055,26 @@ const cardData = [
     ],
   },
 ];
+
+const VideoWrapper = styled.div`
+  border-radius: 20px;
+  overflow: hidden;
+  width: 90%;
+  max-width: 900px;
+  aspect-ratio: 16 / 9;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+
+  @media (max-width: 768px) {
+    max-width: 100%;
+  }
+`;
 
 const cards = [
   {

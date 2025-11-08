@@ -81,9 +81,9 @@ const SkeletonGrid = styled.div`
 `;
 
 const TABS = {
-  WEEKPRACTICE: '주간 연습횟수',
-  MONTHPRACTICE: '월간 연습횟수',
-  BOOKMARKS: '스크랩 수',
+  WEEKPRACTICE: '주간연습횟수',
+  MONTHPRACTICE: '월간연습횟수',
+  BOOKMARKS: '스크랩수',
 };
 
 const RankPage = () => {

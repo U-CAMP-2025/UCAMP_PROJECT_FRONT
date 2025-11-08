@@ -1,24 +1,116 @@
 import { axiosInstance } from '@api/axios';
+import { fetchSimulationRecords } from '@api/simulationAPIS';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import { CaretDownIcon, CheckIcon } from '@radix-ui/react-icons';
 import * as RadioGroup from '@radix-ui/react-radio-group';
 import * as Select from '@radix-ui/react-select';
 import * as Tabs from '@radix-ui/react-tabs';
+import { useAuthStore } from '@store/auth/useAuthStore';
+import { useTutorialStore } from '@store/tutorial/useTutorialStore';
+import theme from '@styles/theme';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useForm, FormProvider, Controller } from 'react-hook-form';
+import { Joyride } from 'react-joyride';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 // --- [컴포넌트 로직] ---
 
 export default function SimulationPresetPage() {
+  const { seenSimTour, setSimTour } = useTutorialStore();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [questionSets, setQuestionSets] = useState([]);
-  const [interviewers, setInterviewers] = useState([]);
+  const [, setInterviewers] = useState([]);
   const [submitting, setSubmitting] = useState(false);
+  const { isLogin } = useAuthStore();
+
+  const MODEL_COUNT = 6; // 면접관 모델 수
+
+  // ================== 면접 연습 가이드투어 ========================
+  const [runSimTour, setRunSimTour] = useState(false);
+  const SimTourSteps = [
+    {
+      target: '#tour-config-label-1',
+      content: (
+        <>
+          <b style={{ fontSize: '20px' }}>면접 모드</b>
+          <br />
+          <br />
+          등장할 면접관의 수를 결정합니다.
+          <br />
+          다대다 모드는 추후 추가됩니다.
+        </>
+      ),
+      placement: 'right',
+      disableBeacon: true,
+    },
+    {
+      target: '#tour-config-label-2',
+      content: (
+        <>
+          <b style={{ fontSize: '20px' }}>질문 순서</b>
+          <br />
+          <br />
+          랜덤 선택 시, 선택한 노트 내 질문의 순서가 섞여 <br />
+          면접 연습이 진행됩니다.
+        </>
+      ),
+      placement: 'right',
+    },
+    {
+      target: '#tour-sim-controller',
+      content: (
+        <>
+          <b style={{ fontSize: '20px' }}>면접 노트 선택</b>
+          <br />
+          <br />
+          연습을 진행할 노트를 선택해주세요!
+        </>
+      ),
+      placement: 'bottom',
+    },
+    {
+      target: '#tour-sim-start',
+      content: (
+        <>
+          <b style={{ fontSize: '20px' }}>시작하기</b>
+          <br />
+          <br />
+          클릭 시 면접 연습을 시작합니다.
+          <br />
+          면접관은 랜덤으로 배정됩니다.
+        </>
+      ),
+      placement: 'right',
+      hideBackButton: true,
+    },
+  ];
+
+  useEffect(() => {
+    if (isLogin) {
+      fetchSimulationRecords().then((response) => {
+        if (response?.data?.length === 0 && !seenSimTour) {
+          setTimeout(() => {
+            setRunSimTour(true);
+          }, 500);
+        }
+      });
+    }
+  }, [isLogin]);
+
+  const handleJoyrideCallback = (data) => {
+    const { status, action } = data;
+    const finishedStatuses = ['finished', 'skipped'];
+
+    if (finishedStatuses.includes(status) || action === 'close') {
+      setRunSimTour(false);
+      setSimTour(true);
+    }
+  };
+  // ================== 가이드투어 종료 =========================
 
   const methods = useForm({
     defaultValues: {
@@ -81,7 +173,7 @@ export default function SimulationPresetPage() {
     const simulationRandom = formData.questionOrder === 'random' ? 'Y' : 'N';
     const postId = Number(formData.selectedSetId) || formData.selectedSetId;
     // const interviewerId = Number(formData.selectedInterviewerId) || formData.selectedInterviewerId;
-    const interviewerId = Math.floor(Math.random() * 10) + 1;
+    const interviewerId = Math.floor(Math.random() * MODEL_COUNT) + 1;
 
     setSubmitting(true);
     try {
@@ -126,7 +218,11 @@ export default function SimulationPresetPage() {
                 render={({ field }) => (
                   <ConfigSection>
                     <ConfigLabel>면접 모드</ConfigLabel>
-                    <StyledRadioGroup value={field.value} onValueChange={field.onChange}>
+                    <StyledRadioGroup
+                      id='tour-config-label-1'
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
                       <RadioOption>
                         <StyledRadioItem value='one-on-one' id='r1' />
                         일대일
@@ -147,7 +243,11 @@ export default function SimulationPresetPage() {
                 render={({ field }) => (
                   <ConfigSection>
                     <ConfigLabel>질문 순서</ConfigLabel>
-                    <StyledRadioGroup value={field.value} onValueChange={field.onChange}>
+                    <StyledRadioGroup
+                      id='tour-config-label-2'
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
                       <RadioOption>
                         <StyledRadioItem value='sequential' id='r3' />
                         순차적으로
@@ -173,7 +273,7 @@ export default function SimulationPresetPage() {
                       onValueChange={field.onChange}
                       disabled={loading}
                     >
-                      <StyledSelectTrigger>
+                      <StyledSelectTrigger id='tour-sim-controller'>
                         {selectedSet ? (
                           <ItemContent>
                             <Typography size={3} weight='semiBold'>
@@ -270,13 +370,45 @@ export default function SimulationPresetPage() {
               </SelectConfigSection> */}
 
               {/* 시작하기 */}
-              <StartButton type='submit' disabled={loading || submitting}>
-                {submitting ? '시작 중…' : '시작하기'}
-              </StartButton>
+              <StartButtonContainer>
+                <Typography
+                  size={3}
+                  color='gray.9'
+                  style={{ textAlign: 'center', whiteSpace: 'nowrap' }}
+                >
+                  AI 면접관은 랜덤으로 배정됩니다.
+                </Typography>
+                <StartButton id='tour-sim-start' type='submit' disabled={loading || submitting}>
+                  {submitting ? '시작 중…' : '시작하기'}
+                </StartButton>
+              </StartButtonContainer>
             </SettingsBox>
           </PresetForm>
         </FormProvider>
       </MainContentWrapper>
+      <Joyride
+        steps={SimTourSteps}
+        run={runSimTour}
+        callback={handleJoyrideCallback}
+        continuous={true}
+        showProgress={false}
+        showSkipButton={true}
+        locale={{
+          next: '다음',
+          back: '이전',
+          skip: '건너뛰기',
+          last: '확인',
+        }}
+        scrollOffset={200}
+        styles={{
+          options: {
+            primaryColor: theme.colors.primary[9],
+            textColor: theme.colors.gray[12],
+            backgroundColor: theme.colors.gray[1],
+            arrowColor: theme.colors.gray[1],
+          },
+        }}
+      />
     </PageContainer>
   );
 }
@@ -497,7 +629,7 @@ const StartButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: ${({ theme }) => theme.space[10]} auto 0;
+  // margin: ${({ theme }) => theme.space[10]} auto 0;
   padding: ${({ theme }) => theme.space[3]} 0;
   background-color: ${({ theme }) => theme.colors.primary[9]};
   color: white;
@@ -537,4 +669,14 @@ const JobChip = styled.div`
   border-radius: ${({ theme }) => theme.radius.lg};
   font-size: ${({ theme }) => theme.font.size[2]};
   font-weight: ${({ theme }) => theme.font.weight.semiBold};
+`;
+
+const StartButtonContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[3]};
+  margin: ${({ theme }) => theme.space[10]} auto 0;
+  width: 100%;
+  max-width: 120px;
 `;

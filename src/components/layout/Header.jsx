@@ -1,5 +1,13 @@
-import { getNoti, notiDel, notiDelAll, notiRead, notiReadAll } from '@api/notificationsAPIS';
-import { fetchUserRole, fetchUserStatus, patchUserStaus } from '@api/userAPIS';
+import { postLogout } from '@api/authAPIS';
+import {
+  getNoti,
+  getNotiLast,
+  notiDel,
+  notiDelAll,
+  notiRead,
+  notiReadAll,
+} from '@api/notificationsAPIS';
+import { fetchUserRole, fetchUserStatus, patchUserStatus } from '@api/userAPIS';
 import Button from '@components/common/Button';
 import { Overlay, Content, Title, Description } from '@components/common/Dialog';
 import * as H from '@components/common/HeaderStyles';
@@ -10,15 +18,18 @@ import * as Dialog from '@radix-ui/react-dialog';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { ChevronDownIcon, PersonIcon, BellIcon } from '@radix-ui/react-icons';
 import { useAuthStore } from '@store/auth/useAuthStore';
+import { useTutorialStore } from '@store/tutorial/useTutorialStore';
 import theme from '@styles/theme';
 import { useState } from 'react';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import Joyride from 'react-joyride';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 export const Header = () => {
   const { isLogin, logout, user } = useAuthStore();
+  const { setTutorial } = useTutorialStore();
+  const { seenHeaderTour, setHeaderTour } = useTutorialStore();
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
@@ -27,12 +38,14 @@ export const Header = () => {
   const unreadDerived = notifications?.filter((n) => !n.read).length;
 
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const [loginAlertOpen, setLoginAlertOpen] = useState(false);
   const [welcomeModalOpen, setWelcomeModalOpen] = useState(false);
 
   const [userRole, setUserRole] = useState('USER');
 
   // ======================= 유저 가이드투어 ======================
   // Joyride 실행 state
+
   const [runTour, setRunTour] = useState(false);
 
   const tourSteps = [
@@ -104,21 +117,17 @@ export const Header = () => {
 
   useEffect(() => {
     if (isLogin) {
-      fetchUserStatus()
-        .then((response) => {
-          if (response?.status === 'NEW' && !localStorage.getItem('seenHeaderTour')) {
-            setWelcomeModalOpen(true); // 튜토리얼 모달 열기
-          }
-        })
-        .catch((err) => {
-          console.error('유저 상태 조회에 실패했습니다:', err);
-        });
+      fetchUserStatus().then((response) => {
+        if (response?.status === 'NEW' && !seenHeaderTour) {
+          setWelcomeModalOpen(true); // 튜토리얼 모달 열기
+        }
+      });
     }
-  }, [isLogin]);
+  }, []);
 
   const handleStartTutorial = () => {
     setWelcomeModalOpen(false);
-    localStorage.setItem('seenHeaderTour', true);
+    setHeaderTour(true);
     setTimeout(() => {
       setRunTour(true);
     }, 100);
@@ -126,38 +135,37 @@ export const Header = () => {
 
   const handleSkipAndClose = () => {
     setWelcomeModalOpen(false);
-    localStorage.setItem('seenHeaderTour', true);
+    setHeaderTour(true);
     setRunTour(false);
 
-    // // 튜토리얼을 보지 않았으므로 상태를 'ACTIVE'로 업데이트
-    // patchUserStaus('ACTIVE')
-    //   .then(() => {
-    //     console.log("튜토리얼 건너뜀: 유저 상태가 'ACTIVE'로 업데이트되었습니다.");
-    //   })
-    //   .catch((err) => {
-    //     console.error('유저 상태 업데이트에 실패했습니다:', err);
-    //   });
+    // 튜토리얼을 보지 않았으므로 상태를 'ACTIVE'로 업데이트
+    patchUserStatus('ACTIVE');
   };
 
   const handleJoyrideCallback = (data) => {
-    const { status, action } = data;
+    const { status, action, index } = data;
     const finishedStatuses = ['finished', 'skipped'];
 
     if (finishedStatuses.includes(status) || action === 'close') {
       setRunTour(false);
-      localStorage.setItem('seenHeaderTour', 'true');
+      setHeaderTour(true);
+      patchUserStatus('ACTIVE');
+    }
 
-      // // 서버에 유저 상태를 'ACTIVE'로 업데이트
-      // patchUserStaus('ACTIVE')
-      //   .then(() => {
-      //     console.log("튜토리얼 완료: 유저 상태가 'ACTIVE'로 업데이트되었습니다.");
-      //   })
-      //   .catch((err) => {
-      //     console.error('유저 상태 업데이트에 실패했습니다:', err);
-      //   });
+    if (index === tourSteps.length - 1 && action === 'next') {
+      navigate('/qalist');
     }
   };
   // ========================== 유저 가이드투어 ================================
+
+  const handleProtectedLink = (path) => {
+    // 면접 노트와 랭킹은 비로그인도 접근 가능
+    if (!isLogin && path !== '/qalist' && path !== '/rank') {
+      setLoginAlertOpen(true);
+      return;
+    }
+    navigate(path);
+  };
 
   const handleClickLogoButton = () => {
     navigate('/');
@@ -168,7 +176,15 @@ export const Header = () => {
   };
 
   const handleClickLogout = () => {
-    logout();
+    postLogout().then(() => {
+      setTutorial({
+        seenHeaderTour: false,
+        seenSimTour: false,
+        seenQAListTour: false,
+      });
+      logout();
+    });
+
     window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/logout`;
   };
 
@@ -182,20 +198,37 @@ export const Header = () => {
     if (isLogin) {
       getNoti()
         .then((response) => {
-          setNotifications(response?.data ?? null);
+          setNotifications(response?.data ?? []);
         })
-        .catch(() => setNotifications(null));
+        .catch(() => setNotifications([]));
     }
-  }, [isLogin, alertTrigger]);
+  }, [isLogin]);
 
   useEffect(() => {
-    fetchUserRole().then((response) => {
-      if (response?.role === 'ADMIN') {
-        setUserRole('ADMIN');
-      } else {
-        setUserRole('USER');
-      }
-    });
+    if (isLogin) {
+      setTimeout(() => {
+        getNotiLast()
+          .then((response) => {
+            if (response?.data === null) {
+              return;
+            }
+            setNotifications((prevNotifications) => [...prevNotifications, response?.data ?? []]);
+          })
+          .catch(() => setNotifications([]));
+      }, 10);
+    }
+  }, [alertTrigger]);
+
+  useEffect(() => {
+    if (isLogin) {
+      fetchUserRole().then((response) => {
+        if (response?.role === 'ADMIN') {
+          setUserRole('ADMIN');
+        } else {
+          setUserRole('USER');
+        }
+      });
+    }
   }, [isLogin]);
 
   return (
@@ -211,7 +244,7 @@ export const Header = () => {
         </H.LeftSection>
         <H.Nav>
           <H.NavItem
-            onClick={() => navigate('/qalist')}
+            onClick={() => handleProtectedLink('/qalist')}
             $isActive={pathname === '/qalist'}
             id='tour-nav-qalist'
           >
@@ -219,7 +252,7 @@ export const Header = () => {
           </H.NavItem>
 
           <H.NavItem
-            onClick={() => navigate('/myqa')}
+            onClick={() => handleProtectedLink('/myqa')}
             $isActive={pathname === '/myqa'}
             id='tour-nav-myqa'
           >
@@ -227,7 +260,7 @@ export const Header = () => {
           </H.NavItem>
 
           <H.NavItem
-            onClick={() => navigate('/simulation')}
+            onClick={() => handleProtectedLink('/simulation')}
             $isActive={pathname.startsWith('/simulation')}
             id='tour-nav-simulation'
           >
@@ -235,7 +268,7 @@ export const Header = () => {
           </H.NavItem>
 
           <H.NavItem
-            onClick={() => navigate('/rank')}
+            onClick={() => handleProtectedLink('/rank')}
             $isActive={pathname === '/rank'}
             id='tour-nav-ranking'
           >
@@ -298,33 +331,33 @@ export const Header = () => {
                   // 예시: 클릭 시 읽음 처리
                   if (!item.read) {
                     notiRead(item.notiId)
-                      .then((response) => {
+                      .then(() => {
                         setNotifications((prev) =>
                           prev.map((n) => (n.notiId === item.notiId ? { ...n, read: true } : n)),
                         );
                       })
-                      .catch(() => setNotifications(null));
+                      .catch(() => setNotifications([]));
                   } else {
                     notiDel(item.notiId)
-                      .then((response) => {
-                        setNotifications((prev) => prev.filter((n) => n.notiId !== item.notiId));
+                      .then(() => {
+                        setNotifications((prev) => prev?.filter((n) => n.notiId !== item.notiId));
                       })
-                      .catch(() => setNotifications(null));
+                      .catch(() => setNotifications([]));
                   }
                 }}
                 onMarkAllRead={() => {
                   if (unreadDerived !== 0) {
                     notiReadAll()
-                      .then((response) => {
+                      .then(() => {
                         setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
                       })
-                      .catch(() => setNotifications(null));
+                      .catch(() => setNotifications([]));
                   } else {
                     notiDelAll()
-                      .then((response) => {
+                      .then(() => {
                         setNotifications([]);
                       })
-                      .catch(() => setNotifications(null));
+                      .catch(() => setNotifications([]));
                   }
                 }}
               />
@@ -368,27 +401,42 @@ export const Header = () => {
           </Content>
         </Dialog.Portal>
       </Dialog.Root>
+      <Dialog.Root open={loginAlertOpen} onOpenChange={setLoginAlertOpen}>
+        <Dialog.Portal>
+          <Overlay />
+          <Content style={{ maxWidth: '350px' }}>
+            <Title>🔒 로그인 필요</Title>
+            <Description>
+              로그인 후 이용 가능한 페이지입니다.
+              <br />
+              지금 로그인하고 서비스를 이용해보세요!
+            </Description>
+            <ButtonArea style={{ justifyContent: 'center', marginTop: '24px' }}>
+              <KakaoButton
+                type='button'
+                onClick={() => {
+                  window.location.href = import.meta.env.VITE_API_KAKAO_LOGIN;
+                }}
+              >
+                <img src='/images/kakao_login.png' alt='카카오 로그인' />
+              </KakaoButton>
+            </ButtonArea>
+          </Content>
+        </Dialog.Portal>
+      </Dialog.Root>
       <Joyride
-        // 튜토리얼 단계
         steps={tourSteps}
-        // 튜토리얼 실행 여부 (state와 연결)
         run={runTour}
-        // 튜토리얼 완료/스킵/닫기 시 호출될 함수
         callback={handleJoyrideCallback}
-        // '다음' 버튼 클릭 시 다음 단계로 자동 이동
         continuous={true}
-        // 진행률 표시 (예: 2/6)
         showProgress={false}
-        // '건너뛰기' 버튼 표시
         showSkipButton={true}
-        // 버튼 텍스트 한글화
         locale={{
           next: '다음',
           back: '이전',
           skip: '건너뛰기',
           last: '확인',
         }}
-        // 스타일 커스터마이징
         styles={{
           options: {
             primaryColor: theme.colors.primary[9],
@@ -431,4 +479,33 @@ const ModalButton = styled.button`
       }
     `;
   }}
+`;
+
+const KakaoButton = styled.button`
+  all: unset;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 220px;
+  height: 44px;
+  border-radius: 8px;
+  background: #fee500;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+  img {
+    width: 140px;
+    height: auto;
+    display: block;
+  }
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.14);
+  }
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  }
 `;

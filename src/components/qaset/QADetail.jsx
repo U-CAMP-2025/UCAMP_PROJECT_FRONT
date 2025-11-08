@@ -4,7 +4,6 @@ import { Overlay, Content, Title, Description } from '@components/common/Dialog'
 import Tag, { TagGroup } from '@components/common/Tag';
 import Typography from '@components/common/Typography';
 import { BookmarkIcon } from '@components/common/icons';
-// 🧩 다이얼로그 관련 import
 import * as Dialog from '@radix-ui/react-dialog';
 import { Pencil1Icon, TrashIcon } from '@radix-ui/react-icons';
 import { useAuthStore } from '@store/auth/useAuthStore';
@@ -13,15 +12,15 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-// ✅ 너가 준 다이얼로그 파일
+import { QADetailSkeleton } from './QADetailSkeleton';
 
-// TODO: 유저 자신의 QA셋인 경우에만 삭제 아이콘 노출
 export const QADetail = () => {
   const params = useParams();
   const qaId = params.qaId;
   const [qaData, setQaData] = useState(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
+  const [copyId, setCopyId] = useState(0);
   const navigate = useNavigate();
   const { isLogin } = useAuthStore();
   const onPractice = () => {
@@ -49,7 +48,8 @@ export const QADetail = () => {
 
   const onCopy = () => {
     copyPost(qaId)
-      .then(() => {
+      .then((response) => {
+        setCopyId(response?.data ?? 0);
         setIsCopyModalOpen(true);
       })
       .catch();
@@ -63,7 +63,8 @@ export const QADetail = () => {
       })
       .catch();
   };
-  if (!qaData) return null;
+
+  if (!qaData) return <QADetailSkeleton />;
   const {
     job = [],
     userId,
@@ -75,6 +76,7 @@ export const QADetail = () => {
     qa = [],
     me,
     otherWriter,
+    bookCount = 0,
   } = qaData;
   const dateOnly = createAt ? createAt.split('T')[0] : '';
 
@@ -103,6 +105,18 @@ export const QADetail = () => {
             <Typography size={3} style={{ color: theme.colors.primary[11] }}>
               {dateOnly}
             </Typography>
+            {typeof bookCount === 'number' && (
+              <>
+                <Dot>•</Dot>
+                <Typography size={3} weight='semiBold' style={{ color: theme.colors.gray[12] }}>
+                  스크랩{' '}
+                  <Typography as='span' style={{ color: theme.colors.primary[11] }}>
+                    {bookCount}
+                  </Typography>
+                  개
+                </Typography>
+              </>
+            )}
             {isPassed && <PassBadge>합격자</PassBadge>}
             {!isPassed && <FailBadge>구직자</FailBadge>}
           </Meta>
@@ -121,7 +135,7 @@ export const QADetail = () => {
         <div>
           {!me && (
             <IconButton1
-              aria-label='북마크'
+              aria-label='스크랩'
               onClick={onCopy}
               title='현재 면접 노트를 나의 면접 노트로 스크랩합니다.'
             >
@@ -159,14 +173,22 @@ export const QADetail = () => {
           </Content>
         </Dialog.Portal>
       </Dialog.Root>
-      <Dialog.Root open={isCopyModalOpen} onOpenChange={setIsCopyModalOpen}>
+      <Dialog.Root
+        open={isCopyModalOpen}
+        onOpenChange={(open) => {
+          setIsCopyModalOpen(open);
+          if (!open) {
+            navigate(`/qa/${copyId}`);
+          }
+        }}
+      >
         <Dialog.Portal>
           <Overlay />
           <Content>
             <Title>스크랩 완료</Title>
             <Description>
               스크랩되었습니다. <br />
-              '나의 노트' 페이지에서 마음껏 수정해보세요!
+              &apos;나의 노트&apos; 페이지에서 마음껏 수정해보세요!
             </Description>
             <ButtonRow>
               <Dialog.Close asChild>
@@ -202,14 +224,16 @@ export const QADetail = () => {
           <Pre>{item.answer || '-'}</Pre>
         </QABox>
       ))}
-      <Button
-        type='button'
-        size='sm'
-        onClick={onPractice}
-        style={{ alignSelf: 'flex-end', padding: '0 16px' }}
-      >
-        연습 하기
-      </Button>
+      {me && (
+        <Button
+          type='button'
+          size='sm'
+          onClick={onPractice}
+          style={{ alignSelf: 'flex-end', padding: '0 16px' }}
+        >
+          연습하기
+        </Button>
+      )}
     </Wrap>
   );
 };

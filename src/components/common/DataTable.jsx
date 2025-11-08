@@ -107,7 +107,29 @@ export const Pill = styled.span`
     `;
   }}
 `;
+// ✅ 스켈레톤 바 정의
+const SkeletonBar = styled.div`
+  height: 14px;
+  width: ${({ width }) => width || '80%'};
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    ${({ theme }) => theme.colors.gray[3]} 25%,
+    ${({ theme }) => theme.colors.gray[4]} 50%,
+    ${({ theme }) => theme.colors.gray[3]} 75%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
 
+  @keyframes shimmer {
+    0% {
+      background-position: -400px 0;
+    }
+    100% {
+      background-position: 400px 0;
+    }
+  }
+`;
 // ===== 타입 =====
 // columns: [{ key?: string, header: string | ReactNode, width?:string, align?:'left'|'center'|'right', render?: (row) => ReactNode }]
 // rowKey: (row)=>string|number  (필수)
@@ -121,6 +143,7 @@ export default function DataTable({
   selectable = false,
   onSelectionChange,
   className,
+  loading = false,
 }) {
   const allSelected = selectable && rows.length > 0 && rows.every((r) => r.__selected);
   const toggleAll = (checked) => {
@@ -129,7 +152,7 @@ export default function DataTable({
   };
   const toggleOne = (row, checked) => {
     row.__selected = checked;
-    const selected = rows.filter((r) => r.__selected).map(rowKey);
+    const selected = rows?.filter((r) => r.__selected).map(rowKey);
     onSelectionChange?.(selected);
   };
 
@@ -163,26 +186,52 @@ export default function DataTable({
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, rIdx) => (
-            <Tr key={rowKey(row)}>
-              {selectable && (
-                <Td align='center'>
-                  <CheckboxRoot
-                    checked={!!row.__selected}
-                    onCheckedChange={(v) => toggleOne(row, !!v)}
-                    aria-label='선택'
-                  >
-                    <CheckboxIndicator>✓</CheckboxIndicator>
-                  </CheckboxRoot>
-                </Td>
-              )}
-              {columns.map((c, cIdx) => (
-                <Td key={cIdx} align={c.align}>
-                  {c.render ? c.render(row) : c.key ? row[c.key] : null}
-                </Td>
-              ))}
+          {loading ? (
+            // ✅ 스켈레톤 로딩 행
+            Array.from({ length: 5 }).map((_, rIdx) => (
+              <Tr key={`skeleton-${rIdx}`}>
+                {selectable && (
+                  <Td align='center'>
+                    <SkeletonBar width='18px' />
+                  </Td>
+                )}
+                {columns.map((c, cIdx) => (
+                  <Td key={cIdx} align={c.align}>
+                    <SkeletonBar width={`${60 + Math.random() * 30}%`} />
+                  </Td>
+                ))}
+              </Tr>
+            ))
+          ) : rows.length > 0 ? (
+            rows.map((row) => (
+              <Tr key={rowKey(row)}>
+                {selectable && (
+                  <Td align='center'>
+                    <CheckboxRoot
+                      checked={!!row.__selected}
+                      onCheckedChange={(v) => toggleOne(row, !!v)}
+                      aria-label='선택'
+                    >
+                      <CheckboxIndicator>✓</CheckboxIndicator>
+                    </CheckboxRoot>
+                  </Td>
+                )}
+                {columns.map((c, cIdx) => (
+                  <Td key={cIdx} align={c.align}>
+                    {c.render ? c.render(row) : c.key ? row[c.key] : null}
+                  </Td>
+                ))}
+              </Tr>
+            ))
+          ) : (
+            <Tr>
+              <Td align='center' colSpan={columns.length + (selectable ? 1 : 0)}>
+                <Typography size={2} color='gray'>
+                  데이터가 없습니다.
+                </Typography>
+              </Td>
             </Tr>
-          ))}
+          )}
         </tbody>
       </Table>
     </TableWrap>

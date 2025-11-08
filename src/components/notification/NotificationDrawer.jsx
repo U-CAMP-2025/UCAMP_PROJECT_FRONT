@@ -14,6 +14,7 @@ import { useSSE } from './useSSE';
  *  - items: Array<{ notiId:number|string, content:string, type:'TRANSCRIPTION'|'REVIEW'|'CERTIFICATE'|string, read:boolean, createdAt:string }>
  *  - onItemClick?: (item) => void
  *  - onMarkAllRead?: () => void1
+ *
  */
 
 export default function NotificationDrawer({
@@ -24,7 +25,7 @@ export default function NotificationDrawer({
   onItemClick,
   onMarkAllRead,
 }) {
-  const unreadCount = items.filter((i) => !i.read).length;
+  const unreadCount = items?.filter((i) => !i.read).length;
   const sortedItems = [...items].sort((a, b) => {
     if (a.read !== b.read) return a.read ? 1 : -1;
     const at = new Date(a.createdAt).getTime();
@@ -83,8 +84,13 @@ export default function NotificationDrawer({
                     <Typography as='p' size={2} style={{ whiteSpace: 'pre-wrap' }}>
                       {it.type === 'REVIEW' ? (
                         <StyledLink to={`/qa/${it.content.split(':::')[1]}`}>
-                          {it.content.split(':::')[0]}{' '}
-                          <Message>면접노트에 리뷰가 달렸습니다.</Message>
+                          {'"' + it.content.split(':::')[0] + '" '}
+                          <Message> 면접노트에 리뷰가 달렸습니다.</Message>
+                        </StyledLink>
+                      ) : it.type === 'SCRAP' ? (
+                        <StyledLink to={`/qa/${it.content.split(':::')[1]}`}>
+                          {'"' + it.content.split(':::')[0] + '" '}
+                          <Message>가 스크랩되었습니다.</Message>
                         </StyledLink>
                       ) : (
                         <Message>{it.content}</Message>
@@ -258,7 +264,7 @@ const Badge = styled.span`
   font-weight: ${({ theme }) => theme.font.weight.semiBold};
   ${({ $type, theme }) => {
     const map = {
-      TRANSCRIPT: { bg: theme.colors.primary[3], fg: theme.colors.primary[11] },
+      SCRAP: { bg: theme.colors.primary[3], fg: theme.colors.primary[11] },
       REVIEW: { bg: '#E7F8ED', fg: '#18794E' },
       CERT: { bg: '#ffedd5', fg: '#fb923c' },
     };

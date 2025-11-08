@@ -21,7 +21,7 @@ const SimulationStart = () => {
   const handleQuestionSetChange = (event) => {
     setQuestionSet(event.target.value);
     setQuestionTag(
-      questionSets.filter((qu) => {
+      questionSets?.filter((qu) => {
         return qu.postId == event.target.value;
       }),
     );

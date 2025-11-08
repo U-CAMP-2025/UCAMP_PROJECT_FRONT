@@ -9,6 +9,11 @@ export const getNoti = async () => {
   return data;
 };
 
+export const getNotiLast = async () => {
+  const { data } = await axiosInstance.get('/notifications/last');
+  return data;
+};
+
 /**
  * Put: 단일 알람 읽기
  * @param {long} notiId - 알람ID

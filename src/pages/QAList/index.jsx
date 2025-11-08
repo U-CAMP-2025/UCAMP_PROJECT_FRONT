@@ -1,7 +1,5 @@
-import { fetchJobList } from '@api/jobAPIS';
 import { scrollQaSet } from '@api/postAPIS';
 import { fetchUserMypage } from '@api/userAPIS';
-import { fetchUserStatus, patchUserStaus } from '@api/userAPIS';
 import { JobSelector } from '@components/common/JobSelector';
 import { SortSelector } from '@components/common/SortSelector';
 import Typography from '@components/common/Typography';
@@ -10,14 +8,16 @@ import QASetList from '@components/qaset/QASetList';
 import { QASetCardSkeleton } from '@components/qaset/SkeletonCard';
 import { PlusIcon } from '@radix-ui/react-icons';
 import { useAuthStore } from '@store/auth/useAuthStore';
+import { useTutorialStore } from '@store/tutorial/useTutorialStore';
 import theme from '@styles/theme';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Joyride from 'react-joyride';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 export default function QAListPage() {
+  const { seenHeaderTour, seenQAListTour, setQAListTour } = useTutorialStore();
   const { isLogin } = useAuthStore();
   const [currentSort, setCurrentSort] = useState('bookcount_desc');
   const [selectedJobIds, setSelectedJobIds] = useState([]);
@@ -51,15 +51,10 @@ export default function QAListPage() {
       });
 
       // 튜토리얼 진행 조건
-      fetchUserStatus().then((res) => {
-        // 상태 'NEW' && 헤더 튜토리얼 봤음
-        if (res?.status === 'NEW' && localStorage.getItem('seenHeaderTour') === 'true') {
-          // '신규 노트' 버튼이 렌더링될 시간
-          setTimeout(() => {
-            setRunQAListTour(true);
-          }, 500);
-        }
-      });
+      // header의 투어를 봤고 qa 투어는 안 본 사람에게만 진행
+      if (seenHeaderTour && !seenQAListTour) {
+        setRunQAListTour(true);
+      }
     }
   }, [isLogin]);
 
@@ -70,14 +65,8 @@ export default function QAListPage() {
     if (finishedStatuses.includes(status) || action === 'close') {
       setRunQAListTour(false);
 
-      patchUserStaus('ACTIVE')
-        .then(() => {
-          console.log("QAList 튜토리얼 완료: 유저 상태 'ACTIVE' 업데이트");
-          localStorage.removeItem('seenHeaderTour');
-        })
-        .catch((err) => {
-          console.error('유저 상태 업데이트 실패:', err);
-        });
+      // 로컬에 저장
+      setQAListTour(true);
     }
   };
 
@@ -113,15 +102,6 @@ export default function QAListPage() {
     navigate('/qa/create');
   };
 
-  // 초기 직무 데이터 로드
-  // useEffect(() => {
-  //   if (isLogin) {
-  //     fetchUserMypage().then((res) => {
-  //       setYourJob(res?.job?.jobId || null);
-  //     });
-  //   }
-  // }, []);
-
   // API 호출
   const fetchQAList = async (pageNum = 1) => {
     const params = {
@@ -130,8 +110,6 @@ export default function QAListPage() {
       sort: currentSort,
       jobs: selectedJobIds,
     };
-
-    console.log(params);
 
     scrollQaSet(params)
       .then((response) => {

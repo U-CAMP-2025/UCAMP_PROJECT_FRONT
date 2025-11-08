@@ -317,6 +317,19 @@ export default function SimulationGO() {
     });
   };
 
+  // 종료 버튼 누를 시 api 호출
+  const handleStopAndNavigate = async () => {
+    try {
+      await axiosInstance.patch(`/simulation/${simulationId}/-1`);
+      console.log('stopSimulation API 호출 성공');
+    } catch (err) {
+      console.error('stopSimulation API 호출 실패:', err);
+    }
+
+    // PATCH 완료 후 다른 경로로 이동 (예: 결과 페이지)
+    navigate(`/simulation`);
+  };
+
   // ===== 5) 질문 녹음 =====
   const startAnswer = async () => {
     if (!isSessionStarted || isQuestionRecording) return;
@@ -328,6 +341,10 @@ export default function SimulationGO() {
   const finishAnswer = async () => {
     if (!audioRef.current?.finish) return;
     await audioRef.current.finish();
+    if (currentIdx >= totalQuestions - 1) {
+      stopSession();
+      return;
+    }
     goNextQuestionGuarded();
   };
 
@@ -344,6 +361,10 @@ export default function SimulationGO() {
   const handleRecordingChange = (rec) => setIsQuestionRecording(rec);
 
   const handleAutoFinish = (qaId, url) => {
+    if (currentIdx >= totalQuestions - 1) {
+      stopSession();
+      return;
+    }
     goNextQuestionGuarded();
   };
 
@@ -378,8 +399,9 @@ export default function SimulationGO() {
       <S.MainContentWrapper>
         {!!interviewerId && isSessionStarted && currentQuestion && (
           <TextToSpeech
-            voiceModel={VoiceModel[(parseInt(interviewerId, 10) || interviewerId) - 1]}
+            voiceModel={VoiceModel[((Number(interviewerId) || 1) - 1) % VoiceModel.length]}
             currentQuestion={currentQuestion}
+            ttsKey={orderedQa?.[currentIdx]?.qaId ?? currentIdx}
             enabled={isSessionStarted}
             onSpeakingChange={setTtsSpeaking}
           />
@@ -395,15 +417,14 @@ export default function SimulationGO() {
               </S.QuestionCounter>
             </S.TopInfoBar>
             <S.SidebarButton
-              onClick={
-                isSessionStarted
-                  ? () => {
-                      // 아직 남은 질문이 있으면 경고 모달
-                      if (currentIdx < totalQuestions - 1) setEndConfirmOpen(true);
-                      else stopSession();
-                    }
-                  : startSession
-              }
+              onClick={() => {
+                if (isSessionStarted) {
+                  // 세션 중이면 확인 모달 열기
+                  setEndConfirmOpen(true);
+                } else {
+                  startSession();
+                }
+              }}
               $variant={isSessionStarted ? 'danger' : 'default'}
             >
               {isSessionStarted ? <StopIcon /> : <PlayIcon />}
@@ -492,11 +513,12 @@ export default function SimulationGO() {
         open={endConfirmOpen}
         onOpenChange={setEndConfirmOpen}
         title='면접 종료'
-        messages={['지금 종료하면 면접 연습 결과가 저장되지 않습니다.', '종료하시겠어요?']}
-        onConfirm={async () => {
-          await stopSession(); // 확인 → 진짜 종료
-          // stopSession 안에서 라우팅하므로 setEndConfirmOpen(false)는 생략 가능
-        }}
+        messages={[
+          '면접이 진행 중입니다.',
+          '지금 종료하면 면접 연습 결과가 저장되지 않습니다.',
+          '그래도 이동하시겠어요?',
+        ]}
+        onConfirm={handleStopAndNavigate}
       />
       <ConfirmDialog
         open={leaveConfirmOpen}
@@ -509,7 +531,8 @@ export default function SimulationGO() {
         }}
         title='페이지를 떠나시겠어요?'
         messages={[
-          '면접이 진행 중입니다. 지금 종료하면 면접 연습 결과가 저장되지 않습니다.',
+          '면접이 진행 중입니다.',
+          '지금 종료하면 면접 연습 결과가 저장되지 않습니다.',
           '그래도 이동하시겠어요?',
         ]}
         onConfirm={() => {

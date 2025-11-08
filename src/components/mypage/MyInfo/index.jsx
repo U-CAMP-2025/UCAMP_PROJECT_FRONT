@@ -7,20 +7,20 @@ import {
 } from '@api/userAPIS';
 import Button from '@components/common/Button';
 import ErrorDialog from '@components/common/ErrorDialog';
-import ReadonlyInput from '@components/common/ReadOnlyInput';
 import SearchableSelect from '@components/common/SearchableSelect';
 import SuccessDialog from '@components/common/SuccessDialog';
 import Typography from '@components/common/Typography';
 import theme from '@styles/theme';
 import { useEffect, useState } from 'react';
+import { data } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { FieldCard, FieldLeft, FieldLabel, FieldValue, FieldActions, FieldRight } from './FieldRow';
+import { FieldCard, FieldLeft, FieldLabel, FieldValue, FieldActions } from './FieldRow';
 import PhotoSubmitDialog from './PhotoSubmitDialog';
 import { WithdrawlDialog } from './WithdrawlDialog';
 
 const MyInfo = () => {
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [errorOpen, setErrorOpen] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successOpen, setSuccessOpen] = useState(false);
@@ -31,7 +31,7 @@ const MyInfo = () => {
 
   const [openPhotoModal, setOpenPhotoModal] = useState(false);
   const [editingJob, setEditingJob] = useState(false);
-  const [fileName, setFileName] = useState('');
+  const [, setFileName] = useState('');
 
   const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
 
@@ -42,6 +42,9 @@ const MyInfo = () => {
 
       // 합격자 신청 (JWT로 user 식별)
       await postUserPathPass(fileName);
+
+      // 서버 반영 후 프론트 상태도 즉시 갱신
+      setUser((prev) => ({ ...prev, certStatus: 'PENDING' }));
 
       // alert('합격자 인증이 신청되었습니다.');
       setSuccessMsg('합격자 인증이 신청되었습니다.');
@@ -63,15 +66,18 @@ const MyInfo = () => {
           userId: data.userId,
           nickname: data.nickname,
           email: data.email,
-          jobName: data.job.jobName,
+          jobName: data.job?.jobName, // job이 null일 수 있으니 optional chaining
           passStatus: data.passStatus,
           status: data.status,
           userProfileImageUrl: '',
+          certStatus: data.certStatus,
         });
         setSelectedJobId(data.job.jobId);
         console.log('유저 정보', user);
       } catch (err) {
         console.error('데이터 로드 실패:', err);
+      } finally {
+        setIsLoading(false); // ✅ 로딩 끝
       }
     };
 
@@ -101,12 +107,10 @@ const MyInfo = () => {
       await patchUserJob(user.userId, selectedJobId); // 서버 PATCH 요청
       setEditingJob(false); // 수정 모드 종료
       setUser((prev) => ({ ...prev, jobId: selectedJobId })); // 로컬 상태 갱신
-      // alert('관심 직무가 수정되었습니다.');
       setSuccessMsg('관심 직무가 수정되었습니다.');
       setSuccessOpen(true);
     } catch (err) {
       console.error('직무 수정 실패:', err);
-      // alert('직무 수정 중 오류가 발생했습니다.');
       setErrorMsg('직무 수정 중 오류가 발생했습니다.');
       setErrorOpen(true);
     }
@@ -123,143 +127,117 @@ const MyInfo = () => {
           마이 페이지
         </Typography>
       </MyPageHeader>
-      <Row>
-        {/* 닉네임 (수정 불가) */}
-        <FieldCard>
-          <FieldLeft>
-            <FieldLabel htmlFor='nick'>닉네임</FieldLabel>
-            {/* <ReadonlyInput
-              id='nick'
+
+      <FieldCard>
+        <FieldLeft>
+          <FieldLabel htmlFor='nick'>닉네임</FieldLabel>
+          <FieldValue>{isLoading ? <SkeletonText width='80px' /> : user?.nickname}</FieldValue>
+        </FieldLeft>
+      </FieldCard>
+
+      <FieldCard>
+        <FieldLeft>
+          <FieldLabel htmlFor='email'>이메일</FieldLabel>
+          <FieldValue>{isLoading ? <SkeletonText width='140px' /> : user?.email}</FieldValue>
+        </FieldLeft>
+      </FieldCard>
+
+      <FieldCard>
+        <FieldLeft>
+          <FieldLabel>관심 직무</FieldLabel>
+          {isLoading ? (
+            <FieldValue style={{ flex: 1, textAlign: 'right' }}>
+              <SkeletonText width='100px' />
+            </FieldValue>
+          ) : editingJob ? (
+            // 기존 Select + Button 영역 그대로
+            <div
               style={{
-                width: '300px',
-                marginLeft: 'auto',
-                justifyContent: 'flex-end',
-              }}
-            > */}
-            {/* {user?.nickname}
-            </ReadonlyInput> */}
-            <FieldValue>{user?.nickname}</FieldValue>
-          </FieldLeft>
-        </FieldCard>
-        {/* 이메일 (수정 불가) */}
-        <FieldCard>
-          <FieldLeft>
-            <FieldLabel htmlFor='email'>이메일</FieldLabel>
-            {/* <ReadonlyInput
-              id='nick'
-              style={{
-                width: '300px',
-                marginLeft: 'auto',
+                display: 'flex',
+                gap: 12,
+                alignItems: 'center',
+                flex: 1,
                 justifyContent: 'flex-end',
               }}
             >
-              {user?.email}
-            </ReadonlyInput> */}
-            <FieldValue>{user?.email}</FieldValue>
-          </FieldLeft>
-        </FieldCard>
-
-        {/* 관심 직무 */}
-        <FieldCard>
-          <FieldLeft>
-            <FieldLabel>관심 직무</FieldLabel>
-            {editingJob ? (
-              <div
-                style={{
-                  display: 'flex',
-                  gap: 12,
-                  alignItems: 'center',
-                  flex: 1,
-                  justifyContent: 'flex-end',
-                }}
+              <SearchableSelect
+                value={selectedJobId}
+                onChange={(id) => setSelectedJobId(id)}
+                options={jobs}
+                placeholder='직무 선택'
+              />
+              <Button
+                variant='outline'
+                onClick={handleJobUpdate}
+                style={{ fontSize: theme.font.size[2] }}
               >
-                <SearchableSelect
-                  value={selectedJobId}
-                  onChange={(id) => setSelectedJobId(id)}
-                  options={jobs}
-                  placeholder='직무 선택'
-                />
-                <Button
-                  variant='outline'
-                  onClick={handleJobUpdate}
-                  style={{
-                    fontSize: theme.font.size[2],
-                  }}
-                >
-                  완료
+                완료
+              </Button>
+            </div>
+          ) : (
+            <>
+              <FieldValue style={{ flex: 1, textAlign: 'right' }}>
+                {jobs.find((j) => j.jobId === selectedJobId)?.name}
+              </FieldValue>
+              <FieldActions>
+                <Button variant='primary' size='sm' onClick={() => setEditingJob(true)}>
+                  <Typography as='span' size={2} weight='semiBold' color='white'>
+                    수정
+                  </Typography>
                 </Button>
-              </div>
-            ) : (
-              <>
-                <FieldValue style={{ flex: '1', textAlign: 'right' }}>
-                  {jobs.find((j) => j.jobId === selectedJobId)?.name}
-                </FieldValue>
-                <FieldActions>
-                  <button style={pillStyle} onClick={() => setEditingJob(true)}>
-                    <Typography as='span' size={2} weight='semiBold'>
-                      수정
-                    </Typography>
-                  </button>
-                </FieldActions>
-              </>
-            )}
-          </FieldLeft>
-        </FieldCard>
-        {/* 합격 여부 (합격자면 문구 노출, 신청 버튼 -> 사진 첨부 모달) */}
-        <FieldCard>
-          <FieldLeft>
-            <FieldLabel>합격 여부</FieldLabel>
-            {user?.passStatus === 'Y' ? (
-              <>
-                <FieldValue style={{ flex: 1, textAlign: 'right' }}>합격자입니다.</FieldValue>
-                <FieldActions>
-                  {/* {fileName && (
-                    <Typography as='div' size={3}>
-                      {fileName}
-                    </Typography>
-                  )} */}
-                  <button
-                    disabled
-                    style={{
-                      ...pillStyle,
-                      background: theme.colors.primary[4],
-                      opacity: 0.5,
-                    }}
-                    onClick={() => setOpenPhotoModal(true)}
-                  >
-                    <Typography
-                      as='span'
-                      size={2}
-                      weight='semiBold'
-                      color={theme.colors.primary[7]}
-                    >
-                      신청
-                    </Typography>
-                  </button>
-                </FieldActions>
-              </>
-            ) : (
-              <>
-                <FieldValue style={{ flex: '1', textAlign: 'right' }}>
-                  일반 사용자입니다.
-                </FieldValue>
-                <FieldActions>
-                  {/* {fileName && (
-                    <Typography as='div' size={3}>
-                      {fileName}
-                    </Typography>
-                  )} */}
-                  <button style={pillStyle} onClick={() => setOpenPhotoModal(true)}>
-                    <Typography as='span' size={2} weight='semiBold'>
-                      신청
-                    </Typography>
-                  </button>
-                </FieldActions>
-              </>
-            )}
-          </FieldLeft>
-        </FieldCard>
-      </Row>
+              </FieldActions>
+            </>
+          )}
+        </FieldLeft>
+      </FieldCard>
+
+      <FieldCard>
+        <FieldLeft>
+          <FieldLabel>합격여부</FieldLabel>
+          {isLoading ? (
+            <FieldValue style={{ flex: 1, textAlign: 'right' }}>
+              <SkeletonText width='150px' />
+            </FieldValue>
+          ) : user?.passStatus === 'Y' ? (
+            <>
+              <FieldValue style={{ flex: 1, textAlign: 'right' }}>합격자입니다.</FieldValue>
+              <FieldActions>
+                <Button variant='outline' size='sm' disabled style={{ opacity: 0.6 }}>
+                  <Typography as='span' size={2} weight='semiBold' color={theme.colors.primary[7]}>
+                    신청
+                  </Typography>
+                </Button>
+              </FieldActions>
+            </>
+          ) : (
+            <>
+              <FieldValue style={{ flex: 1, textAlign: 'right' }}>
+                {user?.certStatus === 'PENDING' ? (
+                  <Typography as='span' size={2} color={theme.colors.primary[8]}>
+                    (신청 중입니다)
+                  </Typography>
+                ) : user?.certStatus === 'REJECTED' ? (
+                  <Typography as='span' size={2} color={theme.colors.error?.[9] ?? 'red'}>
+                    (신청이 거부되었습니다)
+                  </Typography>
+                ) : (
+                  <Typography as='span' size={2} color={theme.colors.gray[10]}>
+                    (합격자 증명 신청이 가능합니다)
+                  </Typography>
+                )}
+              </FieldValue>
+              <FieldActions>
+                <Button variant='primary' size='sm' onClick={() => setOpenPhotoModal(true)}>
+                  <Typography as='span' size={2} weight='semiBold' color='white'>
+                    신청
+                  </Typography>
+                </Button>
+              </FieldActions>
+            </>
+          )}
+        </FieldLeft>
+      </FieldCard>
+
       <Footer>
         <Button variant='outline' onClick={handleUserDelete}>
           회원 탈퇴
@@ -297,16 +275,6 @@ const Footer = styled.div`
   margin-top: ${({ theme }) => theme.space[8]};
 `;
 
-const pillStyle = {
-  borderRadius: '10px',
-  background: 'rgba(170,153,236,0.3)',
-  padding: '0 12px',
-  height: '32px',
-  display: 'inline-flex',
-  alignItems: 'center',
-  border: '0',
-};
-
 // 페이지 상단 헤더
 const MyPageHeader = styled.div`
   display: flex;
@@ -316,6 +284,30 @@ const MyPageHeader = styled.div`
   padding-bottom: ${({ theme }) => theme.space[4]}; /* 16px */
   border-bottom: 2px solid ${({ theme }) => theme.colors.gray[12]};
   padding-left: ${({ theme }) => theme.space[4]};
+`;
+
+const SkeletonText = styled.div`
+  display: inline-block;
+  width: ${({ width }) => width || '100%'};
+  height: 16px;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    ${({ theme }) => theme.colors.gray[3]} 25%,
+    ${({ theme }) => theme.colors.gray[4]} 50%,
+    ${({ theme }) => theme.colors.gray[3]} 75%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.3s ease-in-out infinite;
+
+  @keyframes shimmer {
+    0% {
+      background-position: -400px 0;
+    }
+    100% {
+      background-position: 400px 0;
+    }
+  }
 `;
 
 export default MyInfo;

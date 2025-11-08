@@ -1,10 +1,11 @@
-import { createPost, editPost, getPost } from '@api/postAPIS';
+import { editPost, getPost } from '@api/postAPIS';
 import { JobSelector } from '@components/common/JobSelector';
 import Typography from '@components/common/Typography';
 import WarnDialog from '@components/common/WarnDialog';
 import { PageContainer } from '@components/layout/PageContainer';
 import {
   DndContext,
+  DragOverlay,
   closestCenter,
   KeyboardSensor,
   PointerSensor,
@@ -16,7 +17,6 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { Settings } from '@elevenlabs/elevenlabs-js/api/resources/voices/resources/settings/client/Client';
 import * as Accordion from '@radix-ui/react-accordion';
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import { CheckIcon, PlusIcon } from '@radix-ui/react-icons';
@@ -36,7 +36,7 @@ export default function QAUpdatePage() {
   const navigate = useNavigate();
   const methods = useForm({
     defaultValues: {
-      jobIds: [1, 4, 6], // 기본값
+      jobIds: [], // 기본값
       title: '',
       summary: '',
       qaSets: [{ question: '', answer: '' }],
@@ -86,6 +86,7 @@ export default function QAUpdatePage() {
   });
 
   const [openItems, setOpenItems] = useState(['item-0']);
+  const [activeId, setActiveId] = useState(null);
 
   const handleAddSet = () => {
     if (fields.length >= 10) {
@@ -99,6 +100,7 @@ export default function QAUpdatePage() {
   };
 
   const selectedJobIds = watch('jobIds');
+  const watchedQaSets = watch('qaSets');
 
   const onSubmit = (data) => {
     // 직무가 1개 이상 선택되어 있을 때만 저장 가능
@@ -125,6 +127,13 @@ export default function QAUpdatePage() {
     }),
   );
 
+  const onDragStart = (event) => {
+    const { active } = event;
+    if (active?.id) {
+      setActiveId(active.id);
+    }
+  };
+
   const onDragEnd = (event) => {
     const { active, over } = event;
 
@@ -136,6 +145,12 @@ export default function QAUpdatePage() {
         move(oldIndex, newIndex);
       }
     }
+
+    setActiveId(null);
+  };
+
+  const onDragCancel = () => {
+    setActiveId(null);
   };
 
   return (
@@ -211,7 +226,9 @@ export default function QAUpdatePage() {
                   <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
+                    onDragStart={onDragStart}
                     onDragEnd={onDragEnd}
+                    onDragCancel={onDragCancel}
                   >
                     <SortableContext
                       items={fields.map((field) => field.id)}
@@ -238,6 +255,24 @@ export default function QAUpdatePage() {
                         </QASetListContainer>
                       </Accordion.Root>
                     </SortableContext>
+                    <DragOverlay>
+                      {activeId
+                        ? (() => {
+                            const activeIndex = fields.findIndex((field) => field.id === activeId);
+                            if (activeIndex === -1) return null;
+
+                            const activeQuestion =
+                              watchedQaSets?.[activeIndex]?.question?.trim() ?? '';
+
+                            return (
+                              <OverlayWrapper>
+                                <OverlayBadge>질문 {activeIndex + 1}</OverlayBadge>
+                                <OverlayQuestion>{activeQuestion}</OverlayQuestion>
+                              </OverlayWrapper>
+                            );
+                          })()
+                        : null}
+                    </DragOverlay>
                   </DndContext>
                   <AddSetButton type='button' onClick={handleAddSet}>
                     <PlusIcon width={30} height={30} />
@@ -314,8 +349,8 @@ const SettingsBox = styled.div`
   background-color: ${({ theme }) => theme.colors.gray[2]};
   border: 1px solid ${({ theme }) => theme.colors.gray[4]};
   border-radius: ${({ theme }) => theme.radius.md};
-  padding: ${({ theme }) => theme.space[4]} ${({ theme }) => theme.space[8]}
-    ${({ theme }) => theme.space[6]};
+  padding: ${({ theme }) => theme.space[4]} ${({ theme }) => theme.space[8]};
+
   margin-top: ${({ theme }) => theme.space[8]};
   box-shadow: ${({ theme }) => theme.shadow.sm};
 
@@ -449,4 +484,41 @@ const Divider = styled.hr`
   border: 0;
   border-top: 1px solid ${({ theme }) => theme.colors.gray[5]};
   margin: ${({ theme }) => theme.space[10]} 0; /* 👈 섹션 간 여백 (40px) */
+`;
+
+const OverlayWrapper = styled.div`
+  transform: none !important;
+  padding: ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[4]};
+  border-radius: ${({ theme }) => theme.radius.sm};
+  box-shadow: ${({ theme }) => theme.shadow.md};
+  background-color: #fff;
+  border: 1px solid ${({ theme }) => theme.colors.gray[4]};
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[2]};
+  min-width: 260px;
+  max-width: 560px;
+  box-sizing: border-box;
+  pointer-events: none; /* 드래그 중 오버레이에 마우스 이벤트 안 먹게 */
+`;
+
+const OverlayBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: ${({ theme }) => theme.font.size[1]};
+  font-weight: ${({ theme }) => theme.font.weight.medium};
+  color: ${({ theme }) => theme.colors.primary[11]};
+  background-color: ${({ theme }) => theme.colors.primary[2]};
+  width: fit-content;
+`;
+
+const OverlayQuestion = styled.div`
+  font-size: ${({ theme }) => theme.font.size[3]};
+  font-weight: ${({ theme }) => theme.font.weight.semiBold};
+  color: ${({ theme }) => theme.colors.gray[12]};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
