@@ -42,7 +42,6 @@ export const uploadCertificateImage = async (file) => {
 
 /**
  * DELETE: 회원 탈퇴
- * TODO: 인증 - userId를 어디서 받아오는지?
  * @param {number} userId
  * @returns {Promise<Object>} response
  */
