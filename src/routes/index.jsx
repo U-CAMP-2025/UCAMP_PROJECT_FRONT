@@ -7,6 +7,7 @@ import MyQAPage from '@pages/MyQA';
 import QACreatePage from '@pages/MyQA/QaCreatePage';
 import QAUpdatePage from '@pages/MyQA/QaUpdatePage';
 import NotFoundPage from '@pages/NotFound';
+import PaymentPage from '@pages/Payment';
 import QADetailPage from '@pages/QADetail';
 import QAListPage from '@pages/QAList';
 import RankPage from '@pages/Rank';
@@ -112,6 +113,14 @@ const AppRoutes = () => {
           element={
             <RequireLogin>
               <SimulationResultPage />
+            </RequireLogin>
+          }
+        />
+        <Route
+          path='/payment'
+          element={
+            <RequireLogin>
+              <PaymentPage />
             </RequireLogin>
           }
         />
