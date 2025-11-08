@@ -1,3 +1,4 @@
+import { postLogout } from '@api/authAPIS';
 import {
   getNoti,
   getNotiLast,
@@ -6,7 +7,7 @@ import {
   notiRead,
   notiReadAll,
 } from '@api/notificationsAPIS';
-import { fetchUserRole, fetchUserStatus } from '@api/userAPIS';
+import { fetchUserRole, fetchUserStatus, patchUserStatus } from '@api/userAPIS';
 import Button from '@components/common/Button';
 import { Overlay, Content, Title, Description } from '@components/common/Dialog';
 import * as H from '@components/common/HeaderStyles';
@@ -138,7 +139,7 @@ export const Header = () => {
     setRunTour(false);
 
     // 튜토리얼을 보지 않았으므로 상태를 'ACTIVE'로 업데이트
-    patchUserStaus('ACTIVE');
+    patchUserStatus('ACTIVE');
   };
 
   const handleJoyrideCallback = (data) => {
@@ -148,7 +149,7 @@ export const Header = () => {
     if (finishedStatuses.includes(status) || action === 'close') {
       setRunTour(false);
       setHeaderTour(true);
-      patchUserStaus('ACTIVE');
+      patchUserStatus('ACTIVE');
     }
 
     if (index === tourSteps.length - 1 && action === 'next') {

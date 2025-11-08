@@ -80,7 +80,7 @@ export const fetchUserStatus = async () => {
  * Patch: 유저 status 업데이트
  * status: 신규면 NEW, 아니면 ACTIVE
  */
-export const patchUserStaus = async (status) => {
+export const patchUserStatus = async (status) => {
   const { data } = await axiosInstance.patch('/users/status', {
     status,
   });
