@@ -110,8 +110,6 @@ export const Header = () => {
   useEffect(() => {
     if (isLogin) {
       fetchUserStatus().then((response) => {
-        console.log(response?.status);
-        console.log(seenHeaderTour);
         if (response?.status === 'NEW' && !seenHeaderTour) {
           setWelcomeModalOpen(true); // 튜토리얼 모달 열기
         }
