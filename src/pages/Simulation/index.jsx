@@ -194,7 +194,7 @@ export default function SimulationPresetPage() {
     const simulationRandom = formData.questionOrder === 'random' ? 'Y' : 'N';
     const postId = Number(formData.selectedSetId) || formData.selectedSetId;
     // const interviewerId = Number(formData.selectedInterviewerId) || formData.selectedInterviewerId;
-    const interviewerId = Math.floor(Math.random() * 10) + 1;
+    const interviewerId = Math.floor(Math.random() * 6) + 1;
 
     setSubmitting(true);
     try {
