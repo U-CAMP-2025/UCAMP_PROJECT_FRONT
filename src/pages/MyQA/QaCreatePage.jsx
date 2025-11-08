@@ -70,7 +70,7 @@ export default function QACreatePage() {
 
   useEffect(() => {
     countPost().then((response) => {
-      if (response?.data >= 5) {
+      if (response?.data >= 10) {
         openAlert('면접 노트는 최대 10개까지 작성할 수 있습니다.', () => {
           navigate(-1);
         });

@@ -1,6 +1,12 @@
-import { postLogout } from '@api/authAPIS';
-import { getNoti, notiDel, notiDelAll, notiRead, notiReadAll } from '@api/notificationsAPIS';
-import { fetchUserRole, fetchUserStatus, patchUserStaus } from '@api/userAPIS';
+import {
+  getNoti,
+  getNotiLast,
+  notiDel,
+  notiDelAll,
+  notiRead,
+  notiReadAll,
+} from '@api/notificationsAPIS';
+import { fetchUserRole, fetchUserStatus } from '@api/userAPIS';
 import Button from '@components/common/Button';
 import { Overlay, Content, Title, Description } from '@components/common/Dialog';
 import * as H from '@components/common/HeaderStyles';
@@ -38,6 +44,7 @@ export const Header = () => {
 
   // ======================= 유저 가이드투어 ======================
   // Joyride 실행 state
+
   const [runTour, setRunTour] = useState(false);
 
   const tourSteps = [
@@ -194,16 +201,33 @@ export const Header = () => {
         })
         .catch(() => setNotifications(null));
     }
-  }, [isLogin, alertTrigger]);
+  }, [isLogin]);
 
   useEffect(() => {
-    fetchUserRole().then((response) => {
-      if (response?.role === 'ADMIN') {
-        setUserRole('ADMIN');
-      } else {
-        setUserRole('USER');
-      }
-    });
+    if (isLogin) {
+      setTimeout(() => {
+        getNotiLast()
+          .then((response) => {
+            if (response?.data === null) {
+              return;
+            }
+            setNotifications((prevNotifications) => [...prevNotifications, response?.data ?? null]);
+          })
+          .catch(() => setNotifications(null));
+      }, 10);
+    }
+  }, [alertTrigger]);
+
+  useEffect(() => {
+    if (isLogin) {
+      fetchUserRole().then((response) => {
+        if (response?.role === 'ADMIN') {
+          setUserRole('ADMIN');
+        } else {
+          setUserRole('USER');
+        }
+      });
+    }
   }, [isLogin]);
 
   return (
