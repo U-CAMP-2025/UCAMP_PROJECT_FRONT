@@ -401,8 +401,8 @@ export default function SimulationGO() {
           <TextToSpeech
             voiceModel={VoiceModel[((Number(interviewerId) || 1) - 1) % VoiceModel.length]}
             currentQuestion={currentQuestion}
-            ttsKey={orderedQa?.[currentIdx]?.qaId ?? currentIdx}
             enabled={isSessionStarted}
+            ttsKey={orderedQa?.[currentIdx]?.qaId ?? currentIdx}
             onSpeakingChange={setTtsSpeaking}
           />
         )}
