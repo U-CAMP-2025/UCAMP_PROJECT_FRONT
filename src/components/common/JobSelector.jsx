@@ -50,15 +50,15 @@ export const JobSelector = ({ value = [], onChange = () => {}, yourJobId = null 
   };
 
   const handleRemoveJob = (jobId) => {
-    onChange(selectedJobs.filter((id) => id !== jobId));
+    onChange(selectedJobs?.filter((id) => id !== jobId));
   };
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
 
-  const availableJobs = jobs.filter((job) => !selectedJobs.includes(job.jobId));
-  const filteredJobs = availableJobs.filter((job) =>
+  const availableJobs = jobs?.filter((job) => !selectedJobs.includes(job.jobId));
+  const filteredJobs = availableJobs?.filter((job) =>
     job.jobName.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 

@@ -42,10 +42,10 @@ export default function MyQAListPage() {
     switch (activeTab) {
       case TABS.MINE:
         // OTHER_WRITER가 null이거나 undefined인 경우 (내가 만든 글)
-        return myQaList.filter((item) => !item.otherWriter);
+        return myQaList?.filter((item) => !item.otherWriter);
       case TABS.BOOKMARKED:
         // OTHER_WRITER 값이 있는 경우 (가져온 글)
-        return myQaList.filter((item) => !!item.otherWriter);
+        return myQaList?.filter((item) => !!item.otherWriter);
       case TABS.ALL:
       default:
         return myQaList;
