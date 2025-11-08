@@ -391,7 +391,7 @@ export default function SimulationGO() {
       <S.MainContentWrapper>
         {!!interviewerId && isSessionStarted && currentQuestion && (
           <TextToSpeech
-            voiceModel={VoiceModel[(parseInt(interviewerId, 10) || interviewerId) - 1]}
+            voiceModel={VoiceModel[(parseInt(interviewerId, 6) || interviewerId) - 1]}
             currentQuestion={currentQuestion}
             enabled={isSessionStarted}
             onSpeakingChange={setTtsSpeaking}
