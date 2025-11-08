@@ -87,3 +87,12 @@ export const patchUserStaus = async (status) => {
   });
   return data;
 };
+
+/**
+ * GET: 유저 상세정보
+ * @Pathvariable {number} userId
+ */
+export const fetchUserDetail = async (userId) => {
+  const { data } = await axiosInstance.get(`/users/${userId}/detail`);
+  return data;
+};
