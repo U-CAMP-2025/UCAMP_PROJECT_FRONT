@@ -5,6 +5,7 @@ import WarnDialog from '@components/common/WarnDialog';
 import { PageContainer } from '@components/layout/PageContainer';
 import {
   DndContext,
+  DragOverlay,
   closestCenter,
   KeyboardSensor,
   PointerSensor,
@@ -81,6 +82,7 @@ export default function QACreatePage() {
   });
 
   const [openItems, setOpenItems] = useState(['item-0']);
+  const [activeId, setActiveId] = useState(null);
 
   const handleAddSet = () => {
     if (fields.length >= 10) {
@@ -94,6 +96,7 @@ export default function QACreatePage() {
   };
 
   const selectedJobIds = watch('jobIds');
+  const watchedQaSets = watch('qaSets');
   const onSubmit = (data) => {
     createPost(data)
       .then((response) => {
@@ -115,7 +118,13 @@ export default function QACreatePage() {
     }),
   );
 
-  // 💡 dnd-kit 드래그 종료 핸들러
+  const onDragStart = (event) => {
+    const { active } = event;
+    if (active?.id) {
+      setActiveId(active.id);
+    }
+  };
+
   const onDragEnd = (event) => {
     const { active, over } = event;
 
@@ -127,6 +136,12 @@ export default function QACreatePage() {
         move(oldIndex, newIndex);
       }
     }
+
+    setActiveId(null);
+  };
+
+  const onDragCancel = () => {
+    setActiveId(null);
   };
 
   return (
@@ -204,7 +219,9 @@ export default function QACreatePage() {
                   <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
+                    onDragStart={onDragStart}
                     onDragEnd={onDragEnd}
+                    onDragCancel={onDragCancel}
                   >
                     <SortableContext
                       items={fields.map((field) => field.id)}
@@ -231,6 +248,24 @@ export default function QACreatePage() {
                         </QASetListContainer>
                       </Accordion.Root>
                     </SortableContext>
+                    <DragOverlay>
+                      {activeId
+                        ? (() => {
+                            const activeIndex = fields.findIndex((field) => field.id === activeId);
+                            if (activeIndex === -1) return null;
+
+                            const activeQuestion =
+                              watchedQaSets?.[activeIndex]?.question?.trim() ?? '';
+
+                            return (
+                              <OverlayWrapper>
+                                <OverlayBadge>질문 {activeIndex + 1}</OverlayBadge>
+                                <OverlayQuestion>{activeQuestion}</OverlayQuestion>
+                              </OverlayWrapper>
+                            );
+                          })()
+                        : null}
+                    </DragOverlay>
                   </DndContext>
                   <AddSetButton type='button' onClick={handleAddSet}>
                     <PlusIcon width={30} height={30} />
@@ -462,4 +497,41 @@ const Divider = styled.hr`
   border: 0;
   border-top: 1px solid ${({ theme }) => theme.colors.gray[5]};
   margin: ${({ theme }) => theme.space[10]} 0;
+`;
+
+const OverlayWrapper = styled.div`
+  transform: none !important;
+  padding: ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[4]};
+  border-radius: ${({ theme }) => theme.radius.sm};
+  box-shadow: ${({ theme }) => theme.shadow.md};
+  background-color: #fff;
+  border: 1px solid ${({ theme }) => theme.colors.gray[4]};
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[2]};
+  min-width: 260px;
+  max-width: 560px;
+  box-sizing: border-box;
+  pointer-events: none;
+`;
+
+const OverlayBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: ${({ theme }) => theme.font.size[1]};
+  font-weight: ${({ theme }) => theme.font.weight.medium};
+  color: ${({ theme }) => theme.colors.primary[11]};
+  background-color: ${({ theme }) => theme.colors.primary[2]};
+  width: fit-content;
+`;
+
+const OverlayQuestion = styled.div`
+  font-size: ${({ theme }) => theme.font.size[3]};
+  font-weight: ${({ theme }) => theme.font.weight.semiBold};
+  color: ${({ theme }) => theme.colors.gray[12]};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
