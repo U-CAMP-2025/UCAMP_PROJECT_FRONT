@@ -84,14 +84,13 @@ export function Checkout() {
                 // ------ '결제하기' 버튼 누르면 결제창 띄우기 ------
                 // 결제를 요청하기 전에 orderId, amount를 서버에 저장하세요.
                 // 결제 과정에서 악의적으로 결제 금액이 바뀌는 것을 확인하는 용도입니다.
+                const randomOrderId = `order_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+
                 await widgets.requestPayment({
-                  orderId: 'kvar8omQPwkm4vxcAzPBL',
-                  orderName: '토스 티셔츠 외 2건',
+                  orderId: randomOrderId,
+                  orderName: '면접톡 플러스 이용권(1개월)',
                   successUrl: window.location.origin + '/payment/success',
                   failUrl: window.location.origin + '/payment/fail',
-                  customerEmail: 'customer123@gmail.com',
-                  customerName: '김토스',
-                  customerMobilePhone: '01012341234',
                 });
               } catch (error) {
                 // 에러 처리하기

@@ -1,4 +1,4 @@
-import { fetchUserPayment } from '@api/paymentAPIS';
+import { fetchAllUserPayment } from '@api/paymentAPIS';
 import Button from '@components/common/Button';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
@@ -11,10 +11,10 @@ import styled, { keyframes } from 'styled-components';
 
 export default function PaymentPage() {
   const { user } = useAuthStore();
-  const [latestPayment, setLatestPayment] = useState(null); // PaymentDTO
+  const [payments, setPayments] = useState([]); // PaymentDTO[]
   const [isLoading, setIsLoading] = useState(true);
   const [showCheckout, setShowCheckout] = useState(false);
-  const [isPlusActive, setIsPlusActive] = useState(!!user?.isPlus);
+  const [isPlusActive, setIsPlusActive] = useState(false);
   const [plusExpiredAt, setPlusExpiredAt] = useState(null);
 
   useEffect(() => {
@@ -23,37 +23,53 @@ export default function PaymentPage() {
       if (!user) {
         setIsLoading(false);
         setIsPlusActive(false);
-        setLatestPayment(null);
+        setPayments([]);
+        setPlusExpiredAt(null);
         return;
       }
 
       try {
-        const res = await fetchUserPayment();
+        const res = await fetchAllUserPayment();
         const data = res?.data ?? res;
 
-        // 결제 내역 없음 또는 만료 정보 없음
-        if (!data || !data.expiredAt) {
+        if (!Array.isArray(data) || data.length === 0) {
+          // 결제 내역이 전혀 없는 경우
+          setPayments([]);
           setIsPlusActive(false);
-          setLatestPayment(null);
           setPlusExpiredAt(null);
           return;
         }
 
-        setLatestPayment(data);
-        setPlusExpiredAt(data.expiredAt);
+        // approvedAt 기준 내림차순 정렬 (최신 결제가 맨 위로)
+        const sorted = [...data].sort((a, b) => {
+          const aTime = a.approvedAt ? new Date(a.approvedAt).getTime() : 0;
+          const bTime = b.approvedAt ? new Date(b.approvedAt).getTime() : 0;
+          return bTime - aTime;
+        });
+
+        setPayments(sorted);
+
+        const latest = sorted[0];
+
+        if (!latest || !latest.expiredAt) {
+          setIsPlusActive(false);
+          setPlusExpiredAt(null);
+          return;
+        }
+
+        setPlusExpiredAt(latest.expiredAt);
 
         const now = new Date();
-        const expiredAtDate = new Date(data.expiredAt);
-        const isActiveByStatus = data.paymentStatus === 'ACTIVE' || data.paymentStatus === 'PAID';
+        const expiredAtDate = new Date(latest.expiredAt);
+        const isActiveByStatus = latest.paymentStatus === 'ACTIVE';
 
         // 상태값 + 만료일 기준으로 이용중 여부 계산
         const active = isActiveByStatus && expiredAtDate > now;
         setIsPlusActive(active);
       } catch (error) {
-        // 401, 404 등 에러 발생 시: 플러스 아님 처리
         console.error('결제 정보 조회 실패:', error);
+        setPayments([]);
         setIsPlusActive(false);
-        setLatestPayment(null);
         setPlusExpiredAt(null);
       } finally {
         setIsLoading(false);
@@ -65,6 +81,8 @@ export default function PaymentPage() {
 
   const formattedPlusExpireDate =
     plusExpiredAt && new Date(plusExpiredAt).toLocaleDateString('ko-KR');
+
+  const latestPayment = payments.length > 0 ? payments[0] : null;
 
   const lastExpiredDate =
     latestPayment?.expiredAt && new Date(latestPayment.expiredAt).toLocaleDateString('ko-KR');
@@ -216,7 +234,7 @@ export default function PaymentPage() {
               <SkeletonLine width='90%' />
               <SkeletonLine width='80%' />
             </HistorySkeleton>
-          ) : !latestPayment ? (
+          ) : payments.length === 0 ? (
             <EmptyHistory>아직 플러스 이용권 결제 내역이 없습니다.</EmptyHistory>
           ) : (
             <HistoryTable>
@@ -230,25 +248,21 @@ export default function PaymentPage() {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>{latestPayment.orderId}</td>
-                  <td>{latestPayment.totalAmount?.toLocaleString() ?? '-'}원</td>
-                  <td>
-                    <HistoryStatus $status={latestPayment.paymentStatus}>
-                      {latestPayment.paymentStatus}
-                    </HistoryStatus>
-                  </td>
-                  <td>
-                    {latestPayment.approvedAt
-                      ? new Date(latestPayment.approvedAt).toLocaleDateString('ko-KR')
-                      : '-'}
-                  </td>
-                  <td>
-                    {latestPayment.expiredAt
-                      ? new Date(latestPayment.expiredAt).toLocaleDateString('ko-KR')
-                      : '-'}
-                  </td>
-                </tr>
+                {payments.map((p) => (
+                  <tr key={p.orderId}>
+                    <td>{p.orderId}</td>
+                    <td>{p.totalAmount?.toLocaleString() ?? '-'}원</td>
+                    <td>
+                      <HistoryStatus $status={p.paymentStatus}>
+                        {p.paymentStatus === 'ACTIVE' ? '이용가능' : '만료'}
+                      </HistoryStatus>
+                    </td>
+                    <td>
+                      {p.approvedAt ? new Date(p.approvedAt).toLocaleDateString('ko-KR') : '-'}
+                    </td>
+                    <td>{p.expiredAt ? new Date(p.expiredAt).toLocaleDateString('ko-KR') : '-'}</td>
+                  </tr>
+                ))}
               </tbody>
             </HistoryTable>
           )}
@@ -395,6 +409,7 @@ const StatusBadge = styled.span`
   background-color: ${({ $active, theme }) =>
     $active ? theme.colors.primary[3] : theme.colors.gray[3]};
   border: 1px solid ${({ $active, theme }) => ($active ? theme.colors.primary[8] : 'transparent')};
+  white-space: nowrap;
 `;
 
 const CTARow = styled.div`
@@ -434,6 +449,7 @@ const HistoryTable = styled.table`
     padding: 10px 8px;
     text-align: left;
     border-bottom: 1px solid ${({ theme }) => theme.colors.gray[4]};
+    white-space: nowrap;
   }
 
   th {
@@ -446,15 +462,10 @@ const HistoryStatus = styled.span`
   padding: 2px 8px;
   border-radius: 999px;
   font-size: 11px;
-  text-transform: uppercase;
   background-color: ${({ theme, $status }) =>
-    $status === 'ACTIVE' || $status === 'PAID'
-      ? theme.colors.primary[2]
-      : $status === 'CANCEL'
-        ? theme.colors.gray[3]
-        : theme.colors.gray[2]};
+    $status === 'ACTIVE' ? theme.colors.primary[2] : theme.colors.gray[3]};
   color: ${({ theme, $status }) =>
-    $status === 'ACTIVE' || $status === 'PAID' ? theme.colors.primary[10] : theme.colors.gray[10]};
+    $status === 'ACTIVE' ? theme.colors.primary[10] : theme.colors.gray[10]};
 `;
 
 /* Skeleton */

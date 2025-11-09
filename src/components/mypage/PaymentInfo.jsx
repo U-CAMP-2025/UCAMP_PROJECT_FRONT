@@ -1,3 +1,4 @@
+import { fetchUserPayment } from '@api/paymentAPIS';
 import Button from '@components/common/Button';
 import Typography from '@components/common/Typography';
 import { PageHeader } from '@components/layout/PageHeader';
@@ -7,18 +8,34 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 
-export const PaymentInfo = ({ expiredAt }) => {
+export const PaymentInfo = () => {
   const { user } = useAuthStore();
   const [isPlusActive] = useState(user.isPlus);
   const [isLoading, setIsLoading] = useState(true);
+  const [expiredAt, setExpiredAt] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
+    const loadPaymentInfo = async () => {
+      if (!user?.isPlus) {
+        // 플러스가 아니면 그냥 로딩만 종료
+        setIsLoading(false);
+        return;
+      }
+
+      fetchUserPayment()
+        .then((response) => {
+          console.log(response);
+          setExpiredAt(response.expiredAt);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    };
+
+    // 플러스 유저일 때만 실행
+    loadPaymentInfo();
+  }, [user]);
 
   const handleGoPayment = () => {
     navigate('/payment');
@@ -65,7 +82,11 @@ export const PaymentInfo = ({ expiredAt }) => {
           ) : isPlusActive ? (
             <>
               <Typography size={3} weight='medium'>
-                현재 <b>한달 이용권</b>이 활성화되어 있습니다.
+                현재{' '}
+                <Typography as='span' color={theme.colors.primary[9]} weight='bold'>
+                  면접톡 플러스
+                </Typography>
+                를 사용중입니다.
               </Typography>
               <Typography size={2} style={{ color: theme.colors.primary[10] }}>
                 {formattedExpireDate
