@@ -173,7 +173,7 @@ export default function PaymentPage() {
                 면접 연습 <span>무제한</span>
               </BenefitItem>
               <BenefitItem>
-                스크랩한 노트는 <span>조회만 가능</span> (수정 불가)
+                스크랩한 노트 원하는대로 <span>수정 가능</span>
               </BenefitItem>
               <BenefitItem>AI 피드백 제공</BenefitItem>
             </BenefitList>
