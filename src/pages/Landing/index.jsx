@@ -3,9 +3,11 @@ import * as L from '@components/common/LandingStyles';
 import { Header } from '@components/layout/Header';
 import { PageContainer } from '@components/layout/PageContainer';
 import { KakaoLoginDialog } from '@components/signup/KakaoLoginDialog';
+import { ChevronDownIcon } from '@radix-ui/react-icons';
 import { useAuthStore } from '@store/auth/useAuthStore';
 import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { scroller } from 'react-scroll';
 
 export default function LandingPage() {
   const { isLogin } = useAuthStore();
@@ -15,6 +17,28 @@ export default function LandingPage() {
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('friends');
   const navigate = useNavigate();
+  const SECTION_IDS = [
+    'problem-section',
+    'video-section',
+    'ranking-section',
+    'cta-section',
+    'hero-section',
+  ];
+  const [nextSectionIdx, setNextSectionIdx] = useState(0);
+
+  const handleScrollDown = () => {
+    const targetId = SECTION_IDS[nextSectionIdx];
+
+    scroller.scrollTo(targetId, {
+      duration: 800, // 스크롤 지속 시간 (ms)
+      delay: 0,
+      smooth: 'easeInOutQuart', // 부드러운 스크롤 효과
+      offset: -80, // 헤더 높이만큼 오프셋 조정 (필요시 변경)
+    });
+
+    // 다음 섹션 인덱스로 업데이트 (마지막 섹션 도달 시 다시 처음(Hero)으로 돌아가게 설정함)
+    setNextSectionIdx((prev) => (prev + 1) % SECTION_IDS.length);
+  };
 
   const currentData = L.mockData[activeTab];
   // 1등(index 0), 2등(index 1), 3등(index 2) 순으로 정렬
@@ -74,13 +98,11 @@ export default function LandingPage() {
       <Header />
       <PageContainer footer>
         {/* Hero Section */}
-        <L.HeroContainer>
+        <L.HeroContainer id='hero-section'>
           <L.BackgroundBlur />
           <L.ContentWrapper>
-            <L.MainHeading>
-              면접의 광장,
-              <L.MainHeading2>면접톡!</L.MainHeading2>
-            </L.MainHeading>
+            <L.MainHeading2>면접톡!</L.MainHeading2>
+
             <L.Description>
               혼자 하는 면접 준비는 이제 그만! 👋 <br />
               함께 성장하는 면접 커뮤니티
@@ -124,7 +146,7 @@ export default function LandingPage() {
         </L.HeroContainer>
 
         {/* Problem & Solution Section */}
-        <L.SectionContainer>
+        <L.SectionContainer id='problem-section'>
           <L.SectionTitle>면접 준비, 이런 고민 해보셨죠? 🤯</L.SectionTitle>
           <L.CardsGrid>
             {L.cards.map((card, index) => (
@@ -141,7 +163,7 @@ export default function LandingPage() {
           </L.CardsGrid>
         </L.SectionContainer>
 
-        <L.SectionTitle>면접톡과 함께 준비해보세요!</L.SectionTitle>
+        <L.SectionTitle id='video-section'>면접톡과 함께 준비해보세요!</L.SectionTitle>
         <L.VideoWrapper>
           <iframe
             src='https://www.youtube.com/embed/2MJbpywFSX0'
@@ -153,7 +175,7 @@ export default function LandingPage() {
         </L.VideoWrapper>
 
         {/* Social Proof & Ranking Section */}
-        <L.SectionContainer $bgColor='#f8f9fd'>
+        <L.SectionContainer $bgColor='#f8f9fd' id='ranking-section'>
           <L.SectionTitle>이미 많은 분들이 함께하고 있어요! 🔥</L.SectionTitle>
 
           {/* Review Slider */}
@@ -238,7 +260,7 @@ export default function LandingPage() {
         </L.SectionContainer>
 
         {/* CTA Section */}
-        <L.CTAContainer>
+        <L.CTAContainer id='cta-section'>
           <L.CTAContent>
             <L.SubText>면접 합격, 혼자가 아니라면 더 쉬워집니다.</L.SubText>
             <L.MainText>
@@ -258,6 +280,9 @@ export default function LandingPage() {
           </L.CTAContent>
         </L.CTAContainer>
       </PageContainer>
+      <L.FloatingScrollButton onClick={handleScrollDown} aria-label='다음 섹션으로 이동'>
+        <ChevronDownIcon width={30} height={30} />
+      </L.FloatingScrollButton>
     </>
   );
 }

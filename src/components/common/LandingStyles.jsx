@@ -799,3 +799,36 @@ export const VideoWrapper = styled.div`
     max-width: 100%;
   }
 `;
+
+export const bounce = keyframes`
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); }
+  40% { transform: translateY(-10px) translateX(-50%); }
+  60% { transform: translateY(-5px) translateX(-50%); }
+`;
+
+export const FloatingScrollButton = styled.button`
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 50px;
+  background-color: white;
+  color: ${({ theme }) => theme.colors.primary[9] || '#667eea'}; /* 테마 색상 또는 직접 지정 */
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100; /* 다른 요소보다 위에 오도록 */
+  transition: all 0.3s ease;
+  animation: ${bounce} 2s infinite;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.primary[9] || '#667eea'};
+    color: white;
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+  }
+`;
