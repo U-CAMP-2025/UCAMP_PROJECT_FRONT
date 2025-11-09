@@ -593,27 +593,56 @@ export const Pedestal = styled.div`
 // 6. CTA Section
 export const CTAContainer = styled.div`
   margin: 100px auto 40px;
-  max-width: 1200px;
+  width: 70%;
   padding: 0 5%;
 `;
 
 export const CTAContent = styled.div`
-  background:
-    radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 20%),
-    radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 20%),
-    linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 
   border-radius: 40px;
   padding: 80px 40px;
   text-align: center;
-
   color: white;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 30px 60px -15px rgba(79, 172, 254, 0.4);
+  box-shadow: 0 30px 60px -15px rgba(118, 75, 162, 0.4);
+
+  /* 내부 컨텐츠 확실한 중앙 정렬 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 
   @media (max-width: 768px) {
     padding: 60px 30px;
+  }
+`;
+
+export const PrimaryButton2 = styled(PrimaryButton)`
+  padding: 20px 48px;
+  font-size: 1.4rem;
+  color: #764ba2;
+  background: white;
+
+  display: inline-flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 12px;
+  line-height: normal;
+
+  width: auto;
+  margin: 0 auto;
+
+  &:hover {
+    color: #553c9a;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  @media (max-width: 640px) {
+    width: 100%;
+    display: flex !important;
   }
 `;
 
@@ -641,46 +670,6 @@ export const MainText = styled.h2`
 
   @media (max-width: 768px) {
     font-size: 2.2rem;
-  }
-`;
-
-export const PrimaryButton2 = styled.button`
-  padding: 20px 48px;
-  font-size: 1.4rem;
-  font-weight: 700;
-  border-radius: 16px;
-  border: none;
-  cursor: pointer;
-  background: #fff;
-  color: #00c6fb;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-
-  /* 중앙 정렬 */
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-
-  /* 추가 설정 */
-  width: auto;
-  white-space: nowrap;
-  line-height: 1;
-
-  &:hover {
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-    color: #005bea;
-  }
-
-  &:active {
-    transform: scale(0.98);
-  }
-
-  @media (max-width: 640px) {
-    width: 100%;
-    padding: 18px 32px;
-    font-size: 1.2rem;
   }
 `;
 
