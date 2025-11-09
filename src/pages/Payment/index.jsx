@@ -141,8 +141,10 @@ export default function PaymentPage() {
             </BenefitList>
 
             <StatusRow>
-              <StatusBadge $active>기본 제공</StatusBadge>
-              <Typography size={2}>모든 유저에게 자동 적용되는 무료 이용권입니다.</Typography>
+              <StatusBadge $variant='base'>기본 제공</StatusBadge>
+              <Typography size={2} style={{ fontWeight: 600 }}>
+                모든 유저에게 자동 적용되는 무료 이용권입니다.
+              </Typography>
             </StatusRow>
           </PlanCard>
 
@@ -154,8 +156,7 @@ export default function PaymentPage() {
                   플러스 회원
                 </Typography>
                 <Typography size={2}>
-                  더 많은 노트와 연습으로 <br />
-                  실전 감각을 끌어올려보세요.
+                  더 많은 노트와 연습으로 실전 감각을 끌어올려보세요.
                 </Typography>
               </div>
               <PriceBlock>
@@ -186,25 +187,28 @@ export default function PaymentPage() {
                 <SkeletonLine width='120px' />
               ) : isPlusActive ? (
                 <>
-                  <StatusBadge $active>이용중</StatusBadge>
+                  <StatusBadge $variant='plusActive'>이용중</StatusBadge>
                   {formattedPlusExpireDate && (
-                    <Typography size={2} style={{ color: theme.colors.primary[10] }}>
+                    <Typography
+                      size={2}
+                      style={{ color: theme.colors.primary[10], fontWeight: 600 }}
+                    >
                       만료일: {formattedPlusExpireDate}
                     </Typography>
                   )}
                 </>
               ) : latestPayment ? (
                 <>
-                  <StatusBadge>만료</StatusBadge>
+                  <StatusBadge $variant='expired'>만료</StatusBadge>
                   {lastExpiredDate && (
-                    <Typography size={2} muted>
+                    <Typography size={2} muted style={{ fontWeight: 600 }}>
                       마지막 이용권 만료일: {lastExpiredDate}
                     </Typography>
                   )}
                 </>
               ) : (
                 <>
-                  <StatusBadge>미이용</StatusBadge>
+                  <StatusBadge $variant='inactive'>미이용</StatusBadge>
                   <Typography size={2}>플러스 이용권 결제 시 혜택이 활성화됩니다.</Typography>
                 </>
               )}
@@ -410,11 +414,48 @@ const StatusBadge = styled.span`
   border-radius: 999px;
   font-size: ${({ theme }) => theme.font.size[1]};
   font-weight: ${({ theme }) => theme.font.weight.semiBold};
-  color: ${({ $active, theme }) => ($active ? theme.colors.primary[11] : theme.colors.gray[10])};
-  background-color: ${({ $active, theme }) =>
-    $active ? theme.colors.primary[3] : theme.colors.gray[3]};
-  border: 1px solid ${({ $active, theme }) => ($active ? theme.colors.primary[8] : 'transparent')};
   white-space: nowrap;
+
+  ${({ theme, $variant }) => {
+    switch ($variant) {
+      case 'base':
+        // 일반 회원 기본 제공
+        return `
+          color: ${theme.colors.gray[11]};
+          background-color: ${theme.colors.gray[2]};
+          border: 1px solid ${theme.colors.gray[5]};
+        `;
+      case 'plusActive':
+        // 플러스 이용중 - 강하게 강조
+        return `
+          color: ${theme.colors.primary[11]};
+          background: linear-gradient(135deg, ${theme.colors.primary[3]}, ${theme.colors.primary[0]});
+          border: 1px solid ${theme.colors.primary[8]};
+          box-shadow: ${theme.shadow.sm};
+        `;
+      case 'expired':
+        // 만료된 플러스
+        return `
+          color: ${theme.colors.gray[10]};
+          background-color: ${theme.colors.gray[2]};
+          border: 1px solid ${theme.colors.gray[5]};
+        `;
+      case 'inactive':
+        // 아직 플러스 미이용
+        return `
+          color: ${theme.colors.gray[9]};
+          background-color: ${theme.colors.gray[1]};
+          border: 1px solid transparent;
+        `;
+      default:
+        // 기본 뱃지 스타일
+        return `
+          color: ${theme.colors.gray[10]};
+          background-color: ${theme.colors.gray[3]};
+          border: 1px solid transparent;
+        `;
+    }
+  }}
 `;
 
 const CTARow = styled.div`
