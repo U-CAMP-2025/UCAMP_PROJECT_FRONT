@@ -129,10 +129,10 @@ export default function PaymentPage() {
 
             <BenefitList>
               <BenefitItem>
-                면접 노트 최대 <span>9개</span>
+                면접 노트 최대 <span>9개</span> 저장 가능
               </BenefitItem>
               <BenefitItem>
-                면접 연습 일 <span>3회</span>
+                면접 연습 일 <span>3회 제한</span>
               </BenefitItem>
               <BenefitItem>
                 스크랩한 노트는 <span>조회만 가능</span> (수정 불가)
@@ -154,7 +154,8 @@ export default function PaymentPage() {
                   플러스 회원
                 </Typography>
                 <Typography size={2}>
-                  더 많은 노트와 연습으로 실전 감각을 끌어올려보세요.
+                  더 많은 노트와 연습으로 <br />
+                  실전 감각을 끌어올려보세요.
                 </Typography>
               </div>
               <PriceBlock>
@@ -167,7 +168,7 @@ export default function PaymentPage() {
 
             <BenefitList>
               <BenefitItem>
-                면접 노트 최대<span>21개</span>
+                면접 노트 최대<span>21개</span> 저장 가능
               </BenefitItem>
               <BenefitItem>
                 면접 연습 <span>무제한</span>
@@ -175,7 +176,9 @@ export default function PaymentPage() {
               <BenefitItem>
                 스크랩한 노트 원하는대로 <span>수정 가능</span>
               </BenefitItem>
-              <BenefitItem>AI 피드백 제공</BenefitItem>
+              <BenefitItem>
+                AI 피드백 제공 및<span> 음성 변환 결과 수정 가능</span>
+              </BenefitItem>
             </BenefitList>
 
             <StatusRow>
@@ -242,7 +245,8 @@ export default function PaymentPage() {
                 <tr>
                   <th>주문번호</th>
                   <th>결제 금액</th>
-                  <th>결제 상태</th>
+                  <th>구독 상태</th>
+                  <th>구독 시작일</th>
                   <th>결제일</th>
                   <th>만료일</th>
                 </tr>
@@ -257,6 +261,7 @@ export default function PaymentPage() {
                         {p.paymentStatus === 'ACTIVE' ? '이용가능' : '만료'}
                       </HistoryStatus>
                     </td>
+                    <td>{p.startedAt ? new Date(p.startedAt).toLocaleDateString('ko-KR') : '-'}</td>
                     <td>
                       {p.approvedAt ? new Date(p.approvedAt).toLocaleDateString('ko-KR') : '-'}
                     </td>
