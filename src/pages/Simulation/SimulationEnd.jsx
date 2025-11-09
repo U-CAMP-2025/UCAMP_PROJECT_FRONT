@@ -46,7 +46,7 @@ export default function SimulationEndPage() {
               state: { initialBlob },
               replace: true,
             });
-          }, 5000);
+          }, 7000);
         }
       } catch (err) {
         console.error('transCheckimulation/polling failed:', err);
