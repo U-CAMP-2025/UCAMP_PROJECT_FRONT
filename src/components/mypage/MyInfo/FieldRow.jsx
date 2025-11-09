@@ -2,16 +2,14 @@ import Typography from '@components/common/Typography';
 import styled from 'styled-components';
 
 export const FieldCard = styled.div`
-  width: 80%;
+  width: 100%;
   margin: 0 auto;
-  border: 1px solid ${({ theme }) => theme.colors.gray[6]};
   border-radius: ${({ theme }) => theme.radius.md};
-  background: #fff;
   padding: ${({ theme }) => theme.space[4]};
   display: grid;
   align-items: center;
   gap: ${({ theme }) => theme.space[4]};
-  height: 80px;
+  height: 50px;
 `;
 
 export const FieldLeft = styled.div`

@@ -1,9 +1,11 @@
-import { myPostAll } from '@api/postAPIS';
+import { countPost, myPostAll } from '@api/postAPIS';
+import { Overlay, Content, Title } from '@components/common/Dialog';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import QASetList from '@components/qaset/QASetList';
 import { QASetCardSkeleton } from '@components/qaset/SkeletonCard';
-// import { myQaList } from '@pages/List/MyQaList';
+import * as Dialog from '@radix-ui/react-dialog';
+import { Cross2Icon } from '@radix-ui/react-icons';
 import { PlusIcon } from '@radix-ui/react-icons';
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -16,13 +18,13 @@ const TABS = {
   BOOKMARKED: '스크랩한 노트',
 };
 
-const MAX_QASET = 10;
-
 export default function MyQAListPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [myQaList, setMyQaList] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState(null);
 
   useEffect(() => {
     setIsLoading(true);
@@ -53,8 +55,40 @@ export default function MyQAListPage() {
   }, [activeTab]); // activeTab이 변경될 때만 재계산
 
   const handleAddClick = () => {
-    // 질문답변 생성 페이지로 이동 (경로 수정 필요)
-    navigate('/qa/create');
+    countPost()
+      .then((response) => {
+        const { count, payments } = response?.data || {};
+        const isPaidUser = payments;
+        const maxNoteCount = isPaidUser ? 21 : 9;
+
+        if (count >= maxNoteCount) {
+          const userType = isPaidUser ? '플러스' : '일반';
+          setModalContent(
+            <>
+              <Typography
+                size={3}
+                color='gray.11'
+                style={{ marginBottom: '24px', lineHeight: 1.5 }}
+              >
+                {`${userType} 회원은 면접 노트를 최대 ${maxNoteCount}개까지 작성할 수 있습니다.`}
+                <br />
+                {`(현재 ${count}개 보유 중)`}
+              </Typography>
+              {!isPaidUser && (
+                <PaymentButton onClick={() => navigate('/payment')}>
+                  플러스 회원이 되어보세요! ✨
+                </PaymentButton>
+              )}
+            </>,
+          );
+          setIsModalOpen(true);
+        } else {
+          navigate('/qa/create');
+        }
+      })
+      .catch((error) => {
+        console.error('노트 개수 확인 실패: ', error);
+      });
   };
 
   return (
@@ -94,15 +128,24 @@ export default function MyQAListPage() {
           <QASetList qaList={filteredList} />
         )}
       </MainContentWrapper>
+      <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <Dialog.Portal>
+          <Overlay />
+          <Content>
+            <Title>알림</Title>
+            {modalContent}
+            <CloseButton aria-label='Close'>
+              <Cross2Icon />
+            </CloseButton>
+          </Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </PageContainer>
   );
 }
 
-// 💡 추가하기 버튼용
-
 // --- 페이지 스타일 정의 ---
 
-// QAListPage의 MainContentWrapper 재사용
 const MainContentWrapper = styled.div`
   width: 100%;
   min-width: 700px;
@@ -161,14 +204,12 @@ const TabButton = styled.button`
   cursor: pointer;
   position: relative;
 
-  /* 활성 탭 스타일 */
   ${({ $isActive, theme }) =>
     $isActive &&
     css`
       color: ${theme.colors.primary[9]};
       font-weight: ${theme.font.weight.bold};
 
-      /* 하단 보라색 밑줄 */
       &::after {
         content: '';
         position: absolute;
@@ -186,4 +227,43 @@ const SkeletonGrid = styled.div`
   gap: ${({ theme }) => theme.space[6]};
   width: 95%;
   margin: 0 auto;
+`;
+const CloseButton = styled(Dialog.Close)`
+  all: unset;
+  font-family: inherit;
+  border-radius: 100%;
+  height: 25px;
+  width: 25px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: ${({ theme }) => theme.colors.gray[11]};
+  position: absolute;
+  top: 10px;
+  right: 10px;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.gray[4]};
+  }
+  &:focus {
+    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary[7]};
+  }
+`;
+
+const PaymentButton = styled.button`
+  all: unset;
+  display: block;
+  width: 100%;
+  margin-bottom: ${({ theme }) => theme.space[4]};
+  padding: ${({ theme }) => theme.space[3]} 0;
+  background-color: ${({ theme }) => theme.colors.primary[3]};
+  color: ${({ theme }) => theme.colors.primary[11]};
+  border-radius: ${({ theme }) => theme.radius.md};
+  font-weight: ${({ theme }) => theme.font.weight.semiBold};
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.primary[4]};
+  }
 `;

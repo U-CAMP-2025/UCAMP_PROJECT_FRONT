@@ -68,14 +68,26 @@ export default function QACreatePage() {
     });
   }, [register]);
 
+  // --- 노트 최대 생성 개수
   useEffect(() => {
-    countPost().then((response) => {
-      if (response?.data >= 10) {
-        openAlert('면접 노트는 최대 10개까지 작성할 수 있습니다.', () => {
-          navigate(-1);
-        });
-      }
-    });
+    countPost()
+      .then((response) => {
+        const { count, payments } = response.data;
+
+        const isPaidUser = payments;
+        const maxNoteCount = isPaidUser ? 21 : 9;
+
+        if (count >= maxNoteCount) {
+          const userType = isPaidUser ? '플러스' : '일반';
+          openAlert(
+            `${userType} 회원은 면접 노트를 최대 ${maxNoteCount}개까지 작성할 수 있습니다.\n(현재 ${count}개 보유 중)`,
+            () => navigate(-1),
+          );
+        }
+      })
+      .catch((error) => {
+        console.error('면접 노트 개수 확인 실패: ', error);
+      });
   }, []);
 
   const { fields, append, remove, move } = useFieldArray({
@@ -91,6 +103,7 @@ export default function QACreatePage() {
       openAlert('질문은 최대 10개까지 등록할 수 있습니다.');
       return;
     }
+
     const newIndex = fields.length;
 
     append({ question: '', answer: '' });
