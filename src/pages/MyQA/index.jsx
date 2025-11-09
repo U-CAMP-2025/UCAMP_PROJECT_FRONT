@@ -55,25 +55,25 @@ export default function MyQAListPage() {
   }, [activeTab]); // activeTab이 변경될 때만 재계산
 
   const handleAddClick = () => {
-    // countPost()
-    //   .then((response) => {
-    //     const { count, payments } = response.data;
-    //     const isPaidUser = payments;
-    //     const maxNoteCount = isPaidUser ? 21 : 9;
+    countPost()
+      .then((response) => {
+        const { count, payments } = response?.data || {};
+        const isPaidUser = payments;
+        const maxNoteCount = isPaidUser ? 21 : 9;
 
-    //     if (count >= maxNoteCount) {
-    //       const userType = isPaidUser ? '플러스' : '일반';
-    //       setModalMessage(
-    //         `${userType} 회원은 면접 노트를 최대 ${maxNoteCount}개까지 작성할 수 있습니다.\n(현재 ${count}개 보유 중)`,
-    //       );
-    //       setIsModalOpen(true);
-    //     } else {
-    navigate('/qa/create');
-    //   }
-    // })
-    // .catch((error) => {
-    //   console.error('노트 개수 확인 실패: ', error);
-    // });
+        if (count >= maxNoteCount) {
+          const userType = isPaidUser ? '플러스' : '일반';
+          setModalMessage(
+            `${userType} 회원은 면접 노트를 최대 ${maxNoteCount}개까지 작성할 수 있습니다.\n(현재 ${count}개 보유 중)`,
+          );
+          setIsModalOpen(true);
+        } else {
+          navigate('/qa/create');
+        }
+      })
+      .catch((error) => {
+        console.error('노트 개수 확인 실패: ', error);
+      });
   };
 
   return (

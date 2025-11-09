@@ -105,7 +105,7 @@ export default function QAListPage() {
   const handleAddClick = () => {
     countPost()
       .then((response) => {
-        const { count, payments } = response.data;
+        const { count, payments } = response?.data || {};
         const isPaidUser = payments;
         const maxNoteCount = isPaidUser ? 21 : 9;
 
