@@ -1,4 +1,5 @@
 import { countPost, createPost } from '@api/postAPIS';
+import { fetchUserPayment } from '@api/userAPIS';
 import { JobSelector } from '@components/common/JobSelector';
 import Typography from '@components/common/Typography';
 import WarnDialog from '@components/common/WarnDialog';
@@ -32,6 +33,7 @@ export default function QACreatePage() {
   const [alertMessage, setAlertMessage] = useState('');
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertOnClose, setAlertOnClose] = useState(null);
+  const [isPaidUser, setIsPaidUser] = useState(false);
 
   const jobSectionRef = useRef(null);
 
@@ -68,12 +70,24 @@ export default function QACreatePage() {
     });
   }, [register]);
 
+  // --- 노트 최대 생성 개수
   useEffect(() => {
-    countPost().then((response) => {
-      if (response?.data >= 10) {
-        openAlert('면접 노트는 최대 10개까지 작성할 수 있습니다.', () => {
-          navigate(-1);
-        });
+    Promise.all([countPost(), fetchUserPayment()]).then(([countRes, userPaymentRes]) => {
+      const paidStatusStr = userPaymentRes?.paidStatus;
+      const isPaid = paidStatusStr === 'Y';
+
+      setIsPaidUser(isPaid);
+
+      const maxNoteCount = isPaid ? 21 : 9;
+
+      if (countRes?.data >= maxNoteCount) {
+        const userType = isPaid ? '플러스' : '일반';
+        openAlert(
+          `${userType} 회원은 면접 노트를 최대 ${maxNoteCount}개까지 작성할 수 있습니다.`,
+          () => {
+            navigate(-1);
+          },
+        );
       }
     });
   }, []);
@@ -91,6 +105,7 @@ export default function QACreatePage() {
       openAlert('질문은 최대 10개까지 등록할 수 있습니다.');
       return;
     }
+
     const newIndex = fields.length;
 
     append({ question: '', answer: '' });

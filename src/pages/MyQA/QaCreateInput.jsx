@@ -109,12 +109,10 @@ export const FormItemContainer = styled(Accordion.Item)`
   overflow: hidden;
   box-shadow: ${({ theme }) => theme.shadow.sm};
 
-  /* 💡 dnd-kit이 아이템을 움직일 때 사용할 스타일 */
   transform: ${({ style }) =>
     style?.transform ? CSS.Transform.toString(style.transform) : 'none'};
   transition: ${({ style }) => style?.transition || 'none'};
 
-  /* 💡 드래그 중일 때의 스타일 (그림자 강조) */
   &[data-dragging='true'] {
     box-shadow: ${({ theme }) => theme.shadow.lg};
     z-index: 10;
