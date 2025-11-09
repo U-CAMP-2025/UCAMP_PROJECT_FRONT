@@ -91,13 +91,13 @@ export const QADetail = () => {
             <Typography size={3} weight='semiBold' style={{ color: theme.colors.gray[12] }}>
               만든 유저
             </Typography>
-            <Typography
+            <Typography2
               size={3}
               style={{ color: theme.colors.gray[12] }}
               onClick={() => handleCardClick(userId)}
             >
               {nickname}
-            </Typography>
+            </Typography2>
             <Dot>•</Dot>
             <Typography size={3} weight='semiBold' style={{ color: theme.colors.gray[12] }}>
               작성일
@@ -387,3 +387,19 @@ const Pre = styled.pre`
 `;
 
 const ConfirmButton = styled(DeleteButton)``;
+
+const Typography2 = styled.p.withConfig({
+  shouldForwardProp: (prop) => !['size', 'weight', 'muted', 'color'].includes(prop),
+})`
+  margin: 0;
+  color: ${({ color, muted, theme }) =>
+    color
+      ? theme.colors[color.split('.')[0]]?.[color.split('.')[1]] || color // theme 색상 or hex값
+      : muted
+        ? theme.colors.gray[3]
+        : theme.colors.gray[12]};
+  &:hover {
+    background: #f1f1f1;
+    cursor: pointer;
+  }
+`;

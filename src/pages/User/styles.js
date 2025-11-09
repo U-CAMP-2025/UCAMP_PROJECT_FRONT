@@ -22,7 +22,7 @@ export const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 100vh;
+  min-height: 80vh;
   padding: 20px 20px 40px 20px;
   font-family: 'Noto Sans KR', sans-serif;
   @media (max-width: 968px) {
@@ -226,6 +226,17 @@ export const PostBox = styled.div`
 
   @media (max-width: 480px) {
     padding: 10px;
+  }
+  &:hover {
+    box-shadow:
+      0 1px 6px rgba(98, 54, 255, 0.1),
+      0 1px 6px rgba(0, 0, 0, 0.06);
+    transform: translateY(-4px);
+    border-color: #e8e5d9;
+    border: 1px solid #e0d7ff;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #ffffff 0%, #fafbff 100%);
+    cursor: pointer;
   }
 `;
 
