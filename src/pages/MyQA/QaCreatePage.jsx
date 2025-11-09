@@ -33,7 +33,6 @@ export default function QACreatePage() {
   const [alertMessage, setAlertMessage] = useState('');
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertOnClose, setAlertOnClose] = useState(null);
-  const [isPaidUser, setIsPaidUser] = useState(false);
 
   const jobSectionRef = useRef(null);
 
