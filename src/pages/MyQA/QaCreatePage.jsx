@@ -1,5 +1,4 @@
 import { countPost, createPost } from '@api/postAPIS';
-import { fetchUserPayment } from '@api/userAPIS';
 import { JobSelector } from '@components/common/JobSelector';
 import Typography from '@components/common/Typography';
 import WarnDialog from '@components/common/WarnDialog';
