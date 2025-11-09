@@ -42,7 +42,15 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
       qaIdRef.current = qaId ?? null;
       qIdxRef.current = typeof qIdx === 'number' ? qIdx : null;
 
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          channelCount: 1, // 모노
+          noiseSuppression: true,
+          echoCancellation: true,
+          autoGainControl: true,
+        },
+        video: false,
+      });
       streamRef.current = stream;
 
       const rec = new RecordRTCPromisesHandler(stream, {
@@ -51,14 +59,13 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
         mimeType: 'audio/webm;codecs=opus', // ★ 진짜 webm
         numberOfAudioChannels: 1,
         disableLogs: true,
+        bitsPerSecond: 32000,
       });
       recRef.current = rec;
       await rec.startRecording();
 
       setTimeLeft(maxSeconds);
       setIsRecording(true);
-      // onRecordingChange?.(true);
-      // onTick?.(maxSeconds);
 
       // 카운트다운
       timerRef.current = setInterval(() => {
@@ -153,25 +160,6 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
             if (simulationId) form.append('simulationId', simulationId);
             if (qaId != null) form.append('qaId', String(qaId)); // ✅ 서버 식별자
 
-            // ✅ baseURL이 /api 이므로 슬래시 없이 호출
-            // const res = await axiosInstance.post(
-            //   qaId != null && simulationId
-            //     ? `simulation/${simulationId}/answers/${qaId}/audio`
-            //     : `simulation/answers/audio`,
-            //   form,
-            // );
-            const urlPath =
-              qaId != null && simulationId
-                ? `simulation/${simulationId}/answers/${qaId}/audio`
-                : `simulation/answers/audio`;
-
-            console.debug('[UPLOAD] start', {
-              urlPath,
-              name: file.name,
-              size: file.size,
-              type: file.type,
-            });
-
             axiosInstance
               .post(
                 qaId != null && simulationId
@@ -185,14 +173,6 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
               .catch((err) => {
                 console.error('업로드 실패:', err);
               });
-
-            // const serverUrl = res?.data?.data?.url || res?.data?.url || null;
-            // transcript = res?.data?.data?.transcript ?? '';
-            // url = serverUrl || localPreviewUrl;
-
-            // ✅ 부모로 (url, qaId, transcript)
-            // onSaved?.(url, qaId ?? qIdx, transcript);
-            // console.log('upload result:', res.data);
           } catch (uploadErr) {
             console.error('오디오 업로드 실패:', uploadErr);
             url = localPreviewUrl;
