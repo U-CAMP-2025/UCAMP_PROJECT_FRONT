@@ -86,3 +86,11 @@ export const patchUserStatus = async (status) => {
   });
   return data;
 };
+
+/**
+ * Get: 유저 payment 조회
+ */
+export const fetchUserPayment = async () => {
+  const { data } = await axiosInstance.get('/users/payment');
+  return data;
+};
