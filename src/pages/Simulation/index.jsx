@@ -1,8 +1,12 @@
 import { axiosInstance } from '@api/axios';
-import { fetchSimulationRecords } from '@api/simulationAPIS';
+import { fetchUserPayment } from '@api/paymentAPIS';
+import { createSimulation, fetchSimulationRecords } from '@api/simulationAPIS';
+import { Overlay, Title, Content } from '@components/common/Dialog';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
+import * as Dialog from '@radix-ui/react-dialog';
 import { CaretDownIcon, CheckIcon } from '@radix-ui/react-icons';
+import { Cross2Icon } from '@radix-ui/react-icons';
 import * as RadioGroup from '@radix-ui/react-radio-group';
 import * as Select from '@radix-ui/react-select';
 import * as Tabs from '@radix-ui/react-tabs';
@@ -25,7 +29,10 @@ export default function SimulationPresetPage() {
   const [questionSets, setQuestionSets] = useState([]);
   const [, setInterviewers] = useState([]);
   const [submitting, setSubmitting] = useState(false);
+  const [modalContent, setModalContent] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { isLogin } = useAuthStore();
+  const [isPaidUser, setIsPaidUser] = useState(false);
 
   const MODEL_COUNT = 6; // 면접관 모델 수
 
@@ -90,16 +97,34 @@ export default function SimulationPresetPage() {
   ];
 
   useEffect(() => {
-    if (isLogin) {
-      fetchSimulationRecords().then((response) => {
-        if (response?.data?.length === 0 && !seenSimTour) {
-          setTimeout(() => {
-            setRunSimTour(true);
-          }, 500);
+    if (!isLogin) return;
+
+    const loadPaymentInfo = async () => {
+      try {
+        const response = await fetchUserPayment();
+        // 결제 내역이 있으면 유료 유저
+        setIsPaidUser(true);
+      } catch (error) {
+        // 404 = 결제 내역 없음 (일반 유저)
+        if (error.response?.status === 404) {
+          console.log('결제 내역 없음: 일반 유저');
+        } else {
+          console.error('결제 정보 확인 중 오류 발생: ', error);
         }
-      });
-    }
-  }, [isLogin]);
+        setIsPaidUser(false);
+      }
+    };
+
+    loadPaymentInfo();
+
+    fetchSimulationRecords().then((response) => {
+      if (response?.data?.length === 0 && !seenSimTour) {
+        setTimeout(() => {
+          setRunSimTour(true);
+        }, 500);
+      }
+    });
+  }, [isLogin, seenSimTour]);
 
   const handleJoyrideCallback = (data) => {
     const { status, action } = data;
@@ -168,29 +193,74 @@ export default function SimulationPresetPage() {
     };
   }, [reset]);
 
+  // const onSubmit = async (formData) => {
+  //   // UI -> 백엔드 파라미터 매핑
+  //   const simulationRandom = formData.questionOrder === 'random' ? 'Y' : 'N';
+  //   const postId = Number(formData.selectedSetId) || formData.selectedSetId;
+  //   // const interviewerId = Number(formData.selectedInterviewerId) || formData.selectedInterviewerId;
+  //   const interviewerId = Math.floor(Math.random() * MODEL_COUNT) + 1;
+
+  //   setSubmitting(true);
+  //   try {
+  //     const resp = await axiosInstance.post('/simulation', {
+  //       simulationRandom,
+  //       post: { postId },
+  //       interviewer: { interviewerId },
+  //     });
+  //     const simulationId = resp?.data?.data?.simulationId;
+  //     if (simulationId) {
+  //       console.log(simulationId);
+  //       navigate(`/simulation/${simulationId}/start`);
+  //     } else {
+  //       console.warn('simulationId가 응답에 없습니다.', resp?.data);
+  //     }
+  //   } catch (e) {
+  //     console.error(e);
+  //   } finally {
+  //     setSubmitting(false);
+  //   }
+  // };
+
   const onSubmit = async (formData) => {
-    // UI -> 백엔드 파라미터 매핑
+    setSubmitting(true);
     const simulationRandom = formData.questionOrder === 'random' ? 'Y' : 'N';
     const postId = Number(formData.selectedSetId) || formData.selectedSetId;
-    // const interviewerId = Number(formData.selectedInterviewerId) || formData.selectedInterviewerId;
     const interviewerId = Math.floor(Math.random() * MODEL_COUNT) + 1;
 
-    setSubmitting(true);
     try {
-      const resp = await axiosInstance.post('/simulation', {
+      const response = await createSimulation({
         simulationRandom,
         post: { postId },
         interviewer: { interviewerId },
       });
-      const simulationId = resp?.data?.data?.simulationId;
-      if (simulationId) {
-        console.log(simulationId);
-        navigate(`/simulation/${simulationId}/start`);
-      } else {
-        console.warn('simulationId가 응답에 없습니다.', resp?.data);
+
+      // 403: 하루 3회 제한 (일반 유저) -> 결제 모달 표시
+      if (response?.code === 403) {
+        setModalContent(
+          <>
+            <Typography size={3} color='gray.11' style={{ marginBottom: '24px', lineHeight: 1.5 }}>
+              {'일반 유저는 하루 3회까지만 면접 연습을 할 수 있습니다.'}
+            </Typography>
+            {!isPaidUser && (
+              <PaymentButton
+                onClick={() => {
+                  setIsModalOpen(false);
+                  navigate('/payment');
+                }}
+              >
+                플러스 회원이 되어보세요! ✨
+              </PaymentButton>
+            )}
+          </>,
+        );
+        setIsModalOpen(true);
       }
-    } catch (e) {
-      console.error(e);
+      // 200: 성공 -> 시뮬레이션 시작
+      else if (response?.code === 200 && response?.data?.simulationId) {
+        navigate(`/simulation/${response.data.simulationId}/start`);
+      }
+    } catch (error) {
+      console.error('시뮬레이션 API 에러:', error);
     } finally {
       setSubmitting(false);
     }
@@ -386,6 +456,18 @@ export default function SimulationPresetPage() {
           </PresetForm>
         </FormProvider>
       </MainContentWrapper>
+      <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <Dialog.Portal>
+          <Overlay />
+          <Content>
+            <Title>알림</Title>
+            {modalContent}
+            <CloseButton aria-label='Close'>
+              <Cross2Icon />
+            </CloseButton>
+          </Content>
+        </Dialog.Portal>
+      </Dialog.Root>
       <Joyride
         steps={SimTourSteps}
         run={runSimTour}
@@ -679,4 +761,44 @@ const StartButtonContainer = styled.div`
   margin: ${({ theme }) => theme.space[10]} auto 0;
   width: 100%;
   max-width: 120px;
+`;
+
+const CloseButton = styled(Dialog.Close)`
+  all: unset;
+  font-family: inherit;
+  border-radius: 100%;
+  height: 25px;
+  width: 25px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: ${({ theme }) => theme.colors.gray[11]};
+  position: absolute;
+  top: 10px;
+  right: 10px;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.gray[4]};
+  }
+  &:focus {
+    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary[7]};
+  }
+`;
+
+const PaymentButton = styled.button`
+  all: unset;
+  display: block;
+  width: 100%;
+  margin-bottom: ${({ theme }) => theme.space[4]};
+  padding: ${({ theme }) => theme.space[3]} 0;
+  background-color: ${({ theme }) => theme.colors.primary[3]};
+  color: ${({ theme }) => theme.colors.primary[11]};
+  border-radius: ${({ theme }) => theme.radius.md};
+  font-weight: ${({ theme }) => theme.font.weight.semiBold};
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.primary[4]};
+  }
 `;

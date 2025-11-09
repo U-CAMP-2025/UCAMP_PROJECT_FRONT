@@ -6,6 +6,7 @@ import Typography from '@components/common/Typography';
 import { BookmarkIcon } from '@components/common/icons';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Pencil1Icon, TrashIcon } from '@radix-ui/react-icons';
+import { useAuthStore } from '@store/auth/useAuthStore';
 import theme from '@styles/theme';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -21,6 +22,7 @@ export const QADetail = () => {
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const [copyId, setCopyId] = useState(0);
   const navigate = useNavigate();
+  const { isLogin } = useAuthStore();
   const onPractice = () => {
     navigate('/simulation');
   };
@@ -34,6 +36,14 @@ export const QADetail = () => {
 
   const onUpdate = () => {
     navigate('/qa/update', { state: { qaId } });
+  };
+
+  const handleCardClick = (userId) => {
+    if (isLogin) {
+      navigate(`/user/${userId}`);
+    } else {
+      navigate('/login');
+    }
   };
 
   const onCopy = () => {
@@ -57,11 +67,12 @@ export const QADetail = () => {
   if (!qaData) return <QADetailSkeleton />;
   const {
     job = [],
+    userId,
     title,
     nickname,
     description,
     createAt,
-    isPassed,
+    passed: isPassed,
     qa = [],
     me,
     otherWriter,
@@ -80,9 +91,13 @@ export const QADetail = () => {
             <Typography size={3} weight='semiBold' style={{ color: theme.colors.gray[12] }}>
               만든 유저
             </Typography>
-            <Typography size={3} style={{ color: theme.colors.gray[12] }}>
+            <Typography2
+              size={3}
+              style={{ color: theme.colors.gray[12] }}
+              onClick={() => handleCardClick(userId)}
+            >
               {nickname}
-            </Typography>
+            </Typography2>
             <Dot>•</Dot>
             <Typography size={3} weight='semiBold' style={{ color: theme.colors.gray[12] }}>
               작성일
@@ -372,3 +387,19 @@ const Pre = styled.pre`
 `;
 
 const ConfirmButton = styled(DeleteButton)``;
+
+const Typography2 = styled.p.withConfig({
+  shouldForwardProp: (prop) => !['size', 'weight', 'muted', 'color'].includes(prop),
+})`
+  margin: 0;
+  color: ${({ color, muted, theme }) =>
+    color
+      ? theme.colors[color.split('.')[0]]?.[color.split('.')[1]] || color // theme 색상 or hex값
+      : muted
+        ? theme.colors.gray[3]
+        : theme.colors.gray[12]};
+  &:hover {
+    background: #f1f1f1;
+    cursor: pointer;
+  }
+`;

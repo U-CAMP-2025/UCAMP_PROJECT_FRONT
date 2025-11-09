@@ -7,6 +7,9 @@ import MyQAPage from '@pages/MyQA';
 import QACreatePage from '@pages/MyQA/QaCreatePage';
 import QAUpdatePage from '@pages/MyQA/QaUpdatePage';
 import NotFoundPage from '@pages/NotFound';
+import PaymentPage from '@pages/Payment';
+import PaymentFailPage from '@pages/Payment/Fail';
+import PaymentSuccessPage from '@pages/Payment/Success';
 import QADetailPage from '@pages/QADetail';
 import QAListPage from '@pages/QAList';
 import RankPage from '@pages/Rank';
@@ -16,6 +19,7 @@ import SimulationEndPage from '@pages/Simulation/SimulationEnd';
 import SimulationGO from '@pages/Simulation/SimulationGo';
 import SimulationRecordPage from '@pages/Simulation/SimulationRecord';
 import SimulationResultPage from '@pages/Simulation/SimulationResult';
+import User from '@pages/User';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
 
 import { RequireAdmin } from './RequireAdmin';
@@ -33,6 +37,7 @@ const AppRoutes = () => {
         <Route path='/logout/complete' element={<LogoutComplete />} />
         <Route path='/rank' element={<RankPage />} />
         <Route path='/qalist' element={<QAListPage />} />
+        <Route path='/user/:userId' element={<User />} />
 
         {/** 로그인 필요 */}
         <Route
@@ -112,6 +117,30 @@ const AppRoutes = () => {
           element={
             <RequireLogin>
               <SimulationResultPage />
+            </RequireLogin>
+          }
+        />
+        <Route
+          path='/payment'
+          element={
+            <RequireLogin>
+              <PaymentPage />
+            </RequireLogin>
+          }
+        />
+        <Route
+          path='/payment/success'
+          element={
+            <RequireLogin>
+              <PaymentSuccessPage />
+            </RequireLogin>
+          }
+        />
+        <Route
+          path='/payment/fail'
+          element={
+            <RequireLogin>
+              <PaymentFailPage />
             </RequireLogin>
           }
         />
