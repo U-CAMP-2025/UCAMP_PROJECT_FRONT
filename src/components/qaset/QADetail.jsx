@@ -1,4 +1,4 @@
-import { copyPost, delPost, getPost } from '@api/postAPIS';
+import { copyPost, countPost, delPost, getPost } from '@api/postAPIS';
 import Button from '@components/common/Button';
 import { Overlay, Content, Title, Description } from '@components/common/Dialog';
 import Tag, { TagGroup } from '@components/common/Tag';
@@ -6,6 +6,7 @@ import Typography from '@components/common/Typography';
 import { BookmarkIcon } from '@components/common/icons';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Pencil1Icon, TrashIcon } from '@radix-ui/react-icons';
+import { Cross2Icon } from '@radix-ui/react-icons';
 import { useAuthStore } from '@store/auth/useAuthStore';
 import theme from '@styles/theme';
 import { useEffect, useState } from 'react';
@@ -21,6 +22,8 @@ export const QADetail = () => {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const [copyId, setCopyId] = useState(0);
+  const [modalContent, setModalContent] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
   const { isLogin } = useAuthStore();
   const onPractice = () => {
@@ -47,12 +50,45 @@ export const QADetail = () => {
   };
 
   const onCopy = () => {
-    copyPost(qaId)
+    countPost()
       .then((response) => {
-        setCopyId(response?.data ?? 0);
-        setIsCopyModalOpen(true);
+        const { count, payments } = response?.data || {};
+        const isPaidUser = payments;
+        const maxNoteCount = isPaidUser ? 21 : 9;
+
+        if (count >= maxNoteCount) {
+          const userType = isPaidUser ? '플러스' : '일반';
+          setModalContent(
+            <>
+              <Typography
+                size={3}
+                color='gray.11'
+                style={{ marginBottom: '24px', lineHeight: 1.5 }}
+              >
+                {`${userType} 회원은 면접 노트를 최대 ${maxNoteCount}개까지 작성할 수 있습니다.`}
+                <br />
+                {`(현재 ${count}개 보유 중)`}
+              </Typography>
+              {!isPaidUser && (
+                <PaymentButton onClick={() => navigate('/payment')}>
+                  플러스 회원이 되어보세요! ✨
+                </PaymentButton>
+              )}
+            </>,
+          );
+          setIsModalOpen(true);
+        } else {
+          copyPost(qaId)
+            .then((response) => {
+              setCopyId(response?.data ?? 0);
+              setIsCopyModalOpen(true);
+            })
+            .catch();
+        }
       })
-      .catch();
+      .catch((error) => {
+        console.error('노트 개수 확인 실패: ', error);
+      });
   };
 
   const onDeleteConfirm = () => {
@@ -170,6 +206,18 @@ export const QADetail = () => {
                 <CancelButton>취소</CancelButton>
               </Dialog.Close>
             </ButtonRow>
+          </Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+      <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <Dialog.Portal>
+          <Overlay />
+          <Content>
+            <Title>알림</Title>
+            <Description>{modalContent}</Description>
+            <CloseButton aria-label='Close'>
+              <Cross2Icon />
+            </CloseButton>
           </Content>
         </Dialog.Portal>
       </Dialog.Root>
@@ -401,5 +449,45 @@ const Typography2 = styled.p.withConfig({
   &:hover {
     background: #f1f1f1;
     cursor: pointer;
+  }
+`;
+
+const PaymentButton = styled.button`
+  all: unset;
+  display: block;
+  width: 100%;
+  margin-bottom: ${({ theme }) => theme.space[4]};
+  padding: ${({ theme }) => theme.space[3]} 0;
+  background-color: ${({ theme }) => theme.colors.primary[3]};
+  color: ${({ theme }) => theme.colors.primary[11]};
+  border-radius: ${({ theme }) => theme.radius.md};
+  font-weight: ${({ theme }) => theme.font.weight.semiBold};
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.primary[4]};
+  }
+`;
+
+const CloseButton = styled(Dialog.Close)`
+  all: unset;
+  font-family: inherit;
+  border-radius: 100%;
+  height: 25px;
+  width: 25px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: ${({ theme }) => theme.colors.gray[11]};
+  position: absolute;
+  top: 10px;
+  right: 10px;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.gray[4]};
+  }
+  &:focus {
+    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary[7]};
   }
 `;

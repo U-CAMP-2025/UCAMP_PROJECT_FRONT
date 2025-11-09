@@ -328,7 +328,7 @@ export const Header = () => {
                 onOpenChange={setNotifOpen}
                 items={notifications}
                 onItemClick={(item) => {
-                  // 예시: 클릭 시 읽음 처리
+                  // 읽지 않은 알림이면 → 읽음 처리
                   if (!item.read) {
                     notiRead(item.notiId)
                       .then(() => {
@@ -337,28 +337,27 @@ export const Header = () => {
                         );
                       })
                       .catch(() => setNotifications([]));
-                  } else {
-                    notiDel(item.notiId)
-                      .then(() => {
-                        setNotifications((prev) => prev?.filter((n) => n.notiId !== item.notiId));
-                      })
-                      .catch(() => setNotifications([]));
+                    return;
                   }
+
+                  // 이미 읽은 알림이면 → 삭제
+                  notiDel(item.notiId)
+                    .then(() => {
+                      setNotifications((prev) => prev?.filter((n) => n.notiId !== item.notiId));
+                    })
+                    .catch(() => setNotifications([]));
                 }}
                 onMarkAllRead={() => {
-                  if (unreadDerived !== 0) {
-                    notiReadAll()
-                      .then(() => {
-                        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-                      })
-                      .catch(() => setNotifications([]));
-                  } else {
-                    notiDelAll()
-                      .then(() => {
-                        setNotifications([]);
-                      })
-                      .catch(() => setNotifications([]));
-                  }
+                  notiReadAll()
+                    .then(() => {
+                      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+                    })
+                    .catch(() => setNotifications([]));
+                }}
+                onDeleteAll={() => {
+                  notiDelAll()
+                    .then(() => setNotifications([]))
+                    .catch(() => setNotifications([]));
                 }}
               />
             </>

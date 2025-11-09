@@ -1,18 +1,13 @@
 import { KakaoLoginDialog } from '@components/signup/KakaoLoginDialog';
 import {
-  CSS2,
-  Header2,
   Container,
   ProfileCard,
   ProfileLeft,
   ProfileRight,
   Avatar,
   Name,
-  Subtitle,
-  InfoItem,
   InfoItemRight,
   Icon,
-  InfoContent,
   InfoContentRight,
   InfoLabel,
   InfoValue,
@@ -25,6 +20,11 @@ import {
   PostJobs,
   PostFooter,
   PostMeta,
+  TableWrapper,
+  EmptyBox,
+  EmptyIcon,
+  EmptyTitle,
+  EmptySubtitle,
 } from '@pages/User/styles';
 import { useAuthStore } from '@store/auth/useAuthStore';
 import { useState } from 'react';
@@ -116,33 +116,42 @@ export default function UserDetail({ user }) {
           </ProfileRight>
         </ProfileCard>
 
-        {posts.map((p) => (
-          <PostBox key={p.postId} onClick={() => handleCardClick(p.postId)} role='button'>
-            <PostHeader>
-              <PostTitle>{p.postTitle || p.postTitle}</PostTitle>
-              {/* render each job as its own badge */}
-              {Array.isArray(p.jobs) && p.jobs.length > 0 ? (
-                <PostJobs>
-                  {p.jobs.map((j) => (
-                    <PostJob key={j.jobId ?? j.jobName}>{j.jobName}</PostJob>
-                  ))}
-                </PostJobs>
-              ) : (
-                <PostJob>{p.job || '-'}</PostJob>
-              )}
-            </PostHeader>
-            <PostFooter>
-              <PostMeta>
-                <CommentIcon />
-                리뷰 {p.reviewCount ?? 0}
-              </PostMeta>
-              <PostMeta>
-                <BookmarkIcon /> 스크랩 {p.bookmarkCount ?? 0}
-              </PostMeta>
-              <PostMeta>🗓 {p.postCreatedAt ?? '-'}</PostMeta>
-            </PostFooter>
-          </PostBox>
-        ))}
+        {!posts || posts.length === 0 ? (
+          <TableWrapper>
+            <EmptyBox>
+              <EmptyIcon>📦</EmptyIcon>
+              <EmptyTitle>아직 작성한 게시글이 없어요</EmptyTitle>
+              <EmptySubtitle>작성된 공개 게시글이 없습니다</EmptySubtitle>
+            </EmptyBox>
+          </TableWrapper>
+        ) : (
+          posts.map((p) => (
+            <PostBox key={p.postId} onClick={() => handleCardClick(p.postId)} role='button'>
+              <PostHeader>
+                <PostTitle>{p.postTitle || p.postTitle}</PostTitle>
+                {Array.isArray(p.jobs) && p.jobs.length > 0 ? (
+                  <PostJobs>
+                    {p.jobs.map((j) => (
+                      <PostJob key={j.jobId ?? j.jobName}>{j.jobName}</PostJob>
+                    ))}
+                  </PostJobs>
+                ) : (
+                  <PostJob>{p.job || '-'}</PostJob>
+                )}
+              </PostHeader>
+              <PostFooter>
+                <PostMeta>
+                  <CommentIcon />
+                  리뷰 {p.reviewCount ?? 0}
+                </PostMeta>
+                <PostMeta>
+                  <BookmarkIcon /> 스크랩 {p.bookmarkCount ?? 0}
+                </PostMeta>
+                <PostMeta>🗓 {p.postCreatedAt ?? '-'}</PostMeta>
+              </PostFooter>
+            </PostBox>
+          ))
+        )}
       </Container>
     </>
   );
