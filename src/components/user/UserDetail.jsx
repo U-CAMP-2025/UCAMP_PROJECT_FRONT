@@ -103,6 +103,16 @@ export default function UserDetail({ user }) {
                 </Tag2>
               </InfoContentRight>
             </InfoItemRight>
+
+            <InfoItemRight>
+              <Icon>⭐</Icon>
+              <InfoContentRight>
+                <InfoLabel>회원여부</InfoLabel>
+                <Tag2 passed={u.paymentStatus === 'ACTIVE'}>
+                  {u.paymentStatus === 'ACTIVE' ? '플러스' : '사용자'}
+                </Tag2>
+              </InfoContentRight>
+            </InfoItemRight>
           </ProfileRight>
         </ProfileCard>
 
