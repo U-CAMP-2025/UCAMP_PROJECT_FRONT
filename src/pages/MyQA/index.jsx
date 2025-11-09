@@ -5,6 +5,7 @@ import { PageContainer } from '@components/layout/PageContainer';
 import QASetList from '@components/qaset/QASetList';
 import { QASetCardSkeleton } from '@components/qaset/SkeletonCard';
 import * as Dialog from '@radix-ui/react-dialog';
+import { Cross2Icon } from '@radix-ui/react-icons';
 import { PlusIcon } from '@radix-ui/react-icons';
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -133,7 +134,9 @@ export default function MyQAListPage() {
           <Content>
             <Title>알림</Title>
             {modalContent}
-            <ModalCloseButton onClick={() => setIsModalOpen(false)}>확인</ModalCloseButton>
+            <CloseButton aria-label='Close'>
+              <Cross2Icon />
+            </CloseButton>
           </Content>
         </Dialog.Portal>
       </Dialog.Root>
@@ -225,19 +228,25 @@ const SkeletonGrid = styled.div`
   width: 95%;
   margin: 0 auto;
 `;
-const ModalCloseButton = styled.button`
+const CloseButton = styled(Dialog.Close)`
   all: unset;
-  padding: ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[6]};
-  background-color: ${({ theme }) => theme.colors.primary[9]};
-  color: white;
-  border-radius: ${({ theme }) => theme.radius.md};
-  font-size: ${({ theme }) => theme.font.size[3]};
-  font-weight: ${({ theme }) => theme.font.weight.semiBold};
-  cursor: pointer;
-  transition: background-color 0.2s;
+  font-family: inherit;
+  border-radius: 100%;
+  height: 25px;
+  width: 25px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: ${({ theme }) => theme.colors.gray[11]};
+  position: absolute;
+  top: 10px;
+  right: 10px;
 
   &:hover {
-    background-color: ${({ theme }) => theme.colors.primary[10]};
+    background-color: ${({ theme }) => theme.colors.gray[4]};
+  }
+  &:focus {
+    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary[7]};
   }
 `;
 
