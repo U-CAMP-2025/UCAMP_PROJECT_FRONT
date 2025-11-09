@@ -1,10 +1,11 @@
 import { countPost, myPostAll } from '@api/postAPIS';
-import { Overlay, Content, Title, Description } from '@components/common/Dialog';
+import { Overlay, Content, Title } from '@components/common/Dialog';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import QASetList from '@components/qaset/QASetList';
 import { QASetCardSkeleton } from '@components/qaset/SkeletonCard';
 import * as Dialog from '@radix-ui/react-dialog';
+import { Cross2Icon } from '@radix-ui/react-icons';
 import { PlusIcon } from '@radix-ui/react-icons';
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -22,9 +23,8 @@ export default function MyQAListPage() {
   const [activeTab, setActiveTab] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [myQaList, setMyQaList] = useState([]);
-  const [alertMessage, setAlertMessage] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMessage, setModalMessage] = useState('');
+  const [modalContent, setModalContent] = useState(null);
 
   useEffect(() => {
     setIsLoading(true);
@@ -63,8 +63,23 @@ export default function MyQAListPage() {
 
         if (count >= maxNoteCount) {
           const userType = isPaidUser ? '플러스' : '일반';
-          setModalMessage(
-            `${userType} 회원은 면접 노트를 최대 ${maxNoteCount}개까지 작성할 수 있습니다.\n(현재 ${count}개 보유 중)`,
+          setModalContent(
+            <>
+              <Typography
+                size={3}
+                color='gray.11'
+                style={{ marginBottom: '24px', lineHeight: 1.5 }}
+              >
+                {`${userType} 회원은 면접 노트를 최대 ${maxNoteCount}개까지 작성할 수 있습니다.`}
+                <br />
+                {`(현재 ${count}개 보유 중)`}
+              </Typography>
+              {!isPaidUser && (
+                <PaymentButton onClick={() => navigate('/payment')}>
+                  플러스 회원이 되어보세요! ✨
+                </PaymentButton>
+              )}
+            </>,
           );
           setIsModalOpen(true);
         } else {
@@ -118,15 +133,10 @@ export default function MyQAListPage() {
           <Overlay />
           <Content>
             <Title>알림</Title>
-            <Description>
-              {modalMessage.split('\n').map((text, index) => (
-                <React.Fragment key={index}>
-                  {text}
-                  <br />
-                </React.Fragment>
-              ))}
-            </Description>
-            <ModalCloseButton onClick={() => setIsModalOpen(false)}>확인</ModalCloseButton>
+            {modalContent}
+            <CloseButton aria-label='Close'>
+              <Cross2Icon />
+            </CloseButton>
           </Content>
         </Dialog.Portal>
       </Dialog.Root>
@@ -218,18 +228,42 @@ const SkeletonGrid = styled.div`
   width: 95%;
   margin: 0 auto;
 `;
-const ModalCloseButton = styled.button`
+const CloseButton = styled(Dialog.Close)`
   all: unset;
-  padding: ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[6]};
-  background-color: ${({ theme }) => theme.colors.primary[9]};
-  color: white;
+  font-family: inherit;
+  border-radius: 100%;
+  height: 25px;
+  width: 25px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: ${({ theme }) => theme.colors.gray[11]};
+  position: absolute;
+  top: 10px;
+  right: 10px;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.gray[4]};
+  }
+  &:focus {
+    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary[7]};
+  }
+`;
+
+const PaymentButton = styled.button`
+  all: unset;
+  display: block;
+  width: 100%;
+  margin-bottom: ${({ theme }) => theme.space[4]};
+  padding: ${({ theme }) => theme.space[3]} 0;
+  background-color: ${({ theme }) => theme.colors.primary[3]};
+  color: ${({ theme }) => theme.colors.primary[11]};
   border-radius: ${({ theme }) => theme.radius.md};
-  font-size: ${({ theme }) => theme.font.size[3]};
   font-weight: ${({ theme }) => theme.font.weight.semiBold};
   cursor: pointer;
   transition: background-color 0.2s;
 
   &:hover {
-    background-color: ${({ theme }) => theme.colors.primary[10]};
+    background-color: ${({ theme }) => theme.colors.primary[4]};
   }
 `;
