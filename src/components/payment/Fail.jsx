@@ -77,7 +77,6 @@ const Card = styled.div`
   padding: ${({ theme }) => theme.space[6]};
   border-radius: ${({ theme }) => theme.radius.lg};
   background-color: #fff;
-  box-shadow: ${({ theme }) => theme.shadow.md};
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.space[3]};
