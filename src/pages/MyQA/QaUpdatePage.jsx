@@ -31,6 +31,7 @@ export default function QAUpdatePage() {
   const location = useLocation();
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
+  const [alertOnClose, setAlertOnClose] = useState(null);
 
   const { qaId } = location.state || {};
   const navigate = useNavigate();
@@ -44,9 +45,15 @@ export default function QAUpdatePage() {
     },
     mode: 'onChange', // 필드가 변경될 때 유효성 검사 수행
   });
-  const openAlert = (message) => {
+  const openAlert = (message, onClose) => {
     setAlertMessage(message);
+    setAlertOnClose(() => onClose);
     setAlertOpen(true);
+  };
+
+  const handleNavigateBack = () => {
+    setAlertOpen(false);
+    navigate(-1);
   };
   const { reset } = methods;
 
@@ -54,6 +61,10 @@ export default function QAUpdatePage() {
     getPost(qaId)
       .then((resp) => {
         const data = resp?.data ?? null;
+        if (!data.payment) {
+          openAlert('스크랩해온 글은 플러스 유저만 수정이 가능합니다.', handleNavigateBack);
+          return;
+        }
         reset({
           jobIds: data.jobIds,
           title: data.title,
@@ -317,7 +328,12 @@ export default function QAUpdatePage() {
       </MainContentWrapper>
       <WarnDialog
         open={alertOpen}
-        onOpenChange={setAlertOpen}
+        onOpenChange={(open) => {
+          setAlertOpen(open);
+          if (!open && alertOnClose) {
+            alertOnClose();
+          }
+        }}
         title='알림'
         message={alertMessage}
         confirmText='확인'
