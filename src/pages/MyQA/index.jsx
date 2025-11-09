@@ -1,5 +1,5 @@
 import { countPost, myPostAll } from '@api/postAPIS';
-import { Overlay, Content, Title, Description } from '@components/common/Dialog';
+import { Overlay, Content, Title } from '@components/common/Dialog';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import QASetList from '@components/qaset/QASetList';
@@ -22,9 +22,8 @@ export default function MyQAListPage() {
   const [activeTab, setActiveTab] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [myQaList, setMyQaList] = useState([]);
-  const [alertMessage, setAlertMessage] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMessage, setModalMessage] = useState('');
+  const [modalContent, setModalContent] = useState(null);
 
   useEffect(() => {
     setIsLoading(true);
@@ -63,8 +62,23 @@ export default function MyQAListPage() {
 
         if (count >= maxNoteCount) {
           const userType = isPaidUser ? '플러스' : '일반';
-          setModalMessage(
-            `${userType} 회원은 면접 노트를 최대 ${maxNoteCount}개까지 작성할 수 있습니다.\n(현재 ${count}개 보유 중)`,
+          setModalContent(
+            <>
+              <Typography
+                size={3}
+                color='gray.11'
+                style={{ marginBottom: '24px', lineHeight: 1.5 }}
+              >
+                {`${userType} 회원은 면접 노트를 최대 ${maxNoteCount}개까지 작성할 수 있습니다.`}
+                <br />
+                {`(현재 ${count}개 보유 중)`}
+              </Typography>
+              {!isPaidUser && (
+                <PaymentButton onClick={() => navigate('/payment')}>
+                  플러스 회원이 되어보세요! ✨
+                </PaymentButton>
+              )}
+            </>,
           );
           setIsModalOpen(true);
         } else {
@@ -118,14 +132,7 @@ export default function MyQAListPage() {
           <Overlay />
           <Content>
             <Title>알림</Title>
-            <Description>
-              {modalMessage.split('\n').map((text, index) => (
-                <React.Fragment key={index}>
-                  {text}
-                  <br />
-                </React.Fragment>
-              ))}
-            </Description>
+            {modalContent}
             <ModalCloseButton onClick={() => setIsModalOpen(false)}>확인</ModalCloseButton>
           </Content>
         </Dialog.Portal>
@@ -231,5 +238,23 @@ const ModalCloseButton = styled.button`
 
   &:hover {
     background-color: ${({ theme }) => theme.colors.primary[10]};
+  }
+`;
+
+const PaymentButton = styled.button`
+  all: unset;
+  display: block;
+  width: 100%;
+  margin-bottom: ${({ theme }) => theme.space[4]};
+  padding: ${({ theme }) => theme.space[3]} 0;
+  background-color: ${({ theme }) => theme.colors.primary[3]};
+  color: ${({ theme }) => theme.colors.primary[11]};
+  border-radius: ${({ theme }) => theme.radius.md};
+  font-weight: ${({ theme }) => theme.font.weight.semiBold};
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.primary[4]};
   }
 `;
