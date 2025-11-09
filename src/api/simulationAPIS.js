@@ -19,3 +19,8 @@ export const transCheckimulation = async (simulationId) => {
   const { data } = await axiosInstance.get(`/simulation/${simulationId}/transCheck`);
   return data;
 };
+
+export const createSimulation = async (body) => {
+  const { data } = await axiosInstance.post('/simulation', body);
+  return data;
+};
