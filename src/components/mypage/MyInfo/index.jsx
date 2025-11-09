@@ -10,6 +10,7 @@ import ErrorDialog from '@components/common/ErrorDialog';
 import SearchableSelect from '@components/common/SearchableSelect';
 import SuccessDialog from '@components/common/SuccessDialog';
 import Typography from '@components/common/Typography';
+import { PageHeader } from '@components/layout/PageHeader';
 import theme from '@styles/theme';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -17,16 +18,6 @@ import styled from 'styled-components';
 import { FieldCard, FieldLeft, FieldLabel, FieldValue, FieldActions } from './FieldRow';
 import PhotoSubmitDialog from './PhotoSubmitDialog';
 import { WithdrawlDialog } from './WithdrawlDialog';
-
-const UnifiedCard = styled.div`
-  border: 1px solid ${({ theme }) => theme.colors.gray[5]};
-  border-radius: ${({ theme }) => theme.radius.md};
-  box-shadow: ${({ theme }) => theme.shadow.sm};
-  padding: ${({ theme }) => theme.space[6]};
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.space[5]};
-`;
 
 const MyInfo = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -131,11 +122,11 @@ const MyInfo = () => {
   };
   return (
     <Container>
-      <MyPageHeader>
-        <Typography as='h1' size={7} weight='bold'>
-          마이 페이지
+      <PageHeader>
+        <Typography as='h1' size={6} weight='bold'>
+          계정
         </Typography>
-      </MyPageHeader>
+      </PageHeader>
 
       <UnifiedCard>
         <FieldCard>
@@ -273,16 +264,20 @@ const MyInfo = () => {
   );
 };
 
+const UnifiedCard = styled.div`
+  border: 1px solid ${({ theme }) => theme.colors.gray[5]};
+  border-radius: ${({ theme }) => theme.radius.md};
+  box-shadow: ${({ theme }) => theme.shadow.sm};
+  padding: ${({ theme }) => theme.space[6]};
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[5]};
+`;
+
 const Container = styled.div`
   display: flex;
   flex-direction: column;
   width: 70%;
-`;
-
-const Row = styled.div`
-  margin-top: ${({ theme }) => theme.space[6]};
-  display: grid;
-  gap: ${({ theme }) => theme.space[4]};
 `;
 
 const Footer = styled.div`
@@ -290,17 +285,6 @@ const Footer = styled.div`
   gap: ${({ theme }) => theme.space[4]};
   justify-content: center;
   margin-top: ${({ theme }) => theme.space[8]};
-`;
-
-// 페이지 상단 헤더
-const MyPageHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: ${({ theme }) => theme.space[6]}; /* 24px */
-  padding-bottom: ${({ theme }) => theme.space[4]}; /* 16px */
-  border-bottom: 2px solid ${({ theme }) => theme.colors.gray[12]};
-  padding-left: ${({ theme }) => theme.space[4]};
 `;
 
 const SkeletonText = styled.div`
