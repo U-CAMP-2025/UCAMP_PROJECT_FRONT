@@ -309,3 +309,17 @@ export const PostMeta = styled.span`
     margin-left: auto;
   }
 `;
+export const TableWrapper = styled.div`
+  width: 100%;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+`;
+export const EmptyMessage = styled.div`
+  text-align: center;
+  padding: 40px 0;
+  color: #999;
+  font-size: 16px;
+`;
