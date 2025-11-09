@@ -50,7 +50,8 @@ const TableBody = styled.tbody``;
 const Row = styled.tr`
   border-bottom: 1px solid #d9d9d9; /* tbody underline color */
   &:hover {
-    background: #fafafa;
+    background: #f5f5f5;
+    cursor: pointer;
   }
   &:last-child {
     border-bottom: none;

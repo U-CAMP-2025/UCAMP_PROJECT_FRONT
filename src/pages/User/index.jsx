@@ -1,4 +1,5 @@
 import { fetchUserDetail } from '@api/userAPIS';
+import { Footer } from '@components/layout/Footer';
 import { Header } from '@components/layout/Header';
 import { QASetCardSkeleton } from '@components/qaset/SkeletonCard';
 import UserDetail from '@components/user/UserDetail';
@@ -40,6 +41,8 @@ export default function User() {
       ) : (
         <UserDetail user={user} />
       )}
+
+      <Footer />
     </>
   );
 }

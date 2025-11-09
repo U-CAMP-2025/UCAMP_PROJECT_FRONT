@@ -1,4 +1,5 @@
 import { bookmark, practice } from '@api/rankAPIS';
+import { Footer } from '@components/layout/Footer';
 // removed unused imports
 import { Header } from '@components/layout/Header';
 import { RankCardSkeleton } from '@components/qaset/SkeletonRankCard';
@@ -10,6 +11,7 @@ const Container = styled.div`
   max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
+  min-height: 80vh;
 `;
 const Header1 = styled.div`
   display: flex;
@@ -178,6 +180,7 @@ const RankPage = () => {
           </>
         )}
       </Container>
+      <Footer />
     </>
   );
 };
