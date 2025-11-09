@@ -90,12 +90,7 @@ export const UserManageTable = () => {
           status: '활성',
           createdAt: user.createdAt?.slice(0, 10) || '-',
           role: user.role === 'ADMIN' ? 'Admin' : 'User',
-          simulationStatus:
-            user.simulationStatus === 'SUCCESS'
-              ? '완료'
-              : user.simulationStatus === 'INPROGRESS'
-                ? '진행중'
-                : '-',
+          paymentStatus: user.paymentStatus === 'ACTIVE' ? '플러스' : '일반',
           simulation: {
             completedAt: user.simulationCompletedAt
               ? user.simulationCompletedAt.replace('T', ' ').slice(0, 16)
@@ -150,14 +145,18 @@ export const UserManageTable = () => {
     { header: '이메일', key: 'email', width: '200px' },
     { header: '닉네임', key: 'nickName', width: '140px' },
     { header: '직무', key: 'job', width: '120px' },
-    // {
-    //   header: '연습 상태',
-    //   render: (row) => <Typography size={2}>{row.simulationStatus || '-'}</Typography>,
-    //   width: '140px',
-    //   align: 'center',
-    // },
     {
-      header: '합격 여부',
+      header: '구독 상태',
+      render: (row) => (
+        <Pill $variant={row.paymentStatus === '플러스' ? 'success' : 'neutral'}>
+          {row.paymentStatus || '-'}
+        </Pill>
+      ),
+      width: '140px',
+      align: 'center',
+    },
+    {
+      header: '합격 상태',
       render: (row) => (
         <Pill $variant={row.passStatus === '합격자' ? 'success' : 'neutral'}>
           {row.passStatus || '-'}
@@ -204,7 +203,7 @@ export const UserManageTable = () => {
         >
           <SegmentItem value='all'>전체 ({rows.length})</SegmentItem>
           <SegmentItem value='pending'>확인 필요 ({pendingCount})</SegmentItem>
-          <SegmentItem value='others'>기타 ({othersCount})</SegmentItem>
+          {/* <SegmentItem value='others'>기타 ({othersCount})</SegmentItem> */}
         </Segmented>
       </div>
 
