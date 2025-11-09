@@ -1,7 +1,6 @@
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
-import { PayContent } from '@components/payment/PayContent';
-import theme from '@styles/theme';
+import { Checkout } from '@components/payment/Checkout';
 import styled from 'styled-components';
 
 export default function PaymentPage() {
@@ -13,7 +12,7 @@ export default function PaymentPage() {
             면접톡 플러스
           </Typography>
         </PageHeader>
-        <PayContent />
+        <Checkout />
       </ContentWrapper>
     </PageContainer>
   );
