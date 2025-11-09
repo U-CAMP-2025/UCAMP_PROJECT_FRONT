@@ -12,12 +12,21 @@ import SuccessDialog from '@components/common/SuccessDialog';
 import Typography from '@components/common/Typography';
 import theme from '@styles/theme';
 import { useEffect, useState } from 'react';
-import { data } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { FieldCard, FieldLeft, FieldLabel, FieldValue, FieldActions } from './FieldRow';
 import PhotoSubmitDialog from './PhotoSubmitDialog';
 import { WithdrawlDialog } from './WithdrawlDialog';
+
+const UnifiedCard = styled.div`
+  border: 1px solid ${({ theme }) => theme.colors.gray[5]};
+  border-radius: ${({ theme }) => theme.radius.md};
+  box-shadow: ${({ theme }) => theme.shadow.sm};
+  padding: ${({ theme }) => theme.space[6]};
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[5]};
+`;
 
 const MyInfo = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -128,115 +137,123 @@ const MyInfo = () => {
         </Typography>
       </MyPageHeader>
 
-      <FieldCard>
-        <FieldLeft>
-          <FieldLabel htmlFor='nick'>닉네임</FieldLabel>
-          <FieldValue>{isLoading ? <SkeletonText width='80px' /> : user?.nickname}</FieldValue>
-        </FieldLeft>
-      </FieldCard>
+      <UnifiedCard>
+        <FieldCard>
+          <FieldLeft>
+            <FieldLabel htmlFor='nick'>닉네임</FieldLabel>
+            <FieldValue>{isLoading ? <SkeletonText width='80px' /> : user?.nickname}</FieldValue>
+          </FieldLeft>
+        </FieldCard>
 
-      <FieldCard>
-        <FieldLeft>
-          <FieldLabel htmlFor='email'>이메일</FieldLabel>
-          <FieldValue>{isLoading ? <SkeletonText width='140px' /> : user?.email}</FieldValue>
-        </FieldLeft>
-      </FieldCard>
+        <FieldCard>
+          <FieldLeft>
+            <FieldLabel htmlFor='email'>이메일</FieldLabel>
+            <FieldValue>{isLoading ? <SkeletonText width='140px' /> : user?.email}</FieldValue>
+          </FieldLeft>
+        </FieldCard>
 
-      <FieldCard>
-        <FieldLeft>
-          <FieldLabel>관심 직무</FieldLabel>
-          {isLoading ? (
-            <FieldValue style={{ flex: 1, textAlign: 'right' }}>
-              <SkeletonText width='100px' />
-            </FieldValue>
-          ) : editingJob ? (
-            // 기존 Select + Button 영역 그대로
-            <div
-              style={{
-                display: 'flex',
-                gap: 12,
-                alignItems: 'center',
-                flex: 1,
-                justifyContent: 'flex-end',
-              }}
-            >
-              <SearchableSelect
-                value={selectedJobId}
-                onChange={(id) => setSelectedJobId(id)}
-                options={jobs}
-                placeholder='직무 선택'
-              />
-              <Button
-                variant='outline'
-                onClick={handleJobUpdate}
-                style={{ fontSize: theme.font.size[2] }}
+        <FieldCard>
+          {/* 관심직무 */}
+          <FieldLeft>
+            <FieldLabel>관심 직무</FieldLabel>
+            {isLoading ? (
+              <FieldValue style={{ flex: 1, textAlign: 'right' }}>
+                <SkeletonText width='100px' />
+              </FieldValue>
+            ) : editingJob ? (
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 12,
+                  alignItems: 'center',
+                  flex: 1,
+                  justifyContent: 'flex-end',
+                }}
               >
-                완료
-              </Button>
-            </div>
-          ) : (
-            <>
-              <FieldValue style={{ flex: 1, textAlign: 'right' }}>
-                {jobs.find((j) => j.jobId === selectedJobId)?.name}
-              </FieldValue>
-              <FieldActions>
-                <Button variant='primary' size='sm' onClick={() => setEditingJob(true)}>
-                  <Typography as='span' size={2} weight='semiBold' color='white'>
-                    수정
-                  </Typography>
+                <SearchableSelect
+                  value={selectedJobId}
+                  onChange={(id) => setSelectedJobId(id)}
+                  options={jobs}
+                  placeholder='직무 선택'
+                />
+                <Button
+                  variant='outline'
+                  onClick={handleJobUpdate}
+                  style={{ fontSize: theme.font.size[2] }}
+                >
+                  완료
                 </Button>
-              </FieldActions>
-            </>
-          )}
-        </FieldLeft>
-      </FieldCard>
+              </div>
+            ) : (
+              <>
+                <FieldValue style={{ flex: 1, textAlign: 'right' }}>
+                  {jobs.find((j) => j.jobId === selectedJobId)?.name}
+                </FieldValue>
+                <FieldActions>
+                  <Button variant='primary' size='sm' onClick={() => setEditingJob(true)}>
+                    <Typography as='span' size={2} weight='semiBold' color='white'>
+                      수정
+                    </Typography>
+                  </Button>
+                </FieldActions>
+              </>
+            )}
+          </FieldLeft>
+        </FieldCard>
 
-      <FieldCard>
-        <FieldLeft>
-          <FieldLabel>합격여부</FieldLabel>
-          {isLoading ? (
-            <FieldValue style={{ flex: 1, textAlign: 'right' }}>
-              <SkeletonText width='150px' />
-            </FieldValue>
-          ) : user?.passStatus === 'Y' ? (
-            <>
-              <FieldValue style={{ flex: 1, textAlign: 'right' }}>합격자입니다.</FieldValue>
-              <FieldActions>
-                <Button variant='outline' size='sm' disabled style={{ opacity: 0.6 }}>
-                  <Typography as='span' size={2} weight='semiBold' color={theme.colors.primary[7]}>
-                    신청
-                  </Typography>
-                </Button>
-              </FieldActions>
-            </>
-          ) : (
-            <>
+        <FieldCard>
+          {/* 합격 여부 */}
+          <FieldLeft>
+            <FieldLabel>합격여부</FieldLabel>
+            {isLoading ? (
               <FieldValue style={{ flex: 1, textAlign: 'right' }}>
-                {user?.certStatus === 'PENDING' ? (
-                  <Typography as='span' size={2} color={theme.colors.primary[8]}>
-                    (신청 중입니다)
-                  </Typography>
-                ) : user?.certStatus === 'REJECTED' ? (
-                  <Typography as='span' size={2} color={theme.colors.error?.[9] ?? 'red'}>
-                    (신청이 거부되었습니다)
-                  </Typography>
-                ) : (
-                  <Typography as='span' size={2} color={theme.colors.gray[10]}>
-                    (합격자 증명 신청이 가능합니다)
-                  </Typography>
-                )}
+                <SkeletonText width='150px' />
               </FieldValue>
-              <FieldActions>
-                <Button variant='primary' size='sm' onClick={() => setOpenPhotoModal(true)}>
-                  <Typography as='span' size={2} weight='semiBold' color='white'>
-                    신청
-                  </Typography>
-                </Button>
-              </FieldActions>
-            </>
-          )}
-        </FieldLeft>
-      </FieldCard>
+            ) : user?.passStatus === 'Y' ? (
+              <>
+                <FieldValue style={{ flex: 1, textAlign: 'right' }}>합격자입니다.</FieldValue>
+                <FieldActions>
+                  <Button variant='outline' size='sm' disabled style={{ opacity: 0.6 }}>
+                    <Typography
+                      as='span'
+                      size={2}
+                      weight='semiBold'
+                      color={theme.colors.primary[7]}
+                    >
+                      신청
+                    </Typography>
+                  </Button>
+                </FieldActions>
+              </>
+            ) : (
+              <>
+                <FieldValue style={{ flex: 1, textAlign: 'right' }}>
+                  {user?.certStatus === 'PENDING' ? (
+                    <Typography as='span' size={2} color={theme.colors.primary[8]}>
+                      (신청 중입니다)
+                    </Typography>
+                  ) : user?.certStatus === 'REJECTED' ? (
+                    <Typography as='span' size={2} color={theme.colors.error?.[9] ?? 'red'}>
+                      (신청이 거부되었습니다)
+                    </Typography>
+                  ) : (
+                    <Typography as='span' size={2} color={theme.colors.gray[10]}>
+                      (합격자 증명 신청이 가능합니다)
+                    </Typography>
+                  )}
+                </FieldValue>
+                <FieldActions>
+                  <Button variant='primary' size='sm' onClick={() => setOpenPhotoModal(true)}>
+                    <Typography as='span' size={2} weight='semiBold' color='white'>
+                      신청
+                    </Typography>
+                  </Button>
+                </FieldActions>
+              </>
+            )}
+          </FieldLeft>
+        </FieldCard>
+      </UnifiedCard>
 
       <Footer>
         <Button variant='outline' onClick={handleUserDelete}>
