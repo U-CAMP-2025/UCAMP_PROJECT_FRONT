@@ -63,7 +63,7 @@ export default function QACreatePage() {
     formState: { errors, isSubmitting },
   } = methods;
 
-  // 직무 선택 유효성 등록
+  // --- 직무 선택 유효성 등록 ---
   useEffect(() => {
     register('jobIds', {
       validate: (value) => value.length > 0 || '직무를 최소 1개 이상 선택해야 합니다.',
@@ -72,24 +72,24 @@ export default function QACreatePage() {
 
   // --- 노트 최대 생성 개수
   useEffect(() => {
-    Promise.all([countPost(), fetchUserPayment()]).then(([countRes, userPaymentRes]) => {
-      const paidStatusStr = userPaymentRes?.paidStatus;
-      const isPaid = paidStatusStr === 'Y';
+    countPost()
+      .then((response) => {
+        const { count, payments } = response.data;
 
-      setIsPaidUser(isPaid);
+        const isPaidUser = payments;
+        const maxNoteCount = isPaidUser ? 21 : 9;
 
-      const maxNoteCount = isPaid ? 21 : 9;
-
-      if (countRes?.data >= maxNoteCount) {
-        const userType = isPaid ? '플러스' : '일반';
-        openAlert(
-          `${userType} 회원은 면접 노트를 최대 ${maxNoteCount}개까지 작성할 수 있습니다.`,
-          () => {
-            navigate(-1);
-          },
-        );
-      }
-    });
+        if (count >= maxNoteCount) {
+          const userType = isPaidUser ? '플러스' : '일반';
+          openAlert(
+            `${userType} 회원은 면접 노트를 최대 ${maxNoteCount}개까지 작성할 수 있습니다.\n(현재 ${count}개 보유 중)`,
+            () => navigate(-1),
+          );
+        }
+      })
+      .catch((error) => {
+        console.error('면접 노트 개수 확인 실패: ', error);
+      });
   }, []);
 
   const { fields, append, remove, move } = useFieldArray({
