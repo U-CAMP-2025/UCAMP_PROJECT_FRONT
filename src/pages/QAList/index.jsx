@@ -1,11 +1,13 @@
-import { scrollQaSet } from '@api/postAPIS';
+import { countPost, scrollQaSet } from '@api/postAPIS';
 import { fetchUserMypage } from '@api/userAPIS';
+import { Overlay, Description, Title, Content } from '@components/common/Dialog';
 import { JobSelector } from '@components/common/JobSelector';
 import { SortSelector } from '@components/common/SortSelector';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import QASetList from '@components/qaset/QASetList';
 import { QASetCardSkeleton } from '@components/qaset/SkeletonCard';
+import * as Dialog from '@radix-ui/react-dialog';
 import { PlusIcon } from '@radix-ui/react-icons';
 import { useAuthStore } from '@store/auth/useAuthStore';
 import { useTutorialStore } from '@store/tutorial/useTutorialStore';
@@ -79,6 +81,8 @@ export default function QAListPage() {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [yourJob, setYourJob] = useState(null);
   const ITEMS_PER_PAGE = 9;
+  const [modalMessage, setModalMessage] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // 정렬 변경
   const handleSortChange = (newSort) => {
@@ -99,7 +103,25 @@ export default function QAListPage() {
   };
 
   const handleAddClick = () => {
-    navigate('/qa/create');
+    countPost()
+      .then((response) => {
+        const { count, payments } = response.data;
+        const isPaidUser = payments;
+        const maxNoteCount = isPaidUser ? 21 : 9;
+
+        if (count >= maxNoteCount) {
+          const userType = isPaidUser ? '플러스' : '일반';
+          setModalMessage(
+            `${userType} 회원은 면접 노트를 최대 ${maxNoteCount}개까지 작성할 수 있습니다.\n(현재 ${count}개 보유 중)`,
+          );
+          setIsModalOpen(true);
+        } else {
+          navigate('/qa/create');
+        }
+      })
+      .catch((error) => {
+        console.error('노트 개수 확인 실패: ', error);
+      });
   };
 
   // API 호출
@@ -195,6 +217,23 @@ export default function QAListPage() {
           </InfiniteScroll>
         )}
       </MainContentWrapper>
+      <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <Dialog.Portal>
+          <Overlay />
+          <Content>
+            <Title>알림</Title>
+            <Description>
+              {modalMessage.split('\n').map((text, index) => (
+                <React.Fragment key={index}>
+                  {text}
+                  <br />
+                </React.Fragment>
+              ))}
+            </Description>
+            <ModalCloseButton onClick={() => setIsModalOpen(false)}>확인</ModalCloseButton>
+          </Content>
+        </Dialog.Portal>
+      </Dialog.Root>
       <Joyride
         steps={qaListTourSteps}
         run={runQAListTour}
@@ -304,4 +343,19 @@ const SkeletonGrid = styled.div`
   gap: ${({ theme }) => theme.space[6]};
   width: 95%;
   margin: 0 auto;
+`;
+const ModalCloseButton = styled.button`
+  all: unset;
+  padding: ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[6]};
+  background-color: ${({ theme }) => theme.colors.primary[9]};
+  color: white;
+  border-radius: ${({ theme }) => theme.radius.md};
+  font-size: ${({ theme }) => theme.font.size[3]};
+  font-weight: ${({ theme }) => theme.font.weight.semiBold};
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.primary[10]};
+  }
 `;
