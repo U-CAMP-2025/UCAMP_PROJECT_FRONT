@@ -1,7 +1,8 @@
+import Button from '@components/common/Button';
 import Typography from '@components/common/Typography';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Cross2Icon } from '@radix-ui/react-icons';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useSSE } from './useSSE';
@@ -34,6 +35,12 @@ export default function NotificationDrawer({
   });
 
   useSSE(trigger);
+
+  const navigate = useNavigate();
+
+  const handlePayment = () => {
+    navigate('/payment');
+  };
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -92,6 +99,17 @@ export default function NotificationDrawer({
                           {'"' + it.content.split(':::')[0] + '" '}
                           <Message>가 스크랩되었습니다.</Message>
                         </StyledLink>
+                      ) : it.type === 'PAY_EXPIRY' ? (
+                        <>
+                          <Message style={{ fontSize: '14px' }}>{it.content}</Message>
+                          <MarkAll
+                            type='button'
+                            style={{ marginLeft: '5px' }}
+                            onClick={handlePayment}
+                          >
+                            연장하기
+                          </MarkAll>
+                        </>
                       ) : (
                         <Message>{it.content}</Message>
                       )}
@@ -267,6 +285,7 @@ const Badge = styled.span`
       SCRAP: { bg: theme.colors.primary[3], fg: theme.colors.primary[11] },
       REVIEW: { bg: '#E7F8ED', fg: '#18794E' },
       CERT: { bg: '#ffedd5', fg: '#fb923c' },
+      PAY_EXPIRY: { bg: '#ffb0b0ff', fg: '#ad1b1bff' },
     };
     const v = map[$type] || { bg: theme.colors.gray[3], fg: theme.colors.gray[11] };
     return `background:${v.bg}; color:${v.fg};`;

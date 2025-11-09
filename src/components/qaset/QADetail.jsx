@@ -61,7 +61,7 @@ export const QADetail = () => {
     nickname,
     description,
     createAt,
-    isPassed,
+    passed: isPassed,
     qa = [],
     me,
     otherWriter,
