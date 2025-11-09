@@ -47,7 +47,7 @@ export const WithdrawlDialog = ({ open, onOpenChange }) => {
             </Header>
             <Body>
               <ContentText>
-                {`정말 탈퇴하시겠습니까? \n 개인정보 이외의 데이터는 삭제되지 않습니다.`}
+                {`정말 탈퇴하시겠습니까?\n탈퇴 후 24시간 동안 재가입이 불가능하며, \n개인정보 이외의 데이터는 삭제되지 않습니다.`}
               </ContentText>
               {/* 입력 영역 */}
               <InputLabel>
