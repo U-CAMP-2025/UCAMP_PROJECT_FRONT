@@ -7,8 +7,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 
-export const PaymentInfo = ({ defaultPlusActive = false, expiredAt }) => {
-  const [isPlusActive, setIsPlusActive] = useState(defaultPlusActive);
+export const PaymentInfo = ({ expiredAt }) => {
+  const { user } = useAuthStore();
+  const [isPlusActive] = useState(user.isPlus);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -84,6 +85,7 @@ export const PaymentInfo = ({ defaultPlusActive = false, expiredAt }) => {
                 <BenefitItem>
                   <span>면접 연습 무제한</span>
                 </BenefitItem>
+                <BenefitItem>AI 피드백 제공</BenefitItem>
                 <BenefitItem>스크랩한 노트는 원저자 보호를 위해 직접 수정할 수 없어요.</BenefitItem>
               </BenefitList>
             </>
