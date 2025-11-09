@@ -122,6 +122,7 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
       if (recRef.current) {
         await recRef.current.stopRecording();
         const blob = await recRef.current.getBlob();
+        console.debug('[REC] stopped. blob.size=', blob.size, 'blob.type=', blob.type);
 
         // 로컬 프리뷰 URL (업로드 실패 시 폴백)
         const localPreviewUrl = URL.createObjectURL(blob);
@@ -159,6 +160,17 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
             //     : `simulation/answers/audio`,
             //   form,
             // );
+            const urlPath =
+              qaId != null && simulationId
+                ? `simulation/${simulationId}/answers/${qaId}/audio`
+                : `simulation/answers/audio`;
+
+            console.debug('[UPLOAD] start', {
+              urlPath,
+              name: file.name,
+              size: file.size,
+              type: file.type,
+            });
 
             axiosInstance
               .post(
@@ -183,8 +195,8 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
             // console.log('upload result:', res.data);
           } catch (uploadErr) {
             console.error('오디오 업로드 실패:', uploadErr);
-            // url = localPreviewUrl;
-            // onSaved?.(url, qaId ?? qIdx, transcript);
+            url = localPreviewUrl;
+            onSaved?.(url, qaId ?? qIdx, transcript);
           }
         }
 

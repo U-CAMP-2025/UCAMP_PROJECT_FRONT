@@ -19,6 +19,7 @@ import SimulationEndPage from '@pages/Simulation/SimulationEnd';
 import SimulationGO from '@pages/Simulation/SimulationGo';
 import SimulationRecordPage from '@pages/Simulation/SimulationRecord';
 import SimulationResultPage from '@pages/Simulation/SimulationResult';
+import User from '@pages/User';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
 
 import { RequireAdmin } from './RequireAdmin';
@@ -36,6 +37,7 @@ const AppRoutes = () => {
         <Route path='/logout/complete' element={<LogoutComplete />} />
         <Route path='/rank' element={<RankPage />} />
         <Route path='/qalist' element={<QAListPage />} />
+        <Route path='/user/:userId' element={<User />} />
 
         {/** 로그인 필요 */}
         <Route

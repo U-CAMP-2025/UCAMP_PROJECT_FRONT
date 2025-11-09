@@ -1,5 +1,6 @@
 import { PersonIcon } from '@radix-ui/react-icons';
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 const TableWrapper = styled.div`
@@ -49,11 +50,13 @@ const TableBody = styled.tbody``;
 const Row = styled.tr`
   border-bottom: 1px solid #d9d9d9; /* tbody underline color */
   &:hover {
-    background: #fafafa;
+    background: #f5f5f5;
+    cursor: pointer;
   }
   &:last-child {
     border-bottom: none;
   }
+  cursor: pointer;
 `;
 const Td = styled.td`
   padding: 16px 20px; /* match Th for tighter layout */
@@ -138,6 +141,8 @@ const PlusCss = styled.span`
 `;
 
 const RankingTable = ({ data, type, value }) => {
+  const navigate = useNavigate();
+
   const getMedalColor = (position) => {
     switch (position) {
       case 1:
@@ -177,7 +182,13 @@ const RankingTable = ({ data, type, value }) => {
       </TableHeader>
       <TableBody>
         {data.map((user, index) => (
-          <Row key={`${user.userId}`}>
+          <Row
+            key={`${user.userId}`}
+            onClick={() => {
+              if (user && user.userId) navigate(`/user/${user.userId}`);
+            }}
+            role='button'
+          >
             <PositionCell>{getRankBadge(index + 1)}</PositionCell>
             <PlayerCell>
               <PlayerWrapper>
