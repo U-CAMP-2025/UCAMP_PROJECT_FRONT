@@ -25,6 +25,8 @@ import {
   PostJobs,
   PostFooter,
   PostMeta,
+  TableWrapper,
+  EmptyMessage,
 } from '@pages/User/styles';
 import { useAuthStore } from '@store/auth/useAuthStore';
 import { useState } from 'react';
@@ -116,33 +118,38 @@ export default function UserDetail({ user }) {
           </ProfileRight>
         </ProfileCard>
 
-        {posts.map((p) => (
-          <PostBox key={p.postId} onClick={() => handleCardClick(p.postId)} role='button'>
-            <PostHeader>
-              <PostTitle>{p.postTitle || p.postTitle}</PostTitle>
-              {/* render each job as its own badge */}
-              {Array.isArray(p.jobs) && p.jobs.length > 0 ? (
-                <PostJobs>
-                  {p.jobs.map((j) => (
-                    <PostJob key={j.jobId ?? j.jobName}>{j.jobName}</PostJob>
-                  ))}
-                </PostJobs>
-              ) : (
-                <PostJob>{p.job || '-'}</PostJob>
-              )}
-            </PostHeader>
-            <PostFooter>
-              <PostMeta>
-                <CommentIcon />
-                리뷰 {p.reviewCount ?? 0}
-              </PostMeta>
-              <PostMeta>
-                <BookmarkIcon /> 스크랩 {p.bookmarkCount ?? 0}
-              </PostMeta>
-              <PostMeta>🗓 {p.postCreatedAt ?? '-'}</PostMeta>
-            </PostFooter>
-          </PostBox>
-        ))}
+        {!posts || posts.length === 0 ? (
+          <TableWrapper>
+            <EmptyMessage>사용자의 글이 존재하지 않습니다.</EmptyMessage>
+          </TableWrapper>
+        ) : (
+          posts.map((p) => (
+            <PostBox key={p.postId} onClick={() => handleCardClick(p.postId)} role='button'>
+              <PostHeader>
+                <PostTitle>{p.postTitle || p.postTitle}</PostTitle>
+                {Array.isArray(p.jobs) && p.jobs.length > 0 ? (
+                  <PostJobs>
+                    {p.jobs.map((j) => (
+                      <PostJob key={j.jobId ?? j.jobName}>{j.jobName}</PostJob>
+                    ))}
+                  </PostJobs>
+                ) : (
+                  <PostJob>{p.job || '-'}</PostJob>
+                )}
+              </PostHeader>
+              <PostFooter>
+                <PostMeta>
+                  <CommentIcon />
+                  리뷰 {p.reviewCount ?? 0}
+                </PostMeta>
+                <PostMeta>
+                  <BookmarkIcon /> 스크랩 {p.bookmarkCount ?? 0}
+                </PostMeta>
+                <PostMeta>🗓 {p.postCreatedAt ?? '-'}</PostMeta>
+              </PostFooter>
+            </PostBox>
+          ))
+        )}
       </Container>
     </>
   );
