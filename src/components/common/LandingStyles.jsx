@@ -780,6 +780,7 @@ export const mockData = {
 };
 
 export const VideoWrapper = styled.div`
+  margin-top: 40px;
   border-radius: 20px;
   overflow: hidden;
   width: 90%;

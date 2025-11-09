@@ -122,15 +122,7 @@ export default function LandingPage() {
             </L.Card>
           </L.CardsWrapper>
         </L.HeroContainer>
-        <L.VideoWrapper>
-          <iframe
-            src='https://www.youtube.com/embed/2MJbpywFSX0'
-            title='YouTube video player'
-            frameBorder='0'
-            allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
-            allowFullScreen
-          />
-        </L.VideoWrapper>
+
         {/* Problem & Solution Section */}
         <L.SectionContainer>
           <L.SectionTitle>면접 준비, 이런 고민 해보셨죠? 🤯</L.SectionTitle>
@@ -148,6 +140,17 @@ export default function LandingPage() {
             ))}
           </L.CardsGrid>
         </L.SectionContainer>
+
+        <L.SectionTitle>면접톡과 함께 준비해보세요!</L.SectionTitle>
+        <L.VideoWrapper>
+          <iframe
+            src='https://www.youtube.com/embed/2MJbpywFSX0'
+            title='YouTube video player'
+            frameBorder='0'
+            allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+            allowFullScreen
+          />
+        </L.VideoWrapper>
 
         {/* Social Proof & Ranking Section */}
         <L.SectionContainer $bgColor='#f8f9fd'>
