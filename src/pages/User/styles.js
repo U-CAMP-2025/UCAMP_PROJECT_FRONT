@@ -312,14 +312,45 @@ export const PostMeta = styled.span`
 export const TableWrapper = styled.div`
   width: 100%;
   background: white;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  padding: 16px;
+  padding: 32px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
-export const EmptyMessage = styled.div`
+
+export const EmptyBox = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
   text-align: center;
-  padding: 40px 0;
+`;
+
+export const EmptyIcon = styled.div`
+  font-size: 48px;
+  background: #eaf1ff;
+  color: #3b82f6;
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+`;
+
+export const EmptyTitle = styled.div`
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+`;
+
+export const EmptySubtitle = styled.div`
+  font-size: 14px;
   color: #999;
-  font-size: 16px;
 `;
