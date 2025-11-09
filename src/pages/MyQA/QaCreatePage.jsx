@@ -63,7 +63,7 @@ export default function QACreatePage() {
     formState: { errors, isSubmitting },
   } = methods;
 
-  // --- 직무 선택 유효성 등록 ---
+  // 직무 선택 유효성 등록
   useEffect(() => {
     register('jobIds', {
       validate: (value) => value.length > 0 || '직무를 최소 1개 이상 선택해야 합니다.',
