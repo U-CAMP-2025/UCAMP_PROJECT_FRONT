@@ -3,7 +3,6 @@ import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import QASetList from '@components/qaset/QASetList';
 import { QASetCardSkeleton } from '@components/qaset/SkeletonCard';
-// import { myQaList } from '@pages/List/MyQaList';
 import { PlusIcon } from '@radix-ui/react-icons';
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -15,8 +14,6 @@ const TABS = {
   MINE: '내가 만든 노트',
   BOOKMARKED: '스크랩한 노트',
 };
-
-const MAX_QASET = 10;
 
 export default function MyQAListPage() {
   const navigate = useNavigate();
@@ -53,7 +50,7 @@ export default function MyQAListPage() {
   }, [activeTab]); // activeTab이 변경될 때만 재계산
 
   const handleAddClick = () => {
-    // 질문답변 생성 페이지로 이동 (경로 수정 필요)
+    // 질문답변 생성 페이지로 이동
     navigate('/qa/create');
   };
 
@@ -98,11 +95,8 @@ export default function MyQAListPage() {
   );
 }
 
-// 💡 추가하기 버튼용
-
 // --- 페이지 스타일 정의 ---
 
-// QAListPage의 MainContentWrapper 재사용
 const MainContentWrapper = styled.div`
   width: 100%;
   min-width: 700px;
@@ -161,14 +155,12 @@ const TabButton = styled.button`
   cursor: pointer;
   position: relative;
 
-  /* 활성 탭 스타일 */
   ${({ $isActive, theme }) =>
     $isActive &&
     css`
       color: ${theme.colors.primary[9]};
       font-weight: ${theme.font.weight.bold};
 
-      /* 하단 보라색 밑줄 */
       &::after {
         content: '';
         position: absolute;
