@@ -1,4 +1,4 @@
-import { loadTossPayments, ANONYMOUS } from '@tosspayments/tosspayments-sdk';
+import { loadTossPayments } from '@tosspayments/tosspayments-sdk';
 import { useEffect, useState } from 'react';
 
 const clientKey = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
@@ -7,7 +7,7 @@ const customerKey = 'e3YYp8rPwZq4wWAIYyBDX';
 export function Checkout() {
   const [amount, setAmount] = useState({
     currency: 'KRW',
-    value: 5000_000000,
+    value: 5000,
   });
   const [ready, setReady] = useState(false);
   const [widgets, setWidgets] = useState(null);
@@ -20,8 +20,6 @@ export function Checkout() {
       const widgets = tossPayments.widgets({
         customerKey,
       });
-      // 비회원 결제
-      // const widgets = tossPayments.widgets({ customerKey: ANONYMOUS });
 
       setWidgets(widgets);
     }
