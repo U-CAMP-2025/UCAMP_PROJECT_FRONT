@@ -1,18 +1,13 @@
 import { KakaoLoginDialog } from '@components/signup/KakaoLoginDialog';
 import {
-  CSS2,
-  Header2,
   Container,
   ProfileCard,
   ProfileLeft,
   ProfileRight,
   Avatar,
   Name,
-  Subtitle,
-  InfoItem,
   InfoItemRight,
   Icon,
-  InfoContent,
   InfoContentRight,
   InfoLabel,
   InfoValue,
@@ -26,7 +21,10 @@ import {
   PostFooter,
   PostMeta,
   TableWrapper,
-  EmptyMessage,
+  EmptyBox,
+  EmptyIcon,
+  EmptyTitle,
+  EmptySubtitle,
 } from '@pages/User/styles';
 import { useAuthStore } from '@store/auth/useAuthStore';
 import { useState } from 'react';
@@ -120,7 +118,11 @@ export default function UserDetail({ user }) {
 
         {!posts || posts.length === 0 ? (
           <TableWrapper>
-            <EmptyMessage>사용자의 글이 존재하지 않습니다.</EmptyMessage>
+            <EmptyBox>
+              <EmptyIcon>📦</EmptyIcon>
+              <EmptyTitle>아직 작성한 게시글이 없어요</EmptyTitle>
+              <EmptySubtitle>작성된 공개 게시글이 없습니다</EmptySubtitle>
+            </EmptyBox>
           </TableWrapper>
         ) : (
           posts.map((p) => (
