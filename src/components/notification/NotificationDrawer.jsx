@@ -149,6 +149,7 @@ const Overlay = styled(Dialog.Overlay)`
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.28);
+  z-index: 10000;
 `;
 
 const Panel = styled(Dialog.Content)`
@@ -163,7 +164,7 @@ const Panel = styled(Dialog.Content)`
   grid-template-rows: auto 1fr;
   gap: 0;
   overflow: hidden; /* ensure inner content scrolls */
-  z-index: 9999;
+  z-index: 10001;
 `;
 
 const Header = styled.div`

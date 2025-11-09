@@ -215,7 +215,7 @@ const BookmarkIconWrapper = styled.div`
   position: absolute;
   top: -12px;
   right: 7px;
-  z-index: 3;
+  z-index: 1;
   color: ${({ theme }) => theme.colors.primary[8]};
   font-size: 60px;
   display: flex;
