@@ -814,7 +814,7 @@ export const FloatingScrollButton = styled.button`
   width: 50px;
   height: 50px;
   background-color: white;
-  color: ${({ theme }) => theme.colors.primary[9] || '#667eea'}; /* 테마 색상 또는 직접 지정 */
+  color: ${({ theme }) => theme.colors.primary[9] || '#667eea'};
   border: none;
   border-radius: 50%;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -822,7 +822,7 @@ export const FloatingScrollButton = styled.button`
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 100; /* 다른 요소보다 위에 오도록 */
+  z-index: 100;
   transition: all 0.3s ease;
   animation: ${bounce} 2s infinite;
 

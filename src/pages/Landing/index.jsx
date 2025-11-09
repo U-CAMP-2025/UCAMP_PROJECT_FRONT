@@ -41,7 +41,6 @@ export default function LandingPage() {
   };
 
   const currentData = L.mockData[activeTab];
-  // 1등(index 0), 2등(index 1), 3등(index 2) 순으로 정렬
   const sortedData = [...currentData].sort((a, b) => b.score - a.score);
 
   // 포디움 배치 순서: 2등(왼쪽), 1등(가운데), 3등(오른쪽)
@@ -116,7 +115,7 @@ export default function LandingPage() {
           </L.ContentWrapper>
 
           <L.CardsWrapper>
-            <L.Card as={L.Card1}>
+            <L.Card as={L.Card2}>
               <L.CardIcon>📝</L.CardIcon>
               <L.CardTitle>AI 면접 분석</L.CardTitle>
               <L.CardDescription>
@@ -124,7 +123,7 @@ export default function LandingPage() {
                 완벽한 피드백까지!
               </L.CardDescription>
             </L.Card>
-            <L.Card as={L.Card2}>
+            <L.Card as={L.Card1}>
               <L.CardIcon>💼</L.CardIcon>
               <L.CardTitle>합격 전략 공유</L.CardTitle>
               <L.CardDescription>
@@ -220,7 +219,6 @@ export default function LandingPage() {
           </L.SliderWrapper>
 
           {/* Ranking Podium */}
-          {/* 메인 타이틀을 컨테이너 밖으로 배치 */}
           <L.CompetitionTitle>다른 유저들과 선의의 경쟁을 펼쳐보세요 🏆</L.CompetitionTitle>
           <L.RankingContainer>
             <L.RankingHeader>
@@ -240,7 +238,7 @@ export default function LandingPage() {
                 const actualRank = user.rank;
                 // 포디움 높이: 2등(index 0), 1등(index 1), 3등(index 2)
                 const pedestalHeights = [100, 140, 70];
-                const delay = [0.2, 0, 0.4]; // 1등이 가장 먼저 등장하도록 조정 가능
+                const delay = [0.2, 0, 0.4];
 
                 return (
                   <L.PodiumItem key={user.id} style={{ animationDelay: `${delay[index]}s` }}>
