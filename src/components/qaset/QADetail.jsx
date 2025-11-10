@@ -119,76 +119,83 @@ export const QADetail = () => {
   return (
     <Wrap $isMine={me}>
       <HeaderRow>
-        <div>
-          <TitleRow>
-            <Typography as='h1' size={7} weight='bold'>
+        <BadgeRow>
+          {me &&
+            (qaData?.public ? (
+              <PublicBadge>공개글</PublicBadge>
+            ) : (
+              <PrivateBadge>비공개글</PrivateBadge>
+            ))}
+          {me && <MyNoteBadge>나의 노트</MyNoteBadge>}
+          {otherWriter && <SpanOther size={3}>(from: {otherWriter})</SpanOther>}
+        </BadgeRow>
+
+        <TitleAndActionsRow>
+          <TitleWrapper>
+            <Typography
+              as='h1'
+              size={7}
+              weight='bold'
+              style={{
+                wordBreak: 'keep-all',
+                overflowWrap: 'break-word',
+              }}
+            >
               {title}
             </Typography>
+          </TitleWrapper>
 
-            {/* 공개 / 비공개 배지 */}
-            {me &&
-              (qaData?.public ? (
-                <PublicBadge>공개글</PublicBadge>
-              ) : (
-                <PrivateBadge>비공개글</PrivateBadge>
-              ))}
-
-            {/* 내가 작성한 노트면 “나의 노트” 표시 */}
-            {me && <MyNoteBadge>나의 노트</MyNoteBadge>}
-            <SpanOther size={3}>{otherWriter && '(from: ' + otherWriter + ')'}</SpanOther>
-          </TitleRow>
-
-          {/* 작성자 정보 */}
-          <Meta>
-            <Typography size={3} weight='semiBold' style={{ color: theme.colors.gray[12] }}>
-              만든 유저
-            </Typography>
-            <Typography2
-              size={3}
-              style={{ color: theme.colors.gray[12] }}
-              onClick={() => handleCardClick(userId)}
-            >
-              {nickname}
-            </Typography2>
-            <Dot>•</Dot>
-            <Typography size={3} weight='semiBold' style={{ color: theme.colors.gray[12] }}>
-              작성일
-            </Typography>
-            <Typography size={3} style={{ color: theme.colors.primary[11] }}>
-              {dateOnly}
-            </Typography>
-            <Typography size={3} style={{ color: theme.colors.gray[12] }}>
-              • 스크랩{' '}
-              <span
-                style={{ color: theme.colors.primary[11], fontWeight: theme.font.weight.semiBold }}
-              >
-                {bookCount}
-              </span>
-              회
-            </Typography>
-            {isPassed ? <PassBadge>합격자</PassBadge> : <FailBadge>구직자</FailBadge>}
-          </Meta>
-        </div>
-
-        <div>
-          {/* 스크랩 / 수정 / 삭제 버튼 */}
-          {!me && (
-            <IconButton1 onClick={onCopy} title='이 노트를 스크랩합니다.'>
-              <BookmarkIcon />
-            </IconButton1>
-          )}
-          {me && (
-            <>
-              <IconButton1 onClick={onUpdate}>
-                <Pencil1Icon width={24} height={24} />
+          <HeaderActions>
+            {!me && (
+              <IconButton1 onClick={onCopy} title='이 노트를 스크랩합니다.'>
+                <BookmarkIcon />
               </IconButton1>
-              <IconButton2 onClick={() => setOpenDeleteModal(true)}>
-                <TrashIcon width={24} height={24} />
-              </IconButton2>
-            </>
-          )}
-        </div>
+            )}
+            {me && (
+              <>
+                <IconButton1 onClick={onUpdate}>
+                  <Pencil1Icon width={24} height={24} />
+                </IconButton1>
+                <IconButton2 onClick={() => setOpenDeleteModal(true)}>
+                  <TrashIcon width={24} height={24} />
+                </IconButton2>
+              </>
+            )}
+          </HeaderActions>
+        </TitleAndActionsRow>
+
+        {/* 작성자 정보 */}
+        <Meta>
+          <Typography size={3} weight='semiBold' style={{ color: theme.colors.gray[12] }}>
+            만든 유저
+          </Typography>
+          <Typography2
+            size={3}
+            style={{ color: theme.colors.gray[12] }}
+            onClick={() => handleCardClick(userId)}
+          >
+            {nickname}
+          </Typography2>
+          <Dot>•</Dot>
+          <Typography size={3} weight='semiBold' style={{ color: theme.colors.gray[12] }}>
+            작성일
+          </Typography>
+          <Typography size={3} style={{ color: theme.colors.primary[11] }}>
+            {dateOnly}
+          </Typography>
+          <Typography size={3} style={{ color: theme.colors.gray[12] }}>
+            • 스크랩{' '}
+            <span
+              style={{ color: theme.colors.primary[11], fontWeight: theme.font.weight.semiBold }}
+            >
+              {bookCount}
+            </span>
+            회
+          </Typography>
+          {isPassed ? <PassBadge>합격자</PassBadge> : <FailBadge>구직자</FailBadge>}
+        </Meta>
       </HeaderRow>
+
       {/* ✅ 삭제 확인 다이얼로그 */}
       <Dialog.Root open={openDeleteModal} onOpenChange={setOpenDeleteModal}>
         <Dialog.Portal>
@@ -302,13 +309,46 @@ const Wrap = styled.div`
   border-radius: ${({ theme }) => theme.radius.md};
   padding: ${({ theme }) => theme.space[4]};
   transition: background-color 0.2s;
+  width: 100%;
 `;
 
 const HeaderRow = styled.div`
   display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[3]};
+`;
+
+const BadgeRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  flex-wrap: wrap;
+`;
+
+const TitleAndActionsRow = styled.div`
+  display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: ${({ theme }) => theme.space[6]};
+  gap: ${({ theme }) => theme.space[4]};
+`;
+
+const TitleWrapper = styled.div`
+  flex: 1;
+  min-width: 0;
+`;
+
+const HeaderActions = styled.div`
+  flex-shrink: 0;
+  display: flex;
+  gap: ${({ theme }) => theme.space[2]};
+  white-space: nowrap;
+`;
+
+const HeaderContent = styled.div`
+  flex: 1;
+  min-width: 0;
+
+  word-break: break-word;
 `;
 
 const Meta = styled.div`
@@ -555,4 +595,11 @@ const SpanOther = styled.span`
   font-size: ${({ theme }) => theme.font.size[3]};
   color: ${({ theme }) => theme.colors.gray[9]};
   margin-top: ${({ theme }) => theme.space[1]};
+`;
+
+const CharCount = styled.div`
+  text-align: left;
+  font-size: ${({ theme }) => theme.font.size[1]};
+  color: ${({ theme }) => theme.colors.gray[9]};
+  margin-top: ${({ theme }) => theme.space[2]};
 `;
