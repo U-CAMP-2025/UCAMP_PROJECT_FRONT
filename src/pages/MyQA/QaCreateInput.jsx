@@ -75,11 +75,11 @@ export const QACreateInput = ({ id, index, onDelete }) => {
               <FormTextArea
                 id={questionName}
                 placeholder='예: 프로젝트 경험에 대해 설명해주세요.'
-                maxLength={30}
+                maxLength={100}
                 {...register(questionName, { required: '질문은 필수입니다.' })}
               />
             </InputGroup>
-            <CharCount>{(currentQuestion || '').length} / 30</CharCount>
+            <CharCount>{(currentQuestion || '').length} / 100</CharCount>
           </div>
           <div>
             <InputGroup>

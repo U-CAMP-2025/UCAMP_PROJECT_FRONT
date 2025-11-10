@@ -178,7 +178,12 @@ export default function QAUpdatePage() {
               <form onSubmit={handleSubmit(onSubmit)}>
                 {/* 직무 선택 (최소 1개 선택 필수) */}
                 <Section>
-                  <SectionTitle>직무 선택 (최대 3개)</SectionTitle>
+                  <SectionTitle>
+                    <span>
+                      관련 직무 선택(최대 3개)<RequiredAsterisk>*</RequiredAsterisk>
+                    </span>
+                  </SectionTitle>
+
                   <JobSelector
                     value={selectedJobIds}
                     onChange={(newJobIds) => {
@@ -232,6 +237,7 @@ export default function QAUpdatePage() {
                 <Section>
                   <SectionTitle>
                     <span>면접 노트</span>
+                    <RequiredAsterisk>*</RequiredAsterisk>
                     <OptionalText>최소 1개의 노트를 작성해야 합니다.</OptionalText>
                   </SectionTitle>
                   <DndContext
