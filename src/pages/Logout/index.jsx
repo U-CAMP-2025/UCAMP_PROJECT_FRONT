@@ -1,15 +1,18 @@
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import { useAuthStore } from '@store/auth/useAuthStore';
+import { usePaymentStore } from '@store/payment/usePaymentStore';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 
 export default function LogoutComplete() {
   const navigate = useNavigate();
+  const { refreshIsPlus } = usePaymentStore.getState();
 
   useEffect(() => {
     useAuthStore.getState().logout?.();
+    refreshIsPlus();
     navigate('/');
   }, []);
 
