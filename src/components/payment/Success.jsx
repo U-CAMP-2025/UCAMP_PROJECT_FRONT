@@ -1,7 +1,7 @@
 import { postPaymentConfirm } from '@api/paymentAPIS';
 import Button from '@components/common/Button';
 import Typography from '@components/common/Typography';
-import { useAuthStore } from '@store/auth/useAuthStore';
+import { usePaymentStore } from '@store/payment/usePaymentStore';
 import theme from '@styles/theme';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -17,6 +17,8 @@ export function Success() {
   const orderId = searchParams.get('orderId');
   const amount = searchParams.get('amount');
   const paymentKey = searchParams.get('paymentKey');
+
+  const { setIsPlus } = usePaymentStore.getState();
 
   useEffect(() => {
     // 필수 파라미터 없으면 바로 에러 처리
@@ -40,13 +42,7 @@ export function Success() {
         await postPaymentConfirm(requestData);
 
         // 결제 승인 성공 시: 최신 user 기준으로 isPlus 활성화
-        const current = useAuthStore.getState().user;
-        useAuthStore.setState({
-          user: {
-            ...current,
-            isPlus: true,
-          },
-        });
+        setIsPlus(true);
 
         setIsError(false);
       } catch (error) {
@@ -57,13 +53,7 @@ export function Success() {
 
         // ✅ 이미 처리된 결제는 성공으로 간주 (ALREADY_PROCESSED_PAYMENT)
         if (code === 'ALREADY_PROCESSED_PAYMENT' || message.includes('ALREADY_PROCESSED_PAYMENT')) {
-          const current = useAuthStore.getState().user;
-          useAuthStore.setState({
-            user: {
-              ...current,
-              isPlus: true,
-            },
-          });
+          setIsPlus(true);
           setIsError(false);
         } else {
           setIsError(true);

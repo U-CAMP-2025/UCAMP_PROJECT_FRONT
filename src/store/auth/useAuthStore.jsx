@@ -8,7 +8,6 @@ const initialState = {
   user: {
     name: '',
     profileImageUrl: '',
-    isPlus: false,
   },
 };
 export const useAuthStore = create(

@@ -236,7 +236,7 @@ export const Header = () => {
       <H.HeaderContentWrapper>
         <H.LeftSection>
           <H.Logo onClick={handleClickLogoButton} id='tour-logo'>
-            <H.LogoImage src='/images/logo2.png' alt='면접톡 로고' />
+            <H.LogoImage src='/images/logo_0.svg' alt='면접톡 로고' />
             <Typography size={5} weight='bold' style={{ color: theme.colors.primary[9] }}>
               면접톡
             </Typography>
