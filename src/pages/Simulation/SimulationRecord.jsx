@@ -53,7 +53,7 @@ export default function SimulationRecordPage() {
     (async () => {
       try {
         const res = await axiosInstance.get('/simulation/records');
-        console.log(res.data);
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
         setRecords(res.data?.data ?? []);
       } catch (e) {
         setError(e?.response?.data?.message ?? '기록을 불러오지 못했습니다.');
