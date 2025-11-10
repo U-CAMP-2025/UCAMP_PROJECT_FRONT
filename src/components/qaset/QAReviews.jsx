@@ -9,7 +9,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { PersonIcon, TrashIcon } from '@radix-ui/react-icons';
 import { useAuthStore } from '@store/auth/useAuthStore';
 import { useEffect, useState, useContext } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import styled, { ThemeContext } from 'styled-components';
 
 import QAReviewForm from './QAReviewForm';
@@ -48,6 +48,7 @@ export const QAReviews = () => {
   const theme = useContext(ThemeContext);
   const isLogin = useAuthStore((state) => state.isLogin);
   const authUser = useAuthStore((state) => state.user);
+  const navigate = useNavigate();
 
   const formUserProp = {
     nickname: authUser.name, // name -> nickname
@@ -161,8 +162,12 @@ export const QAReviews = () => {
 
                 <Body>
                   <Meta>
-                    <Typography size={2} weight='semiBold'>
-                      {r.nickname}
+                    <Typography
+                      size={2}
+                      weight='semiBold'
+                      onClick={() => navigate('/user/' + r.userId)}
+                    >
+                      <SpanHover>{r.nickname}</SpanHover>
                     </Typography>
                     <Dot>•</Dot>
                     <Typography size={2} color='gray.10'>
@@ -215,6 +220,12 @@ const Wrap = styled.section`
   gap: ${({ theme }) => theme.space[5]};
 `;
 
+const SpanHover = styled.span`
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
+`;
 const Header = styled.div`
   display: flex;
 
