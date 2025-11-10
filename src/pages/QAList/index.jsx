@@ -1,6 +1,6 @@
 import { countPost, scrollQaSet } from '@api/postAPIS';
 import { fetchUserMypage } from '@api/userAPIS';
-import { Overlay, Description, Title, Content } from '@components/common/Dialog';
+import { Overlay, Title, Content } from '@components/common/Dialog';
 import { JobSelector } from '@components/common/JobSelector';
 import { SortSelector } from '@components/common/SortSelector';
 import Typography from '@components/common/Typography';
@@ -39,7 +39,7 @@ export default function QAListPage() {
           <br />
           이 버튼을 눌러 나만의 면접 노트를
           <br />
-          만들 수 있습니다. 면접 연습을 시작해보세요!
+          만들 수 있습니다. 면접 노트를 만들어보세요!
         </>
       ),
       placement: 'bottom-end',

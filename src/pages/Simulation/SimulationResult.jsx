@@ -4,7 +4,6 @@ import ConfirmDialog from '@components/common/ConfirmDialog';
 import ErrorDialog from '@components/common/ErrorDialog';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
-import { feedback } from '@elevenlabs/elevenlabs-js/api/resources/conversationalAi/resources/conversations';
 import * as Accordion from '@radix-ui/react-accordion';
 import * as Checkbox from '@radix-ui/react-checkbox';
 import { CaretDownIcon } from '@radix-ui/react-icons';
@@ -24,6 +23,7 @@ export default function SimulationResultPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [saveConfirmOpen, setSaveConfirmOpen] = useState(false);
+  const [isPaid, setIsPaid] = useState(false);
 
   const incomingBlob = location.state?.initialBlob ?? null;
   const [videoUrl, setVideoUrl] = useState(null);
@@ -59,14 +59,13 @@ export default function SimulationResultPage() {
     fetchSimulationResult(simulationId)
       .then((response) => {
         const raw = response.data.post?.qaList ?? [];
-
+        setIsPaid(Boolean(response.data?.payment));
         // 피드백 정규화: 문자열 1개로 보장
         const list = raw.map((q) => ({
           ...q,
           // 1) 새 백엔드: q.feedback 사용
           feedback: (q.feedback ?? '').trim(),
         }));
-        console.log(feedback);
         setQaList(list);
         setSelectedKeys(new Set(list.map((qa, i) => keyOf(i, qa))));
         setData(response.data);
@@ -106,7 +105,7 @@ export default function SimulationResultPage() {
     setSaving(true);
     putSimulationFinalize(simulationId, body)
       .then(() => {
-        navigate('/myqa');
+        navigate('/simulation/record');
       })
       .catch((e) => {
         openAlert('저장에 실패했습니다.');
@@ -167,26 +166,34 @@ export default function SimulationResultPage() {
         <SelectionBar>
           <Info>
             <InfoCircledIcon />
-            <Typography as='span' size={3}>
-              선택한 항목만 저장됩니다.{' '}
-              <Typography
-                as='span'
-                style={{
-                  color: theme.colors.primary[10],
-                }}
-              >
-                ({selectedKeys.size} / {qaList.length})
+            {isPaid ? (
+              <Typography as='span' size={3}>
+                선택한 항목만 저장됩니다.{` `}
+                <Typography
+                  as='span'
+                  style={{
+                    color: theme.colors.primary[10],
+                  }}
+                >
+                  ({selectedKeys.size} / {qaList.length})
+                </Typography>
               </Typography>
-            </Typography>
+            ) : (
+              <Typography as='span' size={3} style={{ color: theme.colors.gray[9] }}>
+                플러스 유저만 수정/저장 기능을 사용할 수 있습니다.
+              </Typography>
+            )}
           </Info>
-          <SelActions>
-            <MiniButton type='button' onClick={selectAll}>
-              전체 선택
-            </MiniButton>
-            <MiniButton type='button' onClick={clearAll}>
-              전체 해제
-            </MiniButton>
-          </SelActions>
+          {isPaid && (
+            <SelActions>
+              <MiniButton type='button' onClick={selectAll}>
+                전체 선택
+              </MiniButton>
+              <MiniButton type='button' onClick={clearAll}>
+                전체 해제
+              </MiniButton>
+            </SelActions>
+          )}
         </SelectionBar>
         {!loading && !error && data && (
           <>
@@ -195,15 +202,17 @@ export default function SimulationResultPage() {
                 <StyledAccordionItem key={qa.qaId || index} value={`q-${index}`}>
                   <StyledAccordionHeader>
                     <RowLeft>
-                      <SelCheckbox
-                        checked={isSelected(keyOf(index, qa))}
-                        onCheckedChange={() => toggleOne(keyOf(index, qa))}
-                        aria-label={`Q${index + 1} 선택`}
-                      >
-                        <Checkbox.Indicator>
-                          <CheckIcon />
-                        </Checkbox.Indicator>
-                      </SelCheckbox>
+                      {isPaid && (
+                        <SelCheckbox
+                          checked={isSelected(keyOf(index, qa))}
+                          onCheckedChange={() => toggleOne(keyOf(index, qa))}
+                          aria-label={`Q${index + 1} 선택`}
+                        >
+                          <Checkbox.Indicator>
+                            <CheckIcon />
+                          </Checkbox.Indicator>
+                        </SelCheckbox>
+                      )}
                       <StyledAccordionTrigger>
                         <TitleText>
                           <Typography as='h3' size={4} weight='bold'>
@@ -231,8 +240,8 @@ export default function SimulationResultPage() {
                       <AnswerLabel>
                         새로운 답변 <SmallHint>(마지막 면접 연습에서 내가 했던 답변)</SmallHint>
                       </AnswerLabel>
-                      <SelectedHint $on={isSelected(keyOf(index, qa))}>
-                        {isSelected(keyOf(index, qa))
+                      <SelectedHint $on={isSelected(keyOf(index, qa) && isPaid)}>
+                        {isSelected(keyOf(index, qa) && isPaid)
                           ? '이 항목은 저장됩니다'
                           : '이 항목은 저장되지 않습니다'}
                       </SelectedHint>
@@ -242,6 +251,7 @@ export default function SimulationResultPage() {
                         onChange={(e) => handleTransContentChange(index, e.target.value)}
                         rows={6}
                         maxLength={500}
+                        readOnly={!isPaid}
                       />
                       <CharCount>{(qa.transContent?.length ?? 0).toLocaleString()}/500자</CharCount>
                       {/* 여기에 피드백 좋았던점 아쉬웠던점 추천 답변을 대입 */}
@@ -302,9 +312,11 @@ export default function SimulationResultPage() {
 
             <ButtonGroup>
               <CancelButton onClick={handleCancelClick}>나가기</CancelButton>
-              <SaveButton onClick={handleSaveButtonClick} disabled={saving}>
-                {saving ? '저장 중…' : '저장'}
-              </SaveButton>
+              {isPaid && (
+                <SaveButton onClick={handleSaveButtonClick} disabled={saving}>
+                  {saving ? '저장 중…' : '저장'}
+                </SaveButton>
+              )}
             </ButtonGroup>
           </>
         )}

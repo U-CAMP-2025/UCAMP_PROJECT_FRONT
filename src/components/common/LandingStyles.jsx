@@ -44,7 +44,7 @@ export const HeroContainer = styled.section`
   justify-content: space-between;
   overflow: hidden;
   margin: 20px auto 60px;
-  max-width: 1400px;
+  max-width: 1800px;
   box-shadow: 0 20px 40px -10px rgba(102, 126, 234, 0.4);
 
   @media (max-width: 968px) {
@@ -278,7 +278,7 @@ export const CardsGrid = styled.div`
 `;
 
 export const ProblemCard = styled.div`
-  background: ${(props) => props.bgColor};
+  background: ${(props) => props.$bgColor};
   border-radius: 32px;
   padding: 40px 32px;
   text-align: left;
@@ -490,9 +490,9 @@ export const Tab = styled.button`
   font-size: 0.95rem;
   cursor: pointer;
   transition: all 0.3s;
-  background: ${(props) => (props.active ? '#fff' : 'transparent')};
-  color: ${(props) => (props.active ? '#667eea' : '#718096')};
-  box-shadow: ${(props) => (props.active ? '0 4px 12px rgba(0,0,0,0.05)' : 'none')};
+  background: ${(props) => (props.$active ? '#fff' : 'transparent')};
+  color: ${(props) => (props.$active ? '#667eea' : '#718096')};
+  box-shadow: ${(props) => (props.$active ? '0 4px 12px rgba(0,0,0,0.05)' : 'none')};
 
   &:hover {
     color: #667eea;
@@ -551,7 +551,7 @@ export const RankBadge = styled.div`
   width: 30px;
   height: 30px;
   background: ${(props) =>
-    props.rank === 1 ? '#FFD700' : props.rank === 2 ? '#C0C0C0' : '#CD7F32'};
+    props.$rank === 1 ? '#FFD700' : props.$rank === 2 ? '#C0C0C0' : '#CD7F32'};
   color: white;
   font-weight: 800;
   border-radius: 50%;
@@ -577,12 +577,12 @@ export const Score = styled.div`
 
 export const Pedestal = styled.div`
   width: 100%;
-  height: ${(props) => props.height}px;
+  height: ${(props) => props.$height}px;
   // 랭킹별 다른 컬러 적용
   background: ${(props) =>
-    props.rank === 1
+    props.$rank === 1
       ? 'linear-gradient(to bottom, #667eea, #764ba2)'
-      : props.rank === 2
+      : props.$rank === 2
         ? 'linear-gradient(to bottom, #a3bffa, #8a9fdc)'
         : 'linear-gradient(to bottom, #d6bcfa, #9f7aea)'};
   border-radius: 16px 16px 0 0;
@@ -593,7 +593,7 @@ export const Pedestal = styled.div`
 // 6. CTA Section
 export const CTAContainer = styled.div`
   margin: 100px auto 40px;
-  width: 70%;
+  width: 88%;
   padding: 0 5%;
 `;
 
@@ -802,7 +802,7 @@ export const FloatingScrollButton = styled.button`
   transform: translateX(-50%);
   width: 50px;
   height: 50px;
-  background-color: white;
+  background-color: #d9cffcff;
   color: ${({ theme }) => theme.colors.primary[9] || '#667eea'};
   border: none;
   border-radius: 50%;
@@ -820,4 +820,170 @@ export const FloatingScrollButton = styled.button`
     color: white;
     box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
   }
+`;
+export const PlansRow = styled.div`
+  display: flex;
+  gap: ${({ theme }) => theme.space[4]};
+  align-items: stretch;
+  margin-bottom: ${({ theme }) => theme.space[4]};
+  flex-wrap: wrap;
+`;
+export const PlanCard = styled.div`
+  flex: 1;
+  min-width: 300px;
+  border: 1px solid
+    ${({ theme, $plus, $active }) =>
+      $plus ? ($active ? theme.colors.primary[8] : theme.colors.primary[5]) : theme.colors.gray[5]};
+  border-radius: ${({ theme }) => theme.radius.lg};
+  padding: ${({ theme }) => theme.space[5]};
+  box-shadow: ${({ theme, $plus, $active }) =>
+    $plus && $active ? theme.shadow.md : theme.shadow.sm};
+  background: ${({ theme, $plus, $active }) =>
+    $plus
+      ? $active
+        ? `linear-gradient(135deg, ${theme.colors.primary[2]}, #ffffff)`
+        : theme.colors.primary[1]
+      : '#ffffff'};
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[4]};
+  transition: all 0.18s ease;
+
+  ${({ $plus, theme }) =>
+    $plus &&
+    `
+    position: relative;
+    &::after {
+      content: '추천';
+      position: absolute;
+      top: 14px;
+      right: 16px;
+      padding: 2px 8px;
+      font-size: ${theme.font.size[1]};
+      border-radius: 999px;
+      background-color: ${theme.colors.primary[2]};
+      color: ${theme.colors.primary[11]};
+      font-weight: ${theme.font.weight.medium};
+    }
+  `}
+`;
+export const PlanHeader = styled.div`
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: ${({ theme }) => theme.space[4]};
+  height: 80px;
+  padding-top: 20px;
+  color: ${({ theme }) => theme.colors.gray[12]};
+`;
+export const PriceBlock = styled.div`
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  white-space: nowrap;
+  color: ${({ theme }) => theme.colors.gray[12]};
+`;
+export const BenefitList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: ${({ theme }) => theme.space[1]} 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+export const BenefitItem = styled.li`
+  font-size: ${({ theme }) => theme.font.size[3]};
+  color: ${({ theme }) => theme.colors.gray[11]};
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  &::before {
+    content: '•';
+    color: ${({ theme }) => theme.colors.primary[9]};
+    font-size: 10px;
+  }
+
+  span {
+    font-weight: ${({ theme }) => theme.font.weight.semiBold};
+  }
+  white-space: nowrap;
+`;
+
+export const StatusRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[3]};
+`;
+export const SkeletonLine = styled.div`
+  display: inline-block;
+  width: ${({ width }) => width || '100%'};
+  height: 14px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    ${({ theme }) => theme.colors.gray[3]} 25%,
+    ${({ theme }) => theme.colors.gray[4]} 50%,
+    ${({ theme }) => theme.colors.gray[3]} 75%
+  );
+  background-size: 400% 100%;
+`;
+export const StatusBadge = styled.span`
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: ${({ theme }) => theme.font.size[1]};
+  font-weight: ${({ theme }) => theme.font.weight.semiBold};
+  white-space: nowrap;
+
+  ${({ theme, $variant }) => {
+    switch ($variant) {
+      case 'base':
+        // 일반 회원 기본 제공
+        return `
+          color: ${theme.colors.gray[11]};
+          background-color: ${theme.colors.gray[2]};
+          border: 1px solid ${theme.colors.gray[5]};
+        `;
+      case 'plusActive':
+        // 플러스 이용중 - 강하게 강조
+        return `
+          color: ${theme.colors.primary[11]};
+          background: linear-gradient(135deg, ${theme.colors.primary[3]}, ${theme.colors.primary[0]});
+          border: 1px solid ${theme.colors.primary[8]};
+          box-shadow: ${theme.shadow.sm};
+        `;
+      case 'expired':
+        // 만료된 플러스
+        return `
+          color: ${theme.colors.gray[10]};
+          background-color: ${theme.colors.gray[2]};
+          border: 1px solid ${theme.colors.gray[5]};
+        `;
+      case 'inactive':
+        // 아직 플러스 미이용
+        return `
+          color: ${theme.colors.gray[9]};
+          background-color: ${theme.colors.gray[1]};
+          border: 1px solid transparent;
+        `;
+      default:
+        // 기본 뱃지 스타일
+        return `
+          color: ${theme.colors.gray[10]};
+          background-color: ${theme.colors.gray[3]};
+          border: 1px solid transparent;
+        `;
+    }
+  }}
+`;
+export const CTARow = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: ${({ theme }) => theme.space[2]};
+`;
+export const SkeletonButton = styled(SkeletonLine)`
+  width: 180px;
+  height: 40px;
+  border-radius: ${({ theme }) => theme.radius.md};
 `;

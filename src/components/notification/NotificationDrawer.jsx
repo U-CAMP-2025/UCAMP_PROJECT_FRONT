@@ -126,6 +126,12 @@ export default function NotificationDrawer({
                       ) : it.type === 'PAY_EXPIRY' ? (
                         <StyledSpan onClick={() => navigate('/payment')}>
                           <Message style={{ fontSize: '14px' }}>{it.content}</Message>
+                          <br />
+                          {!it.content.includes('면접노트') && (
+                            <Message style={{ fontSize: '12px' }}>
+                              만료일 경과 시 면접노트가 삭제됩니다. 필요 시 미리 백업하세요.
+                            </Message>
+                          )}
                         </StyledSpan>
                       ) : (
                         <Message>{it.content}</Message>
