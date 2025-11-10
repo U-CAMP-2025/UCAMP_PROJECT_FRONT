@@ -711,9 +711,9 @@ export const cards = [
     id: 4,
     bgColor: '#E8EAF6',
     avatar: '😵‍💫',
-    title: '기술 질문, 깊이가 걱정되나요?',
+    title: '질문 정리 따로, 영상 촬영 따로...',
     description:
-      '직무별 핵심 지식부터 최신 트렌드까지, 놓치기 쉬운 기술 질문도 완벽하게 대비하세요.',
+      '복잡한 준비 과정은 이제 그만! 예상 질문 관리부터 실전 모의 면접 녹화까지 한 곳에서 끝내세요.',
   },
 ];
 
@@ -760,9 +760,9 @@ export const FloatingScrollButton = styled.button`
   transform: translateX(-50%);
   width: 50px;
   height: 50px;
-  background-color: ${({ theme }) => theme.colors.primary[7]};
+  background-color: white;
   color: ${({ theme }) => theme.colors.primary[9] || '#667eea'};
-  border: none;
+  border: 4px solid ${({ theme }) => theme.colors.primary[9]};
   border-radius: 50%;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   display: flex;
