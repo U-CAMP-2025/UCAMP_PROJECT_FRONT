@@ -7,6 +7,93 @@ import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import styled, { keyframes } from 'styled-components';
 
+/**
+ * @param {object} props
+ * @param {string} props.id - dnd-kit을 위한 고유 ID (useFieldArray의 item.id)
+ * @param {number} props.index - 배열 내 인덱스
+ * @param {function} props.onDelete - 삭제 핸들러
+ */
+export const QAUpdateInput = ({ id, index, onDelete }) => {
+  const { register, watch } = useFormContext();
+
+  const questionName = `qaSets[${index}].question`;
+  const answerName = `qaSets[${index}].answer`;
+  const currentQuestion = watch(questionName);
+  const currentAnswer = watch(answerName);
+
+  // 💡 dnd-kit 훅 사용
+  const {
+    attributes,
+    listeners,
+    setNodeRef, // DOM 노드 참조
+    transform,
+    transition,
+    isDragging, // 드래그 상태
+  } = useSortable({ id: id }); // useFieldArray의 item.id를 고유 ID로 사용
+
+  // 💡 dnd-kit 스타일
+  const style = {
+    transform,
+    transition,
+  };
+
+  return (
+    // 💡 setNodeRef, style, data-dragging 속성 추가
+    <FormItemContainer
+      value={`item-${index}`}
+      ref={setNodeRef}
+      style={style}
+      data-dragging={isDragging}
+    >
+      <FormHeader>
+        {/* 드래그 핸들 */}
+        <DragHandle type='button' {...attributes} {...listeners} title='드래그하여 순서 변경'>
+          <DragHandleDots2Icon width={18} height={18} />
+        </DragHandle>
+
+        {/* 접기/펼치기 트리거: 질문 번호 + 제목 + 화살표 */}
+        <AccordionTriggerStyled>
+          <HeaderLeft>
+            <QuestionNumberBadge>{index + 1}</QuestionNumberBadge>
+            <QuestionTitleText>{currentQuestion}</QuestionTitleText>
+          </HeaderLeft>
+          <CaretIcon aria-hidden width={20} height={20} />
+        </AccordionTriggerStyled>
+
+        {/* 휴지통 아이콘: 트리거 밖, 우측 정렬 */}
+        <DeleteButton type='button' title='삭제' onClick={onDelete} aria-label='질문 삭제'>
+          <TrashIcon width={20} height={20} />
+        </DeleteButton>
+      </FormHeader>
+
+      <FormContent>
+        <FormInputsWrapper>
+          <InputGroup>
+            <InputLabel htmlFor={questionName}>질문을 입력하세요</InputLabel>
+            <FormTextArea
+              id={questionName}
+              placeholder='예: 프로젝트 경험에 대해 설명해주세요.'
+              maxLength={100}
+              {...register(questionName, { required: '질문은 필수입니다.' })}
+            />
+          </InputGroup>
+          <CharCount>{(currentQuestion || '').length} / 100</CharCount>
+          <InputGroup>
+            <InputLabel htmlFor={answerName}>답변을 입력하세요</InputLabel>
+            <FormTextArea2
+              id={answerName}
+              placeholder='예: React와 TypeScript를 사용한...'
+              maxLength={500}
+              {...register(answerName, { required: '답변은 필수입니다.' })}
+            />
+          </InputGroup>
+          <CharCount>{(currentAnswer || '').length} / 500</CharCount>
+        </FormInputsWrapper>
+      </FormContent>
+    </FormItemContainer>
+  );
+};
+
 // --- 스타일 정의 ---
 
 export const FormItemContainer = styled(Accordion.Item)`
@@ -115,6 +202,14 @@ const BaseIconButton = styled.button`
     color: ${({ theme }) => theme.colors.gray[12]};
   }
 `;
+
+const CharCount = styled.div`
+  text-align: left;
+  font-size: ${({ theme }) => theme.font.size[1]};
+  color: ${({ theme }) => theme.colors.gray[9]};
+  margin-top: ${({ theme }) => theme.space[2]};
+`;
+
 export const DeleteButton = styled(BaseIconButton)``;
 
 export const CaretIcon = styled(CaretDownIcon)`
@@ -169,7 +264,17 @@ export const InputLabel = styled.label`
 export const FormTextArea = styled.textarea`
   all: unset;
   width: 100%;
-  min-height: 80px;
+  max-height: 50px;
+  font-family: ${({ theme }) => theme.font.family.primary};
+  font-size: ${({ theme }) => theme.font.size[3]};
+  color: ${({ theme }) => theme.colors.gray[12]};
+  line-height: ${({ theme }) => theme.font.lineHeight[4]};
+  resize: none;
+`;
+export const FormTextArea2 = styled.textarea`
+  all: unset;
+  width: 100%;
+  min-height: 100px;
   font-family: ${({ theme }) => theme.font.family.primary};
   font-size: ${({ theme }) => theme.font.size[3]};
   color: ${({ theme }) => theme.colors.gray[12]};
@@ -177,85 +282,3 @@ export const FormTextArea = styled.textarea`
   resize: vertical;
 `;
 // --- 스타일 정의 끝 ---
-
-/**
- * @param {object} props
- * @param {string} props.id - dnd-kit을 위한 고유 ID (useFieldArray의 item.id)
- * @param {number} props.index - 배열 내 인덱스
- * @param {function} props.onDelete - 삭제 핸들러
- */
-export const QAUpdateInput = ({ id, index, onDelete }) => {
-  const { register, watch } = useFormContext();
-
-  const questionName = `qaSets[${index}].question`;
-  const answerName = `qaSets[${index}].answer`;
-  const currentQuestion = watch(questionName);
-
-  // 💡 dnd-kit 훅 사용
-  const {
-    attributes,
-    listeners,
-    setNodeRef, // DOM 노드 참조
-    transform,
-    transition,
-    isDragging, // 드래그 상태
-  } = useSortable({ id: id }); // useFieldArray의 item.id를 고유 ID로 사용
-
-  // 💡 dnd-kit 스타일
-  const style = {
-    transform,
-    transition,
-  };
-
-  return (
-    // 💡 setNodeRef, style, data-dragging 속성 추가
-    <FormItemContainer
-      value={`item-${index}`}
-      ref={setNodeRef}
-      style={style}
-      data-dragging={isDragging}
-    >
-      <FormHeader>
-        {/* 드래그 핸들 */}
-        <DragHandle type='button' {...attributes} {...listeners} title='드래그하여 순서 변경'>
-          <DragHandleDots2Icon width={18} height={18} />
-        </DragHandle>
-
-        {/* 접기/펼치기 트리거: 질문 번호 + 제목 + 화살표 */}
-        <AccordionTriggerStyled>
-          <HeaderLeft>
-            <QuestionNumberBadge>{index + 1}</QuestionNumberBadge>
-            <QuestionTitleText>{currentQuestion}</QuestionTitleText>
-          </HeaderLeft>
-          <CaretIcon aria-hidden width={20} height={20} />
-        </AccordionTriggerStyled>
-
-        {/* 휴지통 아이콘: 트리거 밖, 우측 정렬 */}
-        <DeleteButton type='button' title='삭제' onClick={onDelete} aria-label='질문 삭제'>
-          <TrashIcon width={20} height={20} />
-        </DeleteButton>
-      </FormHeader>
-
-      <FormContent>
-        <FormInputsWrapper>
-          <InputGroup>
-            <InputLabel htmlFor={questionName}>질문을 입력하세요</InputLabel>
-            <FormTextArea
-              id={questionName}
-              placeholder='예: 프로젝트 경험에 대해 설명해주세요.'
-              {...register(questionName, { required: '질문은 필수입니다.' })}
-            />
-          </InputGroup>
-          <InputGroup>
-            <InputLabel htmlFor={answerName}>답변을 입력하세요</InputLabel>
-            <FormTextArea
-              id={answerName}
-              placeholder='예: React와 TypeScript를 사용한...'
-              {...register(answerName, { required: '답변은 필수입니다.' })}
-            />
-          </InputGroup>
-        </FormInputsWrapper>
-      </FormContent>
-    </FormItemContainer>
-  );
-};

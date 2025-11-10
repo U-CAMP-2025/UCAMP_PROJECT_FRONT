@@ -226,7 +226,7 @@ export const QADetail = () => {
         onOpenChange={(open) => {
           setIsCopyModalOpen(open);
           if (!open) {
-            navigate(`/qa/${copyId}`);
+            navigate('/myqa');
           }
         }}
       >

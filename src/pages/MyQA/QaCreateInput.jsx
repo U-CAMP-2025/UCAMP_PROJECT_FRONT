@@ -75,16 +75,16 @@ export const QACreateInput = ({ id, index, onDelete }) => {
               <FormTextArea
                 id={questionName}
                 placeholder='예: 프로젝트 경험에 대해 설명해주세요.'
-                maxLength={30}
+                maxLength={100}
                 {...register(questionName, { required: '질문은 필수입니다.' })}
               />
             </InputGroup>
-            <CharCount>{(currentQuestion || '').length} / 30</CharCount>
+            <CharCount>{(currentQuestion || '').length} / 100</CharCount>
           </div>
           <div>
             <InputGroup>
               <InputLabel htmlFor={answerName}>답변을 입력하세요</InputLabel>
-              <FormTextArea
+              <FormTextArea2
                 id={answerName}
                 placeholder='예: React와 TypeScript를 사용한...'
                 maxLength={500}
@@ -262,12 +262,28 @@ export const InputLabel = styled.label`
 export const FormTextArea = styled.textarea`
   all: unset;
   width: 100%;
-  min-height: 80px;
+  max-height: 50px;
   font-family: ${({ theme }) => theme.font.family.primary};
   font-size: ${({ theme }) => theme.font.size[3]};
   color: ${({ theme }) => theme.colors.gray[12]};
   line-height: ${({ theme }) => theme.font.lineHeight[4]};
   resize: none;
+
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  box-sizing: border-box;
+`;
+
+export const FormTextArea2 = styled.textarea`
+  all: unset;
+  width: 100%;
+  min-height: 100px;
+  font-family: ${({ theme }) => theme.font.family.primary};
+  font-size: ${({ theme }) => theme.font.size[3]};
+  color: ${({ theme }) => theme.colors.gray[12]};
+  line-height: ${({ theme }) => theme.font.lineHeight[4]};
+  resize: vertical;
 
   white-space: pre-wrap;
   word-wrap: break-word;
