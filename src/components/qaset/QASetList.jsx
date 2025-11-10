@@ -1,5 +1,4 @@
 import Typography from '@components/common/Typography';
-import theme from '@styles/theme';
 import styled from 'styled-components';
 
 import QASetCard from './QASetCard';
@@ -19,7 +18,7 @@ const Grid = styled.div`
   }
 `;
 
-export default function QASetList({ qaList = [] }) {
+export default function QASetList({ qaList = [], showPublicBadge = false, onClickCard }) {
   if (!qaList.length) {
     return (
       <div style={{ padding: 48, textAlign: 'center' }}>
@@ -31,7 +30,12 @@ export default function QASetList({ qaList = [] }) {
   return (
     <Grid>
       {qaList.map((item) => (
-        <QASetCard key={item.postId} item={item} />
+        <QASetCard
+          key={item.postId}
+          item={item}
+          showPublicBadge={showPublicBadge}
+          onClick={onClickCard}
+        />
       ))}
     </Grid>
   );
