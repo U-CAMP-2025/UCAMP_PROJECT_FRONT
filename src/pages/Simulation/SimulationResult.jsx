@@ -59,7 +59,7 @@ export default function SimulationResultPage() {
     fetchSimulationResult(simulationId)
       .then((response) => {
         const raw = response.data.post?.qaList ?? [];
-        setIsPaid(Boolean(response.data?.subscribed));
+        setIsPaid(Boolean(response.data?.payment));
         // 피드백 정규화: 문자열 1개로 보장
         const list = raw.map((q) => ({
           ...q,
