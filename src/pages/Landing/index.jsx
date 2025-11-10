@@ -8,6 +8,7 @@ import { useAuthStore } from '@store/auth/useAuthStore';
 import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { scroller } from 'react-scroll';
+import styled from 'styled-components';
 
 export default function LandingPage() {
   const { isLogin } = useAuthStore();
@@ -17,13 +18,17 @@ export default function LandingPage() {
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('friends');
   const navigate = useNavigate();
+  // 1️⃣ SECTION_IDS에 plan-section 추가
   const SECTION_IDS = [
     'problem-section',
     'video-section',
     'ranking-section',
+    'ranking-section2',
+    'plan-section',
     'cta-section',
     'hero-section',
   ];
+
   const [nextSectionIdx, setNextSectionIdx] = useState(0);
 
   const handleScrollDown = () => {
@@ -219,7 +224,9 @@ export default function LandingPage() {
           </L.SliderWrapper>
 
           {/* Ranking Podium */}
-          <L.CompetitionTitle>다른 유저들과 선의의 경쟁을 펼쳐보세요 🏆</L.CompetitionTitle>
+          <L.CompetitionTitle id='ranking-section2'>
+            다른 유저들과 선의의 경쟁을 펼쳐보세요 🏆
+          </L.CompetitionTitle>
           <L.RankingContainer>
             <L.RankingHeader>
               <L.RankingSubTitle>이번 주 명예의 전당</L.RankingSubTitle>
@@ -256,7 +263,42 @@ export default function LandingPage() {
             </L.PodiumContainer>
           </L.RankingContainer>
         </L.SectionContainer>
+        {/* ====== 플러스 이용권 소개 섹션 ====== */}
+        <PlansIntroSection id='plan-section'>
+          <PlansTitle>더 많은 기능이 필요하신가요?</PlansTitle>
+          <PlansRow>
+            <PlanCard>
+              <PlanName>일반 회원</PlanName>
+              <PlanDesc>기본 제공 기능</PlanDesc>
+              <PlanList>
+                <li>면접 노트 9개 저장</li>
+                <li>면접 연습 일 3회</li>
+                <li>스크랩 노트 조회만 가능</li>
+              </PlanList>
+              <PlanPrice>무료</PlanPrice>
+            </PlanCard>
 
+            <PlanCard $plus>
+              <PlanName>플러스 회원</PlanName>
+              <PlanDesc>더 많은 연습과 저장공간</PlanDesc>
+              <PlanList>
+                <li>면접 노트 21개 저장</li>
+                <li>면접 연습 무제한</li>
+                <li>스크랩 노트 수정 가능</li>
+                <li>AI 피드백 + 음성결과 수정</li>
+              </PlanList>
+              <PlanPrice>₩5,900 / 월</PlanPrice>
+              <PlanButton
+                onClick={() => {
+                  if (isLogin) navigate('/payment');
+                  else setLoginDialogOpen(true);
+                }}
+              >
+                플러스 이용권 결제하기
+              </PlanButton>
+            </PlanCard>
+          </PlansRow>
+        </PlansIntroSection>
         {/* CTA Section */}
         <L.CTAContainer id='cta-section'>
           <L.CTAContent>
@@ -284,3 +326,115 @@ export default function LandingPage() {
     </>
   );
 }
+const PlansIntroSection = styled.section`
+  width: 100%;
+  padding: 20px 0 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: transparent; /* 배경색 제거 */
+`;
+
+const PlansTitle = styled.h2`
+  font-size: ${({ theme }) => theme.font.size[6]};
+  font-weight: ${({ theme }) => theme.font.weight.bold};
+  color: ${({ theme }) => theme.colors.gray[12]};
+  text-align: center;
+  margin-bottom: ${({ theme }) => theme.space[8]};
+`;
+
+const PlansRow = styled.div`
+  width: 100%;
+  max-width: 1000px; /* Hero보다 살짝 좁은 폭 */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: ${({ theme }) => theme.space[6]};
+`;
+
+const PlanCard = styled.div`
+  flex: 1 1 320px;
+  max-width: 460px;
+  background: #fff;
+  border: 1px solid
+    ${({ $plus, theme }) => ($plus ? theme.colors.primary[5] : theme.colors.gray[4])};
+  border-radius: ${({ theme }) => theme.radius.lg};
+  box-shadow: ${({ theme }) => theme.shadow.sm};
+  padding: ${({ theme }) => theme.space[6]};
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: ${({ theme }) => theme.space[3]};
+  transition: all 0.25s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: ${({ theme }) => theme.shadow.md};
+  }
+
+  ${({ $plus, theme }) =>
+    $plus &&
+    `
+    border-color: ${theme.colors.primary[8]};
+    background: linear-gradient(180deg, ${theme.colors.primary[1]}, #ffffff);
+  `}
+`;
+
+const PlanName = styled.h3`
+  font-size: ${({ theme }) => theme.font.size[5]};
+  font-weight: ${({ theme }) => theme.font.weight.semiBold};
+  color: ${({ theme }) => theme.colors.gray[12]};
+`;
+
+const PlanDesc = styled.p`
+  font-size: ${({ theme }) => theme.font.size[2]};
+  color: ${({ theme }) => theme.colors.gray[10]};
+  margin-bottom: ${({ theme }) => theme.space[2]};
+`;
+
+const PlanList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: ${({ theme }) => theme.font.size[3]};
+  color: ${({ theme }) => theme.colors.gray[11]};
+  line-height: 1.6;
+
+  li {
+    margin-bottom: 6px;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+
+    &::before {
+      content: '•';
+      color: ${({ theme }) => theme.colors.primary[9]};
+      font-weight: bold;
+    }
+  }
+`;
+
+const PlanPrice = styled.div`
+  margin-top: auto;
+  font-size: ${({ theme }) => theme.font.size[4]};
+  font-weight: ${({ theme }) => theme.font.weight.bold};
+  color: ${({ theme }) => theme.colors.primary[9]};
+`;
+
+const PlanButton = styled.button`
+  margin-top: ${({ theme }) => theme.space[3]};
+  align-self: stretch;
+  padding: 12px 16px;
+  border-radius: ${({ theme }) => theme.radius.md};
+  background-color: ${({ theme }) => theme.colors.primary[9]};
+  color: white;
+  font-size: ${({ theme }) => theme.font.size[3]};
+  font-weight: ${({ theme }) => theme.font.weight.semiBold};
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.primary[10]};
+  }
+`;
