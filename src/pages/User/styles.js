@@ -60,6 +60,7 @@ export const ProfileCard = styled.div`
 `;
 
 export const ProfileLeft = styled.div`
+  margin-left: 30px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -144,7 +145,7 @@ export const InfoItemRight = styled.div`
   justify-content: flex-start;
   gap: 12px;
   width: 100%;
-  margin-left: 300px;
+  margin-left: 270px;
   @media (max-width: 768px) {
     justify-content: center;
   }
@@ -193,7 +194,9 @@ export const Tag = styled.span`
 `;
 
 export const Tag2 = styled.span`
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 4px 10px;
   border-radius: 12px;
   font-size: 13px;
