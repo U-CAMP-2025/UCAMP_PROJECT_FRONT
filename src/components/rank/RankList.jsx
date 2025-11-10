@@ -120,9 +120,12 @@ const PlayerInfo = styled.div`
   flex-direction: column;
 `;
 const PlayerName = styled.div`
-  font-weight: 500;
-  color: #0066cc;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.gray[12]};
   cursor: pointer;
+  &:hover {
+    color: ${({ theme }) => theme.colors.primary[10]};
+  }
 `;
 const RankBadge = styled.div`
   width: 24px;

@@ -707,6 +707,14 @@ export const cards = [
     title: '실전만 되면 머리가 하얘져요',
     description: 'AI 면접관과의 무한 반복 실전 연습으로 면접 공포증을 극복하세요!',
   },
+  {
+    id: 4,
+    bgColor: '#E8EAF6',
+    avatar: '😵‍💫',
+    title: '질문 정리 따로, 영상 촬영 따로...',
+    description:
+      '복잡한 준비 과정은 이제 그만! 예상 질문 관리부터 실전 모의 면접 녹화까지 한 곳에서 끝내세요.',
+  },
 ];
 
 export const mockData = {
@@ -754,7 +762,7 @@ export const FloatingScrollButton = styled.button`
   height: 50px;
   background-color: white;
   color: ${({ theme }) => theme.colors.primary[9] || '#667eea'};
-  border: none;
+  border: 4px solid ${({ theme }) => theme.colors.primary[9]};
   border-radius: 50%;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   display: flex;
