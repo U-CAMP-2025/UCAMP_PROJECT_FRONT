@@ -182,7 +182,11 @@ export default function QACreatePage() {
               <form onSubmit={handleSubmit(onSubmit, onInvalid)}>
                 {/* 1. 직무 선택 */}
                 <Section ref={jobSectionRef}>
-                  <SectionTitle>관련 직무 선택 (최대 3개)</SectionTitle>
+                  <SectionTitle>
+                    <span>
+                      관련 직무 선택(최대 3개)<RequiredAsterisk>*</RequiredAsterisk>
+                    </span>
+                  </SectionTitle>
                   <JobSelector
                     value={selectedJobIds}
                     onChange={(newJobIds) =>
@@ -238,6 +242,7 @@ export default function QACreatePage() {
                 <Section>
                   <SectionTitle>
                     <span>면접 노트</span>
+                    <RequiredAsterisk>*</RequiredAsterisk>
                     <OptionalText>최소 1개의 노트를 작성해야 합니다.</OptionalText>
                   </SectionTitle>
                   <DndContext
