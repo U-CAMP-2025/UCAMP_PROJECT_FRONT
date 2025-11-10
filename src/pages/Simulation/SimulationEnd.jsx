@@ -1,4 +1,4 @@
-import { transCheckimulation, fetchSimulationResult } from '@api/simulationAPIS';
+import { transCheckSimulation } from '@api/simulationAPIS';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
 import React, { useEffect } from 'react';
@@ -37,7 +37,7 @@ export default function SimulationEndPage() {
     const waitReadyAndGo = async () => {
       try {
         // 1) 서버에 종료/체크 트리거 (기존 로직)
-        await transCheckimulation(simulationId);
+        await transCheckSimulation(simulationId);
 
         // 타임아웃: 부분 완료라도 결과 페이지로 이동
         if (!cancelled) {
@@ -49,7 +49,7 @@ export default function SimulationEndPage() {
           }, 7000);
         }
       } catch (err) {
-        console.error('transCheckimulation/polling failed:', err);
+        console.error('transCheckSimulation/polling failed:', err);
         if (!cancelled) {
           navigate(`/simulation/${simulationId}/result`, {
             state: { initialBlob },

@@ -1,7 +1,8 @@
+import { fetchKakaoSignupCheck } from '@api/authAPIS';
 import WarnDialog from '@components/common/WarnDialog';
 import { PageContainer } from '@components/layout/PageContainer';
 import { SignupForm } from '@components/signup/SignupForm';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import styled from 'styled-components';
 
@@ -9,6 +10,7 @@ export default function SignupPage() {
   const [alertMessage, setAlertMessage] = useState('');
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertOnClose, setAlertOnClose] = useState(null);
+  const [ready, setReady] = useState(false);
 
   const navigate = useNavigate();
 
@@ -17,11 +19,11 @@ export default function SignupPage() {
   const queryParams = new URLSearchParams(location.search);
   const errorCode = queryParams.get('error');
 
-  const openAlert = (message, onClose) => {
+  const openAlert = useCallback((message, onClose) => {
     setAlertMessage(message);
     setAlertOnClose(() => onClose);
     setAlertOpen(true);
-  };
+  }, []);
 
   // 에러 코드에 따른 알림 메시지 처리
   useEffect(() => {
@@ -33,9 +35,29 @@ export default function SignupPage() {
           회원탈퇴 후 재가입까지 <StrongSpan>{remainingHours}</StrongSpan>시간 남았습니다.
         </>
       );
-      openAlert(message, () => navigate(-1)); // 알림 닫히면 뒤로가기
+      openAlert(message, () => navigate('/')); // 알림 닫히면 뒤로가기
     }
-  }, [errorCode, navigate]);
+  }, [errorCode, navigate, openAlert]);
+
+  useEffect(() => {
+    if (errorCode) return;
+
+    const check = async () => {
+      try {
+        const res = await fetchKakaoSignupCheck();
+        if (!res.allowed) {
+          openAlert(res.message || '카카오 로그인 후 회원가입을 진행할 수 있습니다.', () =>
+            navigate('/'),
+          );
+        } else {
+          setReady(true);
+        }
+      } catch (e) {
+        openAlert('카카오 로그인 후 회원가입을 진행할 수 있습니다.', () => navigate('/'));
+      }
+    };
+    check();
+  }, [errorCode, navigate, openAlert]);
 
   return (
     <PageContainer>
@@ -52,8 +74,8 @@ export default function SignupPage() {
         message={alertMessage}
         confirmText='확인'
       />
-      {/* errorCode가 없을 때만 SignupForm을 렌더링 */}
-      {!errorCode && <SignupForm />}
+      {/* errorCode 없고, Kakao 세션 체크를 통과한 경우에만 SignupForm 렌더링 */}
+      {!errorCode && ready && <SignupForm />}
     </PageContainer>
   );
 }
