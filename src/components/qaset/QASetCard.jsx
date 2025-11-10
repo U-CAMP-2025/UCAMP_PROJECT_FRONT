@@ -8,6 +8,14 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
+const getJobColorIndex = (name = '') => {
+  let hash = 0;
+  for (let i = 0; i < name.length; i += 1) {
+    hash = (hash * 31 + name.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash);
+};
+
 export default function QASetCard({ item, showPublicBadge = false, onClick }) {
   const navigate = useNavigate();
   const { isLogin } = useAuthStore();
@@ -81,7 +89,9 @@ export default function QASetCard({ item, showPublicBadge = false, onClick }) {
         {job.length > 0 && (
           <JobChips>
             {job.slice(0, 3).map((j) => (
-              <JobChip key={j}>{j}</JobChip>
+              <JobChip key={j} $colorIndex={getJobColorIndex(j)}>
+                {j}
+              </JobChip>
             ))}
             {job.length > 3 && <MoreChip>+{job.length - 3}</MoreChip>}
           </JobChips>
@@ -204,16 +214,36 @@ const JobChips = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  // border: 1px solid red;
 `;
 
 const JobChip = styled.span`
   padding: 2px 8px;
   border-radius: 999px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: ${({ theme }) => theme.font.weight.semiBold};
-  color: ${({ theme }) => theme.colors.primary[10]};
-  background-color: ${({ theme }) => theme.colors.primary[2]};
+  ${({ theme, $colorIndex = 0 }) => {
+    // 직무명에 따라 항상 동일한 톤이 적용되도록 인덱스 기반 팔레트
+    const colorSets = [
+      { bg: theme.colors.primary[3], text: theme.colors.primary[11] }, // 보라 파스텔
+      { bg: theme.colors.gray[3], text: theme.colors.gray[12] }, // 그레이 중간톤
+      { bg: '#E3F2FD', text: '#0D47A1' }, // 블루
+      { bg: '#E8F5E9', text: '#1B5E20' }, // 그린
+      { bg: '#FFF3E0', text: '#E65100' }, // 오렌지
+      { bg: '#FCE4EC', text: '#880E4F' }, // 핑크
+      { bg: '#E0F7FA', text: '#006064' }, // 민트
+      { bg: '#F3E5F5', text: '#4A148C' }, // 라이트 퍼플
+    ];
+    const set = colorSets[$colorIndex % colorSets.length];
+    return `
+      background-color: ${set.bg};
+      color: ${set.text};
+    `;
+  }}
+  transition: background-color 0.2s ease, transform 0.15s ease;
+
+  &:hover {
+    transform: scale(1.04);
+  }
 `;
 
 const MoreChip = styled.span`
