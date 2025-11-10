@@ -357,13 +357,9 @@ export default function SimulationGO() {
     }
   };
 
-  const handleTick = (left) => setTimeLeft(left);
-  const handleRecordingChange = (rec) => setIsQuestionRecording(rec);
-
   const handleAutoFinish = (qaId, url) => {
-    if (currentIdx >= totalQuestions - 1) {
-      stopSession();
-      return;
+    if (currentIdx < totalQuestions - 1) {
+      goNextQuestionGuarded();
     }
     goNextQuestionGuarded();
   };

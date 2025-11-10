@@ -1,195 +1,16 @@
-import Typography from '@components/common/Typography';
+import * as I from '@components/qaset/QAInputStyle';
 import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import * as Accordion from '@radix-ui/react-accordion';
-import { TrashIcon, CaretDownIcon, DragHandleDots2Icon } from '@radix-ui/react-icons';
+import { TrashIcon, DragHandleDots2Icon } from '@radix-ui/react-icons';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import styled, { keyframes } from 'styled-components';
 
-// --- 스타일 정의 ---
-
-export const FormItemContainer = styled(Accordion.Item)`
-  background-color: white;
-  border: 1px solid ${({ theme }) => theme.colors.gray[5]};
-  border-radius: ${({ theme }) => theme.radius.md};
-  overflow: hidden;
-  box-shadow: ${({ theme }) => theme.shadow.sm};
-
-  transform: ${({ style }) =>
-    style?.transform ? CSS.Transform.toString(style.transform) : 'none'};
-  transition: ${({ style }) => style?.transition || 'none'};
-
-  &[data-dragging='true'] {
-    box-shadow: ${({ theme }) => theme.shadow.lg};
-    z-index: 10;
-  }
-`;
-
-export const FormHeader = styled(Accordion.Header)`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.space[2]};
-  width: 100%;
-  padding-right: ${({ theme }) => theme.space[2]};
-  box-sizing: border-box;
-`;
-
-export const DragHandle = styled.button`
-  all: unset;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[2]};
-  cursor: grab;
-  color: ${({ theme }) => theme.colors.gray[8]};
-
-  &:active {
-    cursor: grabbing;
-  }
-  &:focus {
-    outline: none;
-    box-shadow: inset 0 0 0 2px ${({ theme }) => theme.colors.primary[6]};
-  }
-`;
-
-export const AccordionTriggerStyled = styled(Accordion.Trigger)`
-  all: unset;
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[3]};
-  cursor: pointer;
-  border-radius: ${({ theme }) => theme.radius.sm};
-  transition: background-color 0.15s ease;
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.gray[2]};
-  }
-  &:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary[6]};
-  }
-`;
-
-export const HeaderLeft = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.space[3]};
-`;
-
-export const QuestionNumberBadge = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: ${({ theme }) => theme.radius.sm};
-  background-color: ${({ theme }) => theme.colors.primary[9]};
-  color: white;
-  font-size: ${({ theme }) => theme.font.size[2]};
-  font-weight: ${({ theme }) => theme.font.weight.semiBold};
-`;
-
-export const QuestionTitleText = styled(Typography).attrs({ size: 3, weight: 'semiBold' })`
-  color: ${({ theme }) => theme.colors.gray[12]};
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  max-width: 300px;
-`;
-
-const BaseIconButton = styled.button`
-  all: unset;
-  cursor: pointer;
-  width: 24px;
-  height: 24px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: ${({ theme }) => theme.radius.sm};
-  color: ${({ theme }) => theme.colors.gray[9]};
-  flex-shrink: 0;
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.gray[3]};
-    color: ${({ theme }) => theme.colors.gray[12]};
-  }
-`;
-export const DeleteButton = styled(BaseIconButton)``;
-
-export const CaretIcon = styled(CaretDownIcon)`
-  color: ${({ theme }) => theme.colors.gray[10]};
-  transition: transform 200ms ease;
-  [data-state='open'] & {
-    transform: rotate(-180deg);
-  }
-`;
-
-// --- 콘텐츠 영역 스타일 (QAForm과 동일) ---
-const slideDown = keyframes`
-    from { height: 0; }
-    to { height: var(--radix-accordion-content-height); }
-`;
-const slideUp = keyframes`
-    from { height: var(--radix-accordion-content-height); }
-    to { height: 0; }
-`;
-export const FormContent = styled(Accordion.Content)`
-  overflow: hidden;
-  padding: 0 ${({ theme }) => theme.space[4]} ${({ theme }) => theme.space[4]};
-
-  &[data-state='open'] {
-    animation: ${slideDown} 300ms cubic-bezier(0.87, 0, 0.13, 1);
-  }
-  &[data-state='closed'] {
-    animation: ${slideUp} 300ms cubic-bezier(0.87, 0, 0.13, 1);
-  }
-`;
-export const FormInputsWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.space[4]};
-`;
-export const InputGroup = styled.div`
-  padding: ${({ theme }) => theme.space[3]};
-  border: 1px solid ${({ theme }) => theme.colors.gray[5]};
-  border-radius: ${({ theme }) => theme.radius.sm};
-  &:focus-within {
-    border-color: ${({ theme }) => theme.colors.primary[7]};
-    box-shadow: 0 0 0 1px ${({ theme }) => theme.colors.primary[7]};
-  }
-`;
-export const InputLabel = styled.label`
-  display: block;
-  margin-bottom: ${({ theme }) => theme.space[2]};
-  font-size: ${({ theme }) => theme.font.size[2]};
-  color: ${({ theme }) => theme.colors.gray[10]};
-  font-weight: ${({ theme }) => theme.font.weight.semiBold};
-`;
-export const FormTextArea = styled.textarea`
-  all: unset;
-  width: 100%;
-  min-height: 80px;
-  font-family: ${({ theme }) => theme.font.family.primary};
-  font-size: ${({ theme }) => theme.font.size[3]};
-  color: ${({ theme }) => theme.colors.gray[12]};
-  line-height: ${({ theme }) => theme.font.lineHeight[4]};
-  resize: vertical;
-`;
-// --- 스타일 정의 끝 ---
-
-/**
- * @param {object} props
- * @param {string} props.id - dnd-kit을 위한 고유 ID (useFieldArray의 item.id)
- * @param {number} props.index - 배열 내 인덱스
- * @param {function} props.onDelete - 삭제 핸들러
- */
 export const QAUpdateInput = ({ id, index, onDelete }) => {
   const { register, watch } = useFormContext();
 
   const questionName = `qaSets[${index}].question`;
   const answerName = `qaSets[${index}].answer`;
   const currentQuestion = watch(questionName);
+  const currentAnswer = watch(answerName);
 
   // 💡 dnd-kit 훅 사용
   const {
@@ -209,53 +30,57 @@ export const QAUpdateInput = ({ id, index, onDelete }) => {
 
   return (
     // 💡 setNodeRef, style, data-dragging 속성 추가
-    <FormItemContainer
+    <I.FormItemContainer
       value={`item-${index}`}
       ref={setNodeRef}
       style={style}
       data-dragging={isDragging}
     >
-      <FormHeader>
+      <I.FormHeader>
         {/* 드래그 핸들 */}
-        <DragHandle type='button' {...attributes} {...listeners} title='드래그하여 순서 변경'>
+        <I.DragHandle type='button' {...attributes} {...listeners} title='드래그하여 순서 변경'>
           <DragHandleDots2Icon width={18} height={18} />
-        </DragHandle>
+        </I.DragHandle>
 
         {/* 접기/펼치기 트리거: 질문 번호 + 제목 + 화살표 */}
-        <AccordionTriggerStyled>
-          <HeaderLeft>
-            <QuestionNumberBadge>{index + 1}</QuestionNumberBadge>
-            <QuestionTitleText>{currentQuestion}</QuestionTitleText>
-          </HeaderLeft>
-          <CaretIcon aria-hidden width={20} height={20} />
-        </AccordionTriggerStyled>
+        <I.AccordionTriggerStyled>
+          <I.HeaderLeft>
+            <I.QuestionNumberBadge>{index + 1}</I.QuestionNumberBadge>
+            <I.QuestionTitleText>{currentQuestion}</I.QuestionTitleText>
+          </I.HeaderLeft>
+          <I.CaretIcon aria-hidden width={20} height={20} />
+        </I.AccordionTriggerStyled>
 
         {/* 휴지통 아이콘: 트리거 밖, 우측 정렬 */}
-        <DeleteButton type='button' title='삭제' onClick={onDelete} aria-label='질문 삭제'>
+        <I.DeleteButton type='button' title='삭제' onClick={onDelete} aria-label='질문 삭제'>
           <TrashIcon width={20} height={20} />
-        </DeleteButton>
-      </FormHeader>
+        </I.DeleteButton>
+      </I.FormHeader>
 
-      <FormContent>
-        <FormInputsWrapper>
-          <InputGroup>
-            <InputLabel htmlFor={questionName}>질문을 입력하세요</InputLabel>
-            <FormTextArea
+      <I.FormContent>
+        <I.FormInputsWrapper>
+          <I.InputGroup>
+            <I.InputLabel htmlFor={questionName}>질문을 입력하세요</I.InputLabel>
+            <I.FormTextArea
               id={questionName}
               placeholder='예: 프로젝트 경험에 대해 설명해주세요.'
+              maxLength={100}
               {...register(questionName, { required: '질문은 필수입니다.' })}
             />
-          </InputGroup>
-          <InputGroup>
-            <InputLabel htmlFor={answerName}>답변을 입력하세요</InputLabel>
-            <FormTextArea
+          </I.InputGroup>
+          <I.CharCount>{(currentQuestion || '').length} / 100</I.CharCount>
+          <I.InputGroup>
+            <I.InputLabel htmlFor={answerName}>답변을 입력하세요</I.InputLabel>
+            <I.FormTextArea2
               id={answerName}
               placeholder='예: React와 TypeScript를 사용한...'
+              maxLength={500}
               {...register(answerName, { required: '답변은 필수입니다.' })}
             />
-          </InputGroup>
-        </FormInputsWrapper>
-      </FormContent>
-    </FormItemContainer>
+          </I.InputGroup>
+          <I.CharCount>{(currentAnswer || '').length} / 500</I.CharCount>
+        </I.FormInputsWrapper>
+      </I.FormContent>
+    </I.FormItemContainer>
   );
 };
