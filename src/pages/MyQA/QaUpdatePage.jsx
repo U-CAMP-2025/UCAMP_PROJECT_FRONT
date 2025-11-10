@@ -97,7 +97,7 @@ export default function QAUpdatePage() {
   });
 
   const onInvalid = (errors) => {
-    console.log('Form validation failed:', errors);
+    // console.log('Form validation failed:', errors);
 
     // 1. 직무 선택 에러 처리
     if (errors.jobIds && jobSectionRef.current) {
@@ -156,8 +156,8 @@ export default function QAUpdatePage() {
   const watchedQaSets = watch('qaSets');
 
   const onSubmit = (data) => {
-    console.log('onSubmit called with:', data);
-    console.log('jobIds length:', data.jobIds?.length);
+    // console.log('onSubmit called with:', data);
+    // console.log('jobIds length:', data.jobIds?.length);
 
     editPost(qaId, data)
       .then((response) => {
