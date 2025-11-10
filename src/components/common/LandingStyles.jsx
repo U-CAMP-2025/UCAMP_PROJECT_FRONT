@@ -109,10 +109,6 @@ export const MainHeading2 = styled.span`
   color: #fff;
   margin-top: 8px;
   margin-bottom: 24px;
-
-  @media (max-width: 768px) {
-    font-size: 3rem;
-  }
 `;
 
 export const Description = styled.p`
@@ -125,9 +121,6 @@ export const Description = styled.p`
 export const ButtonGroup = styled.div`
   display: flex;
   gap: 16px;
-  @media (max-width: 968px) {
-    justify-content: center;
-  }
 `;
 
 export const PrimaryButton = styled.button`
@@ -158,13 +151,6 @@ export const CardsWrapper = styled.div`
   height: 400px;
   z-index: 1;
   perspective: 1000px; // 3D 효과를 위한 원근감
-
-  @media (max-width: 968px) {
-    width: 100%;
-    max-width: 500px;
-    height: 350px;
-    margin-top: 40px;
-  }
 `;
 
 // 글래스모피즘(Glassmorphism) 카드 스타일
@@ -245,10 +231,6 @@ export const SectionContainer = styled.section`
   text-align: center;
   background-color: ${(props) => props.$bgColor || 'transparent'};
   border-radius: ${(props) => (props.$bgColor ? '40px' : '0')};
-
-  @media (max-width: 768px) {
-    padding: 60px 20px;
-  }
 `;
 
 export const SectionTitle = styled.h2`
@@ -257,10 +239,6 @@ export const SectionTitle = styled.h2`
   color: #1a202c;
   margin-bottom: 16px;
   letter-spacing: -0.03em;
-
-  @media (max-width: 768px) {
-    font-size: 1.8rem;
-  }
 `;
 
 export const SectionSubTitle = styled.p`
@@ -322,9 +300,6 @@ export const SliderWrapper = styled.div`
   padding: 0 60px;
   margin: 50px auto 80px;
   max-width: 1100px;
-  @media (max-width: 768px) {
-    padding: 0;
-  }
 `;
 
 export const ArrowButton = styled.button`
@@ -353,10 +328,6 @@ export const ArrowButton = styled.button`
   &:disabled {
     opacity: 0.3;
     cursor: not-allowed;
-  }
-
-  @media (max-width: 768px) {
-    display: none;
   }
 `;
 
@@ -469,10 +440,6 @@ export const RankingSubTitle = styled.h3`
   color: #2d3748; /* #718096 -> 조금 더 진한 회색으로 변경하여 강조 */
   margin: 0;
   letter-spacing: -0.02em;
-
-  @media (max-width: 768px) {
-    font-size: 1.4rem; /* 모바일에서도 적당히 크게 유지 */
-  }
 `;
 
 export const Tabs = styled.div`
@@ -613,10 +580,6 @@ export const CTAContent = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
-  @media (max-width: 768px) {
-    padding: 60px 30px;
-  }
 `;
 
 export const PrimaryButton2 = styled(PrimaryButton)`
@@ -638,11 +601,6 @@ export const PrimaryButton2 = styled(PrimaryButton)`
     color: #553c9a;
     transform: translateY(-3px) scale(1.05);
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-  }
-
-  @media (max-width: 640px) {
-    width: 100%;
-    display: flex !important;
   }
 `;
 
@@ -667,10 +625,6 @@ export const MainText = styled.h2`
   line-height: 1.3;
   margin-bottom: 48px;
   text-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-
-  @media (max-width: 768px) {
-    font-size: 2.2rem;
-  }
 `;
 
 export const ArrowIcon = styled.span`
@@ -782,10 +736,6 @@ export const VideoWrapper = styled.div`
     height: 100%;
     border: none;
     display: block;
-  }
-
-  @media (max-width: 768px) {
-    max-width: 100%;
   }
 `;
 

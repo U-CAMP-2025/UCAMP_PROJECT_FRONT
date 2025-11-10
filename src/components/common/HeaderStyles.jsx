@@ -35,7 +35,7 @@ export const Logo = styled.button`
 `;
 
 export const LogoImage = styled.img`
-  height: 50px;
+  height: 30px;
   width: auto;
   border-radius: 4px;
 `;
