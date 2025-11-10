@@ -1,20 +1,12 @@
-import Tag, { TagGroup } from '@components/common/Tag';
 import Typography from '@components/common/Typography';
 import { BookmarkIcon, CommentIcon } from '@components/common/icons';
 import { KakaoLoginDialog } from '@components/signup/KakaoLoginDialog';
 import { BookmarkFilledIcon, GlobeIcon, LockClosedIcon } from '@radix-ui/react-icons';
 import { useAuthStore } from '@store/auth/useAuthStore';
+import { getJobId } from '@utils/styles/getJobId';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-
-const getJobColorIndex = (name = '') => {
-  let hash = 0;
-  for (let i = 0; i < name.length; i += 1) {
-    hash = (hash * 31 + name.charCodeAt(i)) | 0;
-  }
-  return Math.abs(hash);
-};
 
 export default function QASetCard({ item, showPublicBadge = false, onClick }) {
   const navigate = useNavigate();
@@ -85,14 +77,20 @@ export default function QASetCard({ item, showPublicBadge = false, onClick }) {
             {me && <OwnerBadge>내가 만든 셋</OwnerBadge>}
           </BadgeGroup>
         </TopMetaRow>
-
         {job.length > 0 && (
           <JobChips>
-            {job.slice(0, 3).map((j) => (
-              <JobChip key={j} $colorIndex={getJobColorIndex(j)}>
-                {j}
-              </JobChip>
-            ))}
+            {job.slice(0, 3).map((j) => {
+              const jobName = typeof j === 'string' ? j : j.jobName;
+              const key = typeof j === 'string' ? j : (j.jobId ?? j.jobName);
+
+              if (!jobName) return null;
+
+              return (
+                <JobChip key={key} $jobName={jobName}>
+                  {jobName}
+                </JobChip>
+              );
+            })}
             {job.length > 3 && <MoreChip>+{job.length - 3}</MoreChip>}
           </JobChips>
         )}
@@ -108,11 +106,11 @@ export default function QASetCard({ item, showPublicBadge = false, onClick }) {
 
         <BottomRow>
           <AuthorDate>
-            <Typography as='span' size={1}>
+            <Typography as='span' size={2}>
               {displayAuthor}
             </Typography>
             {createdLabel && (
-              <Typography as='span' size={1}>
+              <Typography as='span' size={2}>
                 · {createdLabel}
               </Typography>
             )}
@@ -120,13 +118,13 @@ export default function QASetCard({ item, showPublicBadge = false, onClick }) {
           <Stats>
             <StatItem aria-label='스크랩 수'>
               <BookmarkIcon />
-              <Typography as='span' size={1}>
+              <Typography as='span' size={2}>
                 {bookCount}
               </Typography>
             </StatItem>
             <StatItem aria-label='리뷰 수'>
               <CommentIcon />
-              <Typography as='span' size={1}>
+              <Typography as='span' size={2}>
                 {review}
               </Typography>
             </StatItem>
@@ -221,24 +219,29 @@ const JobChip = styled.span`
   border-radius: 999px;
   font-size: 13px;
   font-weight: ${({ theme }) => theme.font.weight.semiBold};
-  ${({ theme, $colorIndex = 0 }) => {
-    // 직무명에 따라 항상 동일한 톤이 적용되도록 인덱스 기반 팔레트
+
+  ${({ theme, $jobName }) => {
     const colorSets = [
-      { bg: theme.colors.primary[3], text: theme.colors.primary[11] }, // 보라 파스텔
-      { bg: theme.colors.gray[3], text: theme.colors.gray[12] }, // 그레이 중간톤
-      { bg: '#E3F2FD', text: '#0D47A1' }, // 블루
-      { bg: '#E8F5E9', text: '#1B5E20' }, // 그린
-      { bg: '#FFF3E0', text: '#E65100' }, // 오렌지
-      { bg: '#FCE4EC', text: '#880E4F' }, // 핑크
-      { bg: '#E0F7FA', text: '#006064' }, // 민트
-      { bg: '#F3E5F5', text: '#4A148C' }, // 라이트 퍼플
+      { bg: theme.colors.primary[3], text: theme.colors.primary[11] },
+      { bg: theme.colors.gray[3], text: theme.colors.gray[12] },
+      { bg: '#E3F2FD', text: '#0D47A1' },
+      { bg: '#E8F5E9', text: '#1B5E20' },
+      { bg: '#FFF3E0', text: '#E65100' },
+      { bg: '#FCE4EC', text: '#880E4F' },
+      { bg: '#E0F7FA', text: '#006064' },
+      { bg: '#F3E5F5', text: '#4A148C' },
     ];
-    const set = colorSets[$colorIndex % colorSets.length];
+
+    const jobId = getJobId($jobName);
+    const index = jobId % colorSets.length;
+    const set = colorSets[index];
+
     return `
       background-color: ${set.bg};
       color: ${set.text};
     `;
   }}
+
   transition: background-color 0.2s ease, transform 0.15s ease;
 
   &:hover {
@@ -297,8 +300,8 @@ const StatItem = styled.div`
   color: ${({ theme }) => theme.colors.gray[9]};
 
   svg {
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
     color: ${({ theme }) => theme.colors.gray[10]};
   }
 `;
@@ -313,7 +316,7 @@ const BookmarkFloating = styled.div`
   justify-content: center;
 
   & svg {
-    width: 20px;
-    height: 20px;
+    width: 26px;
+    height: 26px;
   }
 `;

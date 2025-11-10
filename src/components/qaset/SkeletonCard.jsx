@@ -4,83 +4,104 @@ import styled from 'styled-components';
 
 export function QASetCardSkeleton() {
   return (
-    <SkeletonTheme
-      baseColor='#f0f0f0'
-      highlightColor='#e0e0e0'
-      duration={1.5}
-      enableAnimation={true}
-    >
+    <SkeletonTheme baseColor='#f3f3f3' highlightColor='#e8e8e8' duration={1.4} enableAnimation>
       <SkeletonCard>
-        <SkeletonHeader>
-          <Skeleton width={80} height={24} count={2} inline style={{ marginRight: 8 }} />
-        </SkeletonHeader>
+        {/* 상단 뱃지 영역 */}
+        <SkeletonTopMetaRow>
+          <SkeletonBadge width={64} />
+          <SkeletonBadge width={52} />
+          <SkeletonBadge width={72} />
+        </SkeletonTopMetaRow>
 
-        <SkeletonContent>
-          <Skeleton width={60} height={20} style={{ marginBottom: 8 }} />
-          <Skeleton height={24} style={{ marginTop: 8 }} />
+        {/* 직무 칩 영역 */}
+        <SkeletonJobChips>
+          <SkeletonChip width={80} />
+          <SkeletonChip width={90} />
+          <SkeletonChip width={70} />
+        </SkeletonJobChips>
 
-          <div style={{ marginTop: 16 }}>
-            <Skeleton width={60} height={20} style={{ marginBottom: 6 }} />
-            <Skeleton count={2} height={18} />
-          </div>
+        {/* 제목 + 설명 */}
+        <SkeletonTitleBlock>
+          <Skeleton height={22} width='80%' style={{ marginBottom: 6 }} />
+          <Skeleton height={16} width='100%' />
+          <Skeleton height={16} width='92%' />
+        </SkeletonTitleBlock>
 
-          <div style={{ marginTop: 16, flexGrow: 1 }}>
-            <Skeleton width={60} height={20} style={{ marginBottom: 6 }} />
-            <Skeleton width={100} height={16} />
-          </div>
-        </SkeletonContent>
-
-        <SkeletonDivider />
-
-        <SkeletonFooter>
-          <Skeleton width={50} height={20} />
-          <Skeleton width={50} height={20} />
-        </SkeletonFooter>
+        {/* 하단 작성자 + 통계 */}
+        <SkeletonBottomRow>
+          <SkeletonAuthor>
+            <Skeleton width={80} height={16} />
+            <Skeleton width={60} height={14} />
+          </SkeletonAuthor>
+          <SkeletonStats>
+            <Skeleton width={40} height={18} />
+            <Skeleton width={40} height={18} />
+          </SkeletonStats>
+        </SkeletonBottomRow>
       </SkeletonCard>
     </SkeletonTheme>
   );
 }
 
 const SkeletonCard = styled.article`
-  border: 1px solid #e8e5d9;
-  border-radius: ${({ theme }) => theme.radius.xl};
-  background: #ffffff;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  padding: ${({ theme }) => theme.space[4]};
+  border-radius: ${({ theme }) => theme.radius.lg};
+  border: 1px solid ${({ theme }) => theme.colors.gray[4]};
+  background-color: ${({ theme }) => theme.colors.gray[1]};
   display: flex;
   flex-direction: column;
-  min-height: 400px;
-  overflow: hidden;
+  gap: ${({ theme }) => theme.space[3]};
 `;
 
-const SkeletonHeader = styled.div`
-  background: ${({ theme }) => theme.colors.primary[5]};
-  border-radius: ${({ theme }) => theme.radius.xl} ${({ theme }) => theme.radius.xl} 0 0;
-  padding: ${({ theme }) => theme.space[4]} ${({ theme }) => theme.space[5]};
-  height: 90px;
+const SkeletonTopMetaRow = styled.div`
   display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+`;
+
+const SkeletonBadge = styled(Skeleton)`
+  border-radius: 999px !important;
+  height: 18px !important;
+`;
+
+const SkeletonJobChips = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+`;
+
+const SkeletonChip = styled(Skeleton)`
+  border-radius: 999px !important;
+  height: 20px !important;
+`;
+
+const SkeletonTitleBlock = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 2px;
+`;
+
+const SkeletonBottomRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  margin-top: ${({ theme }) => theme.space[2]};
+`;
+
+const SkeletonAuthor = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
   align-items: center;
 `;
 
-const SkeletonContent = styled.div`
-  flex-grow: 1;
+const SkeletonStats = styled.div`
   display: flex;
-  flex-direction: column;
-  padding: ${({ theme }) => theme.space[5]};
-  background: #ffffff;
-`;
-
-const SkeletonDivider = styled.hr`
-  border: 0;
-  border-top: 1px solid ${({ theme }) => theme.colors.gray[7]};
-  margin: 0 ${({ theme }) => theme.space[5]};
-`;
-
-const SkeletonFooter = styled.div`
-  display: flex;
+  gap: 10px;
   align-items: center;
-  justify-content: flex-end;
-  gap: ${({ theme }) => theme.space[6]};
-  padding: ${({ theme }) => theme.space[6]};
-  background: #ffffff;
-  border-radius: 0 0 ${({ theme }) => theme.radius.xl} ${({ theme }) => theme.radius.xl};
 `;

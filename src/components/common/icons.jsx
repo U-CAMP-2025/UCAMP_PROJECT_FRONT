@@ -1,5 +1,5 @@
 export const BookmarkIcon = (props) => (
-  <svg width='22' height='22' viewBox='0 0 24 24' fill='none' {...props}>
+  <svg width='36' height='36' viewBox='0 0 24 24' fill='none' {...props}>
     <path
       d='M7 4h10a1 1 0 0 1 1 1v14l-6-3-6 3V5a1 1 0 0 1 1-1z'
       stroke='currentColor'
