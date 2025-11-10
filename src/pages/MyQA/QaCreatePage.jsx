@@ -327,9 +327,11 @@ export default function QACreatePage() {
                         : null}
                     </DragOverlay>
                   </DndContext>
-                  <AddSetButton type='button' onClick={handleAddSet}>
-                    <PlusIcon width={30} height={30} />
-                  </AddSetButton>
+                  {fields.length < 10 && (
+                    <AddSetButton type='button' onClick={handleAddSet}>
+                      <PlusIcon width={30} height={30} />
+                    </AddSetButton>
+                  )}
                 </Section>
 
                 {/* 5. 공개 설정 및 저장 */}
