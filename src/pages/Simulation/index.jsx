@@ -295,7 +295,7 @@ export default function SimulationPresetPage() {
               <CountBadge>
                 {count !== null ? (
                   <Typography size={2} weight='semiBold' color='primary.9'>
-                    오늘 연습 {count} / 3회
+                    오늘 연습 {count >= 3 ? 3 : count} / 3회
                   </Typography>
                 ) : (
                   <Typography size={2} weight='semiBold' color='primary.9'>

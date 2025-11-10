@@ -1,6 +1,5 @@
 import { fetchUserStatus } from '@api/userAPIS';
 import * as L from '@components/common/LandingStyles';
-import { Header } from '@components/layout/Header';
 import { PageContainer } from '@components/layout/PageContainer';
 import { KakaoLoginDialog } from '@components/signup/KakaoLoginDialog';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
@@ -99,226 +98,229 @@ export default function LandingPage() {
 
   return (
     <>
-      <Header />
-      <PageContainer footer>
-        {/* Hero Section */}
-        <L.HeroContainer id='hero-section'>
-          <L.BackgroundBlur />
-          <L.ContentWrapper>
-            <L.MainHeading2>면접톡!</L.MainHeading2>
+      <PageContainer header footer>
+        <Wrapper>
+          {' '}
+          {/* Hero Section */}
+          <L.HeroContainer id='hero-section'>
+            <L.BackgroundBlur />
+            <L.ContentWrapper>
+              <L.MainHeading2>면접톡!</L.MainHeading2>
 
-            <L.Description>
-              혼자 하는 면접 준비는 이제 그만! 👋 <br />
-              함께 성장하는 면접 커뮤니티
-            </L.Description>
-            <L.ButtonGroup>
-              <L.PrimaryButton onClick={handleClickLoginButton}>
-                1분 만에 시작하기 🚀
-              </L.PrimaryButton>
-              <KakaoLoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
-            </L.ButtonGroup>
-          </L.ContentWrapper>
+              <L.Description>
+                혼자 하는 면접 준비는 이제 그만! 👋 <br />
+                함께 성장하는 면접 커뮤니티
+              </L.Description>
+              <L.ButtonGroup>
+                <L.PrimaryButton onClick={handleClickLoginButton}>
+                  1분 만에 시작하기 🚀
+                </L.PrimaryButton>
+                <KakaoLoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
+              </L.ButtonGroup>
+            </L.ContentWrapper>
 
-          <L.CardsWrapper>
-            <L.Card as={L.Card2}>
-              <L.CardIcon>📝</L.CardIcon>
-              <L.CardTitle>AI 면접 분석</L.CardTitle>
-              <L.CardDescription>
-                내 답변을 분석하고 <br />
-                완벽한 피드백까지!
-              </L.CardDescription>
-            </L.Card>
-            <L.Card as={L.Card1}>
-              <L.CardIcon>💼</L.CardIcon>
-              <L.CardTitle>합격 전략 공유</L.CardTitle>
-              <L.CardDescription>
-                다른 사람들의 면접 준비 방법,
-                <br />
-                면접 노트로 확인하세요.
-              </L.CardDescription>
-            </L.Card>
-            <L.Card as={L.Card3}>
-              <L.CardIcon>🎯</L.CardIcon>
-              <L.CardTitle>실전 모의 면접</L.CardTitle>
-              <L.CardDescription>
-                떨지 않고 완벽하게,
-                <br />
-                AI 면접관과 실전 연습!
-              </L.CardDescription>
-            </L.Card>
-          </L.CardsWrapper>
-        </L.HeroContainer>
+            <L.CardsWrapper>
+              <L.Card as={L.Card2}>
+                <L.CardIcon>📝</L.CardIcon>
+                <L.CardTitle>AI 면접 분석</L.CardTitle>
+                <L.CardDescription>
+                  내 답변을 분석하고 <br />
+                  완벽한 피드백까지!
+                </L.CardDescription>
+              </L.Card>
+              <L.Card as={L.Card1}>
+                <L.CardIcon>💼</L.CardIcon>
+                <L.CardTitle>합격 전략 공유</L.CardTitle>
+                <L.CardDescription>
+                  다른 사람들의 면접 준비 방법,
+                  <br />
+                  면접 노트로 확인하세요.
+                </L.CardDescription>
+              </L.Card>
+              <L.Card as={L.Card3}>
+                <L.CardIcon>🎯</L.CardIcon>
+                <L.CardTitle>실전 모의 면접</L.CardTitle>
+                <L.CardDescription>
+                  떨지 않고 완벽하게,
+                  <br />
+                  AI 면접관과 실전 연습!
+                </L.CardDescription>
+              </L.Card>
+            </L.CardsWrapper>
+          </L.HeroContainer>
+          {/* Problem & Solution Section */}
+          <L.SectionContainer id='problem-section'>
+            <L.SectionTitle>면접 준비, 이런 고민 해보셨죠? 🤯</L.SectionTitle>
+            <L.CardsGrid>
+              {L.cards.map((card, index) => (
+                <L.ProblemCard
+                  key={card.id}
+                  bgColor={card.bgColor}
+                  style={{ animationDelay: `${index * 0.2}s` }}
+                >
+                  <L.AvatarWrapper2>{card.avatar}</L.AvatarWrapper2>
+                  <L.CardTitle2>{card.title}</L.CardTitle2>
+                  <L.CardDescription2>{card.description}</L.CardDescription2>
+                </L.ProblemCard>
+              ))}
+            </L.CardsGrid>
+          </L.SectionContainer>
+          <L.SectionTitle id='video-section'>면접톡과 함께 준비해보세요!</L.SectionTitle>
+          <L.VideoWrapper>
+            <iframe
+              src='https://www.youtube.com/embed/2MJbpywFSX0'
+              title='YouTube video player'
+              frameBorder='0'
+              allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+              allowFullScreen
+            />
+          </L.VideoWrapper>
+          {/* Social Proof & Ranking Section */}
+          <L.SectionContainer $bgColor='#f8f9fd' id='ranking-section'>
+            <L.SectionTitle>이미 많은 분들이 함께하고 있어요! 🔥</L.SectionTitle>
 
-        {/* Problem & Solution Section */}
-        <L.SectionContainer id='problem-section'>
-          <L.SectionTitle>면접 준비, 이런 고민 해보셨죠? 🤯</L.SectionTitle>
-          <L.CardsGrid>
-            {L.cards.map((card, index) => (
-              <L.ProblemCard
-                key={card.id}
-                bgColor={card.bgColor}
-                style={{ animationDelay: `${index * 0.2}s` }}
+            {/* Review Slider */}
+            <L.SliderWrapper>
+              <L.ArrowButton $direction='left' onClick={handlePrev} disabled={currentIndex === 0}>
+                <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
+                  <path d='M15 18l-6-6 6-6' strokeLinecap='round' strokeLinejoin='round' />
+                </svg>
+              </L.ArrowButton>
+
+              <L.CardContainer2 ref={containerRef}>
+                <L.Track $translatePx={offsetPx} $gap={cardGap}>
+                  {L.cardData.map((card) => (
+                    <L.ReviewCardWrapper
+                      key={card.id}
+                      style={{ minWidth: cardWidthPx ? `${cardWidthPx}px` : undefined }}
+                    >
+                      <L.ReviewCard>
+                        <L.ReviewTitle>{card.title}</L.ReviewTitle>
+                        <L.ReviewList>
+                          {card.reviews.map((review, idx) => (
+                            <L.ReviewItem key={idx}>
+                              <span>💬</span> <L.ReviewText>{review.text}</L.ReviewText>
+                            </L.ReviewItem>
+                          ))}
+                        </L.ReviewList>
+                      </L.ReviewCard>
+                    </L.ReviewCardWrapper>
+                  ))}
+                </L.Track>
+              </L.CardContainer2>
+
+              <L.ArrowButton
+                $direction='right'
+                onClick={handleNext}
+                disabled={currentIndex >= maxIndex}
               >
-                <L.AvatarWrapper2>{card.avatar}</L.AvatarWrapper2>
-                <L.CardTitle2>{card.title}</L.CardTitle2>
-                <L.CardDescription2>{card.description}</L.CardDescription2>
-              </L.ProblemCard>
-            ))}
-          </L.CardsGrid>
-        </L.SectionContainer>
+                <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
+                  <path d='M9 18l6-6-6-6' strokeLinecap='round' strokeLinejoin='round' />
+                </svg>
+              </L.ArrowButton>
+            </L.SliderWrapper>
 
-        <L.SectionTitle id='video-section'>면접톡과 함께 준비해보세요!</L.SectionTitle>
-        <L.VideoWrapper>
-          <iframe
-            src='https://www.youtube.com/embed/2MJbpywFSX0'
-            title='YouTube video player'
-            frameBorder='0'
-            allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
-            allowFullScreen
-          />
-        </L.VideoWrapper>
+            {/* Ranking Podium */}
+            <L.CompetitionTitle id='ranking-section2'>
+              다른 유저들과 선의의 경쟁을 펼쳐보세요 🏆
+            </L.CompetitionTitle>
+            <L.RankingContainer>
+              <L.RankingHeader>
+                <L.RankingSubTitle>이번 주 명예의 전당</L.RankingSubTitle>
+                <L.Tabs>
+                  <L.Tab active={activeTab === 'friends'} onClick={() => setActiveTab('friends')}>
+                    🔥 활동순
+                  </L.Tab>
+                  <L.Tab active={activeTab === 'world'} onClick={() => setActiveTab('world')}>
+                    📚 북마크순
+                  </L.Tab>
+                </L.Tabs>
+              </L.RankingHeader>
 
-        {/* Social Proof & Ranking Section */}
-        <L.SectionContainer $bgColor='#f8f9fd' id='ranking-section'>
-          <L.SectionTitle>이미 많은 분들이 함께하고 있어요! 🔥</L.SectionTitle>
+              <L.PodiumContainer>
+                {podiumOrder.map((user, index) => {
+                  const actualRank = user.rank;
+                  // 포디움 높이: 2등(index 0), 1등(index 1), 3등(index 2)
+                  const pedestalHeights = [100, 140, 70];
+                  const delay = [0.2, 0, 0.4];
 
-          {/* Review Slider */}
-          <L.SliderWrapper>
-            <L.ArrowButton $direction='left' onClick={handlePrev} disabled={currentIndex === 0}>
-              <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
-                <path d='M15 18l-6-6 6-6' strokeLinecap='round' strokeLinejoin='round' />
-              </svg>
-            </L.ArrowButton>
+                  return (
+                    <L.PodiumItem key={user.id} style={{ animationDelay: `${delay[index]}s` }}>
+                      {actualRank === 1 && <L.Crown>👑</L.Crown>}
+                      <L.AvatarWrapper rank={actualRank}>
+                        <L.Avatar>{user.avatar}</L.Avatar>
+                        <L.RankBadge rank={actualRank}>{actualRank}</L.RankBadge>
+                      </L.AvatarWrapper>
+                      <L.Username>{user.username}</L.Username>
+                      <L.Score>{user.score.toLocaleString()} P</L.Score>
+                      <L.Pedestal height={pedestalHeights[index]} rank={actualRank} />
+                    </L.PodiumItem>
+                  );
+                })}
+              </L.PodiumContainer>
+            </L.RankingContainer>
+          </L.SectionContainer>
+          {/* ====== 플러스 이용권 소개 섹션 ====== */}
+          <PlansIntroSection id='plan-section'>
+            <PlansTitle>더 많은 기능이 필요하신가요?</PlansTitle>
+            <PlansRow>
+              <PlanCard>
+                <PlanName>일반 회원</PlanName>
+                <PlanDesc>기본 제공 기능</PlanDesc>
+                <PlanList>
+                  <li>면접 노트 9개 저장</li>
+                  <li>면접 연습 일 3회</li>
+                  <li>스크랩 노트 조회만 가능</li>
+                </PlanList>
+                <PlanPrice>무료</PlanPrice>
+              </PlanCard>
 
-            <L.CardContainer2 ref={containerRef}>
-              <L.Track $translatePx={offsetPx} $gap={cardGap}>
-                {L.cardData.map((card) => (
-                  <L.ReviewCardWrapper
-                    key={card.id}
-                    style={{ minWidth: cardWidthPx ? `${cardWidthPx}px` : undefined }}
-                  >
-                    <L.ReviewCard>
-                      <L.ReviewTitle>{card.title}</L.ReviewTitle>
-                      <L.ReviewList>
-                        {card.reviews.map((review, idx) => (
-                          <L.ReviewItem key={idx}>
-                            <span>💬</span> <L.ReviewText>{review.text}</L.ReviewText>
-                          </L.ReviewItem>
-                        ))}
-                      </L.ReviewList>
-                    </L.ReviewCard>
-                  </L.ReviewCardWrapper>
-                ))}
-              </L.Track>
-            </L.CardContainer2>
-
-            <L.ArrowButton
-              $direction='right'
-              onClick={handleNext}
-              disabled={currentIndex >= maxIndex}
-            >
-              <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
-                <path d='M9 18l6-6-6-6' strokeLinecap='round' strokeLinejoin='round' />
-              </svg>
-            </L.ArrowButton>
-          </L.SliderWrapper>
-
-          {/* Ranking Podium */}
-          <L.CompetitionTitle id='ranking-section2'>
-            다른 유저들과 선의의 경쟁을 펼쳐보세요 🏆
-          </L.CompetitionTitle>
-          <L.RankingContainer>
-            <L.RankingHeader>
-              <L.RankingSubTitle>이번 주 명예의 전당</L.RankingSubTitle>
-              <L.Tabs>
-                <L.Tab active={activeTab === 'friends'} onClick={() => setActiveTab('friends')}>
-                  🔥 활동순
-                </L.Tab>
-                <L.Tab active={activeTab === 'world'} onClick={() => setActiveTab('world')}>
-                  📚 북마크순
-                </L.Tab>
-              </L.Tabs>
-            </L.RankingHeader>
-
-            <L.PodiumContainer>
-              {podiumOrder.map((user, index) => {
-                const actualRank = user.rank;
-                // 포디움 높이: 2등(index 0), 1등(index 1), 3등(index 2)
-                const pedestalHeights = [100, 140, 70];
-                const delay = [0.2, 0, 0.4];
-
-                return (
-                  <L.PodiumItem key={user.id} style={{ animationDelay: `${delay[index]}s` }}>
-                    {actualRank === 1 && <L.Crown>👑</L.Crown>}
-                    <L.AvatarWrapper rank={actualRank}>
-                      <L.Avatar>{user.avatar}</L.Avatar>
-                      <L.RankBadge rank={actualRank}>{actualRank}</L.RankBadge>
-                    </L.AvatarWrapper>
-                    <L.Username>{user.username}</L.Username>
-                    <L.Score>{user.score.toLocaleString()} P</L.Score>
-                    <L.Pedestal height={pedestalHeights[index]} rank={actualRank} />
-                  </L.PodiumItem>
-                );
-              })}
-            </L.PodiumContainer>
-          </L.RankingContainer>
-        </L.SectionContainer>
-        {/* ====== 플러스 이용권 소개 섹션 ====== */}
-        <PlansIntroSection id='plan-section'>
-          <PlansTitle>더 많은 기능이 필요하신가요?</PlansTitle>
-          <PlansRow>
-            <PlanCard>
-              <PlanName>일반 회원</PlanName>
-              <PlanDesc>기본 제공 기능</PlanDesc>
-              <PlanList>
-                <li>면접 노트 9개 저장</li>
-                <li>면접 연습 일 3회</li>
-                <li>스크랩 노트 조회만 가능</li>
-              </PlanList>
-              <PlanPrice>무료</PlanPrice>
-            </PlanCard>
-
-            <PlanCard $plus>
-              <PlanName>플러스 회원</PlanName>
-              <PlanDesc>더 많은 연습과 저장공간</PlanDesc>
-              <PlanList>
-                <li>면접 노트 21개 저장</li>
-                <li>면접 연습 무제한</li>
-                <li>스크랩 노트 수정 가능</li>
-                <li>AI 피드백 + 음성결과 수정</li>
-              </PlanList>
-              <PlanPrice>₩5,900 / 월</PlanPrice>
-              <PlanButton
-                onClick={() => {
-                  if (isLogin) navigate('/payment');
-                  else setLoginDialogOpen(true);
-                }}
-              >
-                플러스 이용권 결제하기
-              </PlanButton>
-            </PlanCard>
-          </PlansRow>
-        </PlansIntroSection>
-        {/* CTA Section */}
-        <L.CTAContainer id='cta-section'>
-          <L.CTAContent>
-            <L.SubText>면접 합격, 혼자가 아니라면 더 쉬워집니다.</L.SubText>
-            <L.MainText>
-              합격으로 가는 가장 빠른 길,
-              <br /> 면접톡과 시작하세요!
-            </L.MainText>
-            <L.CTAButtonGroup>
-              <L.PrimaryButton2 onClick={handleClickLoginButton}>
-                지금 바로 시작하기
-                <L.ArrowIcon>
-                  <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='3'>
-                    <path d='M5 12h14M12 5l7 7-7 7' strokeLinecap='round' strokeLinejoin='round' />
-                  </svg>
-                </L.ArrowIcon>
-              </L.PrimaryButton2>
-            </L.CTAButtonGroup>
-          </L.CTAContent>
-        </L.CTAContainer>
+              <PlanCard $plus>
+                <PlanName>플러스 회원</PlanName>
+                <PlanDesc>더 많은 연습과 저장공간</PlanDesc>
+                <PlanList>
+                  <li>면접 노트 21개 저장</li>
+                  <li>면접 연습 무제한</li>
+                  <li>스크랩 노트 수정 가능</li>
+                  <li>AI 피드백 + 음성결과 수정</li>
+                </PlanList>
+                <PlanPrice>₩5,900 / 월</PlanPrice>
+                <PlanButton
+                  onClick={() => {
+                    if (isLogin) navigate('/payment');
+                    else setLoginDialogOpen(true);
+                  }}
+                >
+                  플러스 이용권 결제하기
+                </PlanButton>
+              </PlanCard>
+            </PlansRow>
+          </PlansIntroSection>
+          {/* CTA Section */}
+          <L.CTAContainer id='cta-section'>
+            <L.CTAContent>
+              <L.SubText>면접 합격, 혼자가 아니라면 더 쉬워집니다.</L.SubText>
+              <L.MainText>
+                합격으로 가는 가장 빠른 길,
+                <br /> 면접톡과 시작하세요!
+              </L.MainText>
+              <L.CTAButtonGroup>
+                <L.PrimaryButton2 onClick={handleClickLoginButton}>
+                  지금 바로 시작하기
+                  <L.ArrowIcon>
+                    <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='3'>
+                      <path
+                        d='M5 12h14M12 5l7 7-7 7'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
+                    </svg>
+                  </L.ArrowIcon>
+                </L.PrimaryButton2>
+              </L.CTAButtonGroup>
+            </L.CTAContent>
+          </L.CTAContainer>
+        </Wrapper>
       </PageContainer>
       <L.FloatingScrollButton onClick={handleScrollDown} aria-label='다음 섹션으로 이동'>
         <ChevronDownIcon width={30} height={30} />
@@ -326,6 +328,15 @@ export default function LandingPage() {
     </>
   );
 }
+
+const Wrapper = styled.div`
+  min-width: 1148px;
+  overflow-x: scroll;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
 const PlansIntroSection = styled.section`
   width: 100%;
   padding: 20px 0 20px;

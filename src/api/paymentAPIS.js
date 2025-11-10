@@ -22,3 +22,11 @@ export const postPaymentConfirm = async (payment) => {
   const { data } = await axiosInstance.post('/payment/confirm', payment);
   return data;
 };
+
+/**
+ * GET: 유저가 플러스유저인지 확인
+ */
+export const fetchIsUserPayment = async () => {
+  const { data } = await axiosInstance.get('/users/payment');
+  return data;
+};

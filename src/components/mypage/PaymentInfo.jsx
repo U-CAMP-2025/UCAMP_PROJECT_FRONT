@@ -2,22 +2,22 @@ import { fetchUserPayment } from '@api/paymentAPIS';
 import Button from '@components/common/Button';
 import Typography from '@components/common/Typography';
 import { PageHeader } from '@components/layout/PageHeader';
-import { useAuthStore } from '@store/auth/useAuthStore';
+import { usePaymentStore } from '@store/payment/usePaymentStore';
 import theme from '@styles/theme';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 
 export const PaymentInfo = () => {
-  const { user } = useAuthStore();
-  const [isPlusActive] = useState(user.isPlus);
+  const { isPlus } = usePaymentStore.getState();
+  const [isPlusActive] = useState(isPlus);
   const [isLoading, setIsLoading] = useState(true);
   const [expiredAt, setExpiredAt] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const loadPaymentInfo = async () => {
-      if (!user?.isPlus) {
+      if (!isPlus) {
         // 플러스가 아니면 그냥 로딩만 종료
         setIsLoading(false);
         return;
@@ -35,7 +35,7 @@ export const PaymentInfo = () => {
 
     // 플러스 유저일 때만 실행
     loadPaymentInfo();
-  }, [user]);
+  }, [isPlus]);
 
   const handleGoPayment = () => {
     navigate('/payment');

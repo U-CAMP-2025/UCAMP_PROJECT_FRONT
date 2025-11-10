@@ -109,7 +109,7 @@ export default function UserDetail({ user }) {
               <InfoContentRight>
                 <InfoLabel>회원여부</InfoLabel>
                 <Tag2 passed={u.paymentStatus === 'ACTIVE'}>
-                  {u.paymentStatus === 'ACTIVE' ? '플러스' : '사용자'}
+                  {u.paymentStatus === 'ACTIVE' ? '플러스' : '일반'}
                 </Tag2>
               </InfoContentRight>
             </InfoItemRight>

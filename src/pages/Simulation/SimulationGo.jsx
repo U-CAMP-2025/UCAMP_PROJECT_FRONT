@@ -460,8 +460,6 @@ export default function SimulationGO() {
           {/* 메인 */}
           <S.MainContent>
             <S.InterviewerVideo>
-              {isSessionStarted && <S.LiveIndicator>LIVE</S.LiveIndicator>}
-
               {imageUrl && <img src={imageUrl} alt='면접관 이미지' />}
             </S.InterviewerVideo>
 

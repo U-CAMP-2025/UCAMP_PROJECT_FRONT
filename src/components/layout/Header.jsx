@@ -18,6 +18,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { ChevronDownIcon, PersonIcon, BellIcon } from '@radix-ui/react-icons';
 import { useAuthStore } from '@store/auth/useAuthStore';
+import { usePaymentStore } from '@store/payment/usePaymentStore';
 import { useTutorialStore } from '@store/tutorial/useTutorialStore';
 import theme from '@styles/theme';
 import { useState } from 'react';
@@ -43,10 +44,16 @@ export const Header = () => {
 
   const [userRole, setUserRole] = useState('USER');
 
+  const { isPlus, refreshIsPlus } = usePaymentStore.getState();
+
   // ======================= 유저 가이드투어 ======================
   // Joyride 실행 state
 
   const [runTour, setRunTour] = useState(false);
+
+  useEffect(() => {
+    refreshIsPlus();
+  }, []);
 
   const tourSteps = [
     {
@@ -176,14 +183,18 @@ export const Header = () => {
   };
 
   const handleClickLogout = () => {
-    postLogout().then(() => {
-      setTutorial({
-        seenHeaderTour: false,
-        seenSimTour: false,
-        seenQAListTour: false,
+    postLogout()
+      .then(() => {
+        setTutorial({
+          seenHeaderTour: false,
+          seenSimTour: false,
+          seenQAListTour: false,
+        });
+        logout();
+      })
+      .then(() => {
+        refreshIsPlus();
       });
-      logout();
-    });
 
     window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/logout`;
   };
@@ -236,10 +247,10 @@ export const Header = () => {
       <H.HeaderContentWrapper>
         <H.LeftSection>
           <H.Logo onClick={handleClickLogoButton} id='tour-logo'>
-            <H.LogoImage src='/images/logo2.png' alt='면접톡 로고' />
-            <Typography size={5} weight='bold' style={{ color: theme.colors.primary[9] }}>
-              면접톡
-            </Typography>
+            <H.LogoImage
+              src={isPlus ? '/images/logo1.svg' : '/images/logo0.svg'}
+              alt='면접톡 로고'
+            />
           </H.Logo>
         </H.LeftSection>
         <H.Nav>

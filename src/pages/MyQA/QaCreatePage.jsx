@@ -23,6 +23,7 @@ import { CheckIcon, PlusIcon } from '@radix-ui/react-icons';
 import React, { useEffect, useState, useRef } from 'react';
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 
 import { QACreateInput } from './QaCreateInput';
 
@@ -111,6 +112,7 @@ export default function QACreatePage() {
 
   const selectedJobIds = watch('jobIds');
   const watchedQaSets = watch('qaSets');
+  const title = watch('title');
   const onSubmit = (data) => {
     createPost(data)
       .then((response) => {
@@ -243,8 +245,10 @@ export default function QACreatePage() {
                   </C.SectionTitle>
                   <C.FormInput
                     placeholder='면접 노트의 제목을 입력하세요.'
+                    maxLength={30}
                     {...register('title', { required: '제목은 필수 입력입니다.' })}
                   />
+                  <CharCount>{(title || '').length} / 30</CharCount>
                   {errors.title && (
                     <span
                       style={{ color: 'red', fontSize: '14px', marginTop: '8px', display: 'block' }}
@@ -387,3 +391,10 @@ export default function QACreatePage() {
     </PageContainer>
   );
 }
+
+const CharCount = styled.div`
+  text-align: left;
+  font-size: ${({ theme }) => theme.font.size[1]};
+  color: ${({ theme }) => theme.colors.gray[9]};
+  margin-top: ${({ theme }) => theme.space[2]};
+`;
