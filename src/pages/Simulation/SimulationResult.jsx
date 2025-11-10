@@ -240,8 +240,8 @@ export default function SimulationResultPage() {
                       <AnswerLabel>
                         새로운 답변 <SmallHint>(마지막 면접 연습에서 내가 했던 답변)</SmallHint>
                       </AnswerLabel>
-                      <SelectedHint $on={isSelected(keyOf(index, qa) && isPaid)}>
-                        {isSelected(keyOf(index, qa) && isPaid)
+                      <SelectedHint $on={isPaid && isSelected(keyOf(index, qa))}>
+                        {isPaid && isSelected(keyOf(index, qa))
                           ? '이 항목은 저장됩니다'
                           : '이 항목은 저장되지 않습니다'}
                       </SelectedHint>
