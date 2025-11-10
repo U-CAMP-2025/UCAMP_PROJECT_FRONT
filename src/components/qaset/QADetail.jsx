@@ -117,12 +117,28 @@ export const QADetail = () => {
   const dateOnly = createAt ? createAt.split('T')[0] : '';
 
   return (
-    <Wrap>
+    <Wrap $isMine={me}>
       <HeaderRow>
         <div>
-          <Typography as='h1' size={7} weight='bold'>
-            {title}
-          </Typography>
+          <TitleRow>
+            <Typography as='h1' size={7} weight='bold'>
+              {title}
+            </Typography>
+
+            {/* 공개 / 비공개 배지 */}
+            {me &&
+              (qaData?.public ? (
+                <PublicBadge>공개글</PublicBadge>
+              ) : (
+                <PrivateBadge>비공개글</PrivateBadge>
+              ))}
+
+            {/* 내가 작성한 노트면 “나의 노트” 표시 */}
+            {me && <MyNoteBadge>나의 노트</MyNoteBadge>}
+            <SpanOther size={3}>{otherWriter && '(from: ' + otherWriter + ')'}</SpanOther>
+          </TitleRow>
+
+          {/* 작성자 정보 */}
           <Meta>
             <Typography size={3} weight='semiBold' style={{ color: theme.colors.gray[12] }}>
               만든 유저
@@ -141,56 +157,38 @@ export const QADetail = () => {
             <Typography size={3} style={{ color: theme.colors.primary[11] }}>
               {dateOnly}
             </Typography>
-            {typeof bookCount === 'number' && (
-              <>
-                <Dot>•</Dot>
-                <Typography size={3} weight='semiBold' style={{ color: theme.colors.gray[12] }}>
-                  스크랩{' '}
-                  <Typography as='span' style={{ color: theme.colors.primary[11] }}>
-                    {bookCount}
-                  </Typography>
-                  개
-                </Typography>
-              </>
-            )}
-            {isPassed && <PassBadge>합격자</PassBadge>}
-            {!isPassed && <FailBadge>구직자</FailBadge>}
-          </Meta>
-          {otherWriter && (
-            <Typography
-              as='p'
-              size={1}
-              weight='regular'
-              style={{ marginTop: 4, color: theme.colors.gray[9] }}
-            >
-              스크랩한 글 (From: {otherWriter})
+            <Typography size={3} style={{ color: theme.colors.gray[12] }}>
+              • 스크랩{' '}
+              <span
+                style={{ color: theme.colors.primary[11], fontWeight: theme.font.weight.semiBold }}
+              >
+                {bookCount}
+              </span>
+              회
             </Typography>
-          )}
+            {isPassed ? <PassBadge>합격자</PassBadge> : <FailBadge>구직자</FailBadge>}
+          </Meta>
         </div>
 
         <div>
+          {/* 스크랩 / 수정 / 삭제 버튼 */}
           {!me && (
-            <IconButton1
-              aria-label='스크랩'
-              onClick={onCopy}
-              title='현재 면접 노트를 나의 면접 노트로 스크랩합니다.'
-            >
+            <IconButton1 onClick={onCopy} title='이 노트를 스크랩합니다.'>
               <BookmarkIcon />
             </IconButton1>
           )}
           {me && (
             <>
-              <IconButton1 aria-label='수정' onClick={onUpdate}>
-                <Pencil1Icon width={24} height={24} fill='true' />
+              <IconButton1 onClick={onUpdate}>
+                <Pencil1Icon width={24} height={24} />
               </IconButton1>
-              <IconButton2 aria-label='삭제' onClick={() => setOpenDeleteModal(true)}>
-                <TrashIcon width={24} height={24} fill='true' />
+              <IconButton2 onClick={() => setOpenDeleteModal(true)}>
+                <TrashIcon width={24} height={24} />
               </IconButton2>
             </>
           )}
         </div>
       </HeaderRow>
-
       {/* ✅ 삭제 확인 다이얼로그 */}
       <Dialog.Root open={openDeleteModal} onOpenChange={setOpenDeleteModal}>
         <Dialog.Portal>
@@ -258,20 +256,27 @@ export const QADetail = () => {
         </FieldBox>
       )}
 
-      <TextAreaBox>
-        <Placeholder>설명</Placeholder>
+      {/* 설명 */}
+      <TextAreaBox $type='desc'>
+        <Placeholder $variant='설명'>설명</Placeholder>
+
         <Pre>{description || '설명이 없습니다.'}</Pre>
       </TextAreaBox>
 
+      {/* 질문/답변 */}
       {qa.map((item, idx) => (
         <QABox key={item.qaId || idx}>
-          <Placeholder>질문{idx + 1}</Placeholder>
-          <Pre>{item.question || '-'}</Pre>
-          <Divider />
-          <Placeholder>답변{idx + 1}</Placeholder>
-          <Pre>{item.answer || '-'}</Pre>
+          <QABox $type='question'>
+            <Placeholder $variant='질문'>질문 {idx + 1}</Placeholder>
+            <Pre>{item.question || '-'}</Pre>
+          </QABox>
+          <QABox $type='answer'>
+            <Placeholder $variant='답변'>답변 {idx + 1}</Placeholder>
+            <Pre>{item.answer || '-'}</Pre>
+          </QABox>
         </QABox>
       ))}
+
       {me && (
         <Button
           type='button'
@@ -287,10 +292,16 @@ export const QADetail = () => {
 };
 
 /* ----------------------------- 스타일 ----------------------------- */
+/** @typedef {{ $isMine?: boolean }} WrapProps */
+
 const Wrap = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.space[6]};
+  background-color: ${({ $isMine, theme }) => ($isMine ? theme.colors.primary[1] : 'transparent')};
+  border-radius: ${({ theme }) => theme.radius.md};
+  padding: ${({ theme }) => theme.space[4]};
+  transition: background-color 0.2s;
 `;
 
 const HeaderRow = styled.div`
@@ -412,14 +423,35 @@ const Divider = styled.hr`
 
 const Placeholder = styled(Typography).attrs({
   as: 'div',
-  size: 2, // 👈 폰트 크기 2
-  color: theme.colors.gray[11], // 👈 텍스트 색상
+  size: 2,
   weight: 'semiBold',
 })`
-  background-color: ${({ theme }) => theme.colors.gray[3]};
+  color: ${({ theme, $variant }) => {
+    switch ($variant) {
+      case '설명':
+        return '#333333';
+      case '질문':
+        return theme.colors.primary[10];
+      case '답변':
+        return theme.colors.primary[9];
+      default:
+        return theme.colors.gray[3];
+    }
+  }};
+  background-color: ${({ theme, $variant }) => {
+    switch ($variant) {
+      case '설명':
+        return '#E5E5E5';
+      case '질문':
+        return theme.colors.primary[7];
+      case '답변':
+        return theme.colors.primary[4];
+      default:
+        return theme.colors.gray[3];
+    }
+  }};
   padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
   border-radius: ${({ theme }) => theme.radius.sm};
-
   display: inline-block;
   width: fit-content;
 `;
@@ -490,4 +522,37 @@ const CloseButton = styled(Dialog.Close)`
   &:focus {
     box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary[7]};
   }
+`;
+
+const TitleRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[3]};
+`;
+
+const PublicBadge = styled.span`
+  background: ${({ theme }) => theme.colors.primary[3]};
+  color: ${({ theme }) => theme.colors.primary[11]};
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: ${({ theme }) => theme.font.size[2]};
+  font-weight: ${({ theme }) => theme.font.weight.semiBold};
+`;
+
+const PrivateBadge = styled(PublicBadge)`
+  background: ${({ theme }) => theme.colors.gray[4]};
+  color: ${({ theme }) => theme.colors.gray[10]};
+  padding: 4px 10px;
+`;
+
+const MyNoteBadge = styled(PublicBadge)`
+  background: ${({ theme }) => theme.colors.primary[9]};
+  color: white;
+  padding: 4px 10px;
+`;
+
+const SpanOther = styled.span`
+  font-size: ${({ theme }) => theme.font.size[3]};
+  color: ${({ theme }) => theme.colors.gray[9]};
+  margin-top: ${({ theme }) => theme.space[1]};
 `;

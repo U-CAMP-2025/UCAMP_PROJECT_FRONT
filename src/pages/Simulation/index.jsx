@@ -1,9 +1,11 @@
 import { axiosInstance } from '@api/axios';
 import { fetchUserPayment } from '@api/paymentAPIS';
 import { createSimulation, fetchSimulationRecords } from '@api/simulationAPIS';
+import Button from '@components/common/Button';
 import { Overlay, Title, Content } from '@components/common/Dialog';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
+import { qaList } from '@pages/List/qaList';
 import * as Dialog from '@radix-ui/react-dialog';
 import { CaretDownIcon, CheckIcon } from '@radix-ui/react-icons';
 import { Cross2Icon } from '@radix-ui/react-icons';
@@ -16,7 +18,7 @@ import theme from '@styles/theme';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useForm, FormProvider, Controller } from 'react-hook-form';
 import { Joyride } from 'react-joyride';
-import { useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 // --- [컴포넌트 로직] ---
@@ -27,6 +29,7 @@ export default function SimulationPresetPage() {
 
   const [loading, setLoading] = useState(true);
   const [questionSets, setQuestionSets] = useState([]);
+  const [count, setCount] = useState(0);
   const [, setInterviewers] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [modalContent, setModalContent] = useState(null);
@@ -164,12 +167,18 @@ export default function SimulationPresetPage() {
         ]);
 
         const fetchedInterviewers = interviewerResp?.data?.data ?? [];
-        const fetchedSets = setsResp?.data?.data ?? [];
+
+        console.log(setsResp);
+
+        const fetchedSets = setsResp?.data?.data?.post ?? [];
+
+        const fetchedCount = setsResp?.data?.data?.count ?? null;
 
         if (!mounted) return;
 
         setInterviewers(fetchedInterviewers);
         setQuestionSets(fetchedSets);
+        setCount(fetchedCount);
 
         // 기본값 자동 세팅
         const firstSetId = fetchedSets[0]?.postId ? String(fetchedSets[0].postId) : '';
@@ -282,6 +291,18 @@ export default function SimulationPresetPage() {
           <PresetForm onSubmit={handleSubmit(onSubmit)}>
             {/* 면접 모드 (UI만) */}
             <SettingsBox>
+              {/* 이용 가능 횟수 표시 */}
+              <CountBadge>
+                {count !== null ? (
+                  <Typography size={2} weight='semiBold' color='primary.9'>
+                    오늘 연습 {count} / 3회
+                  </Typography>
+                ) : (
+                  <Typography size={2} weight='semiBold' color='primary.9'>
+                    무제한 이용 가능 ✨
+                  </Typography>
+                )}
+              </CountBadge>
               <Controller
                 name='interviewMode'
                 control={control}
@@ -389,6 +410,18 @@ export default function SimulationPresetPage() {
                                 </StyledSelectItem>
                               );
                             })}
+                            {questionSets.length === 0 && !loading && (
+                              <Typography
+                                size={3}
+                                weight='regular'
+                                style={{ textAlign: 'center', padding: '12px 0' }}
+                              >
+                                면접노트가 없습니다.
+                                <StyledSpan onClick={() => navigate('/qa/create')}>
+                                  작성하기
+                                </StyledSpan>
+                              </Typography>
+                            )}
                           </StyledSelectViewport>
                         </StyledSelectContent>
                       </Select.Portal>
@@ -801,4 +834,27 @@ const PaymentButton = styled.button`
   &:hover {
     background-color: ${({ theme }) => theme.colors.primary[4]};
   }
+`;
+
+const StyledSpan = styled.span`
+  color: ${({ theme }) => theme.colors.primary[8]};
+  text-decoration: none;
+  font-weight: ${({ theme }) => theme.font.weight.semiBold};
+  transition: color 0.2s ease;
+  font-size: ${({ theme }) => theme.font.size[3]};
+  cursor: pointer;
+  &:hover {
+    color: ${({ theme }) => theme.colors.primary[9]};
+  }
+`;
+
+const CountBadge = styled.div`
+  display: inline-block;
+  background-color: ${({ theme }) => theme.colors.primary[3]};
+  color: ${({ theme }) => theme.colors.primary[11]};
+  padding: ${({ theme }) => `${theme.space[1]} ${theme.space[3]}`};
+  border-radius: ${({ theme }) => theme.radius.lg};
+  font-size: ${({ theme }) => theme.font.size[2]};
+  font-weight: ${({ theme }) => theme.font.weight.semiBold};
+  box-shadow: ${({ theme }) => theme.shadow.xs};
 `;
