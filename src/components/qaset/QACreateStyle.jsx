@@ -210,3 +210,12 @@ export const OverlayQuestion = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
 `;
+
+export const QaUpdateHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ${({ theme }) => theme.space[6]};
+  padding-bottom: ${({ theme }) => theme.space[4]};
+  border-bottom: 2px solid ${({ theme }) => theme.colors.gray[12]};
+`;
