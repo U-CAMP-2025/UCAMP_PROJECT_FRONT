@@ -59,7 +59,6 @@ const QuestionAudioRecorder = forwardRef(function QuestionAudioRecorder(
         mimeType: 'audio/webm;codecs=opus', // ★ 진짜 webm
         numberOfAudioChannels: 1,
         disableLogs: true,
-        bitsPerSecond: 32000,
       });
       recRef.current = rec;
       await rec.startRecording();

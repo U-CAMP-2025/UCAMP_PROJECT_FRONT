@@ -4,7 +4,6 @@ import ConfirmDialog from '@components/common/ConfirmDialog';
 import ErrorDialog from '@components/common/ErrorDialog';
 import Typography from '@components/common/Typography';
 import { PageContainer } from '@components/layout/PageContainer';
-import { feedback } from '@elevenlabs/elevenlabs-js/api/resources/conversationalAi/resources/conversations';
 import * as Accordion from '@radix-ui/react-accordion';
 import * as Checkbox from '@radix-ui/react-checkbox';
 import { CaretDownIcon } from '@radix-ui/react-icons';
@@ -66,7 +65,6 @@ export default function SimulationResultPage() {
           // 1) 새 백엔드: q.feedback 사용
           feedback: (q.feedback ?? '').trim(),
         }));
-        console.log(feedback);
         setQaList(list);
         setSelectedKeys(new Set(list.map((qa, i) => keyOf(i, qa))));
         setData(response.data);
@@ -106,7 +104,7 @@ export default function SimulationResultPage() {
     setSaving(true);
     putSimulationFinalize(simulationId, body)
       .then(() => {
-        navigate('/myqa');
+        navigate('/simulation/record');
       })
       .catch((e) => {
         openAlert('저장에 실패했습니다.');

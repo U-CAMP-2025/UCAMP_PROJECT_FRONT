@@ -15,9 +15,9 @@ export const putSimulationFinalize = async (simulationId, body) => {
   return;
 };
 
-export const transCheckimulation = async (simulationId) => {
-  const { data } = await axiosInstance.get(`/simulation/${simulationId}/transCheck`);
-  return data;
+export const transCheckSimulation = async (simulationId) => {
+  const res = await axiosInstance.get(`/simulation/${simulationId}/transCheck`);
+  return res?.data?.data === true;
 };
 
 export const createSimulation = async (body) => {
