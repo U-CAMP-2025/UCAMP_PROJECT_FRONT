@@ -121,11 +121,42 @@ export default function QACreatePage() {
   };
 
   const onInvalid = (errors) => {
+    // 1. 직무 선택 에러 처리
     if (errors.jobIds && jobSectionRef.current) {
       jobSectionRef.current.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
       });
+      return;
+    }
+
+    // 2. qaSets 에러 처리
+    if (errors.qaSets) {
+      const firstErrorIndex = fields.findIndex((_, index) => errors.qaSets[index]);
+      if (firstErrorIndex !== -1) {
+        const errorItemId = `item-${firstErrorIndex}`;
+
+        // 해당 아코디언 열기(이미 열려있지 않은 경우)
+        setOpenItems((prev) => {
+          if (!prev.includes(errorItemId)) {
+            return [...prev, errorItemId];
+          }
+          return prev;
+        });
+
+        setTimeout(() => {
+          const errorField = errors.qaSets[firstErrorIndex];
+          const errorFieldName = errorField.question
+            ? `qaSets[${firstErrorIndex}].question`
+            : `qaSets[${firstErrorIndex}].answer`;
+
+          const element = document.querySelector(`[name="${errorFieldName}"]`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            element.focus();
+          }
+        }, 300);
+      }
     }
   };
 

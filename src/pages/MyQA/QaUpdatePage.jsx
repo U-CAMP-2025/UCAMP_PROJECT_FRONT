@@ -20,7 +20,7 @@ import {
 import * as Accordion from '@radix-ui/react-accordion';
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import { CheckIcon, PlusIcon } from '@radix-ui/react-icons';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -32,6 +32,7 @@ export default function QAUpdatePage() {
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertOnClose, setAlertOnClose] = useState(null);
+  const jobSectionRef = useRef(null);
 
   const { qaId } = location.state || {};
   const navigate = useNavigate();
@@ -56,6 +57,20 @@ export default function QAUpdatePage() {
     navigate(-1);
   };
   const { reset } = methods;
+  const {
+    control,
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors, isSubmitting },
+  } = methods;
+
+  useEffect(() => {
+    register('jobIds', {
+      validate: (value) => value.length > 0 || '직무를 최소 1개 이상 선택해야 합니다.',
+    });
+  }, [register]);
 
   useEffect(() => {
     getPost(qaId)
@@ -76,25 +91,50 @@ export default function QAUpdatePage() {
       .catch();
   }, [qaId]);
 
-  const {
-    control,
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors, isSubmitting },
-  } = methods;
-
-  useEffect(() => {
-    register('jobIds', {
-      validate: (value) => value.length > 0 || '직무를 최소 1개 이상 선택해야 합니다.',
-    });
-  }, [register]);
-
   const { fields, append, remove, move } = useFieldArray({
     control,
     name: 'qaSets',
   });
+
+  const onInvalid = (errors) => {
+    // 1. 직무 선택 에러 처리
+    if (errors.jobIds && jobSectionRef.current) {
+      jobSectionRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+      return;
+    }
+
+    // 2. qaSets 에러 처리
+    if (errors.qaSets) {
+      const firstErrorIndex = fields.findIndex((_, index) => errors.qaSets[index]);
+      if (firstErrorIndex !== -1) {
+        const errorItemId = `item-${firstErrorIndex}`;
+
+        // 해당 아코디언 열기(이미 열려있지 않은 경우)
+        setOpenItems((prev) => {
+          if (!prev.includes(errorItemId)) {
+            return [...prev, errorItemId];
+          }
+          return prev;
+        });
+
+        setTimeout(() => {
+          const errorField = errors.qaSets[firstErrorIndex];
+          const errorFieldName = errorField.question
+            ? `qaSets[${firstErrorIndex}].question`
+            : `qaSets[${firstErrorIndex}].answer`;
+
+          const element = document.querySelector(`[name="${errorFieldName}"]`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            element.focus();
+          }
+        }, 300);
+      }
+    }
+  };
 
   const [openItems, setOpenItems] = useState(['item-0']);
   const [activeId, setActiveId] = useState(null);
@@ -114,10 +154,10 @@ export default function QAUpdatePage() {
   const watchedQaSets = watch('qaSets');
 
   const onSubmit = (data) => {
-    // 직무가 1개 이상 선택되어 있을 때만 저장 가능
-    if (data.jobIds.length === 0) {
-      return; // 직무가 선택되지 않았다면 아무 작업도 하지 않음
-    }
+    // // 직무가 1개 이상 선택되어 있을 때만 저장 가능
+    // if (data.jobIds.length === 0) {
+    //   return; // 직무가 선택되지 않았다면 아무 작업도 하지 않음
+    // }
 
     editPost(qaId, data)
       .then((response) => {
@@ -175,9 +215,9 @@ export default function QAUpdatePage() {
         <SettingsBox>
           <FormProvider {...methods}>
             <FormWrapper>
-              <form onSubmit={handleSubmit(onSubmit)}>
+              <form onSubmit={handleSubmit(onSubmit, onInvalid)}>
                 {/* 직무 선택 (최소 1개 선택 필수) */}
-                <Section>
+                <Section ref={jobSectionRef}>
                   <SectionTitle>
                     <span>
                       관련 직무 선택(최대 3개)<RequiredAsterisk>*</RequiredAsterisk>
@@ -543,4 +583,11 @@ const OverlayQuestion = styled.div`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+`;
+
+const ErrorMessage = styled.span`
+  color: red;
+  font-size: 14px;
+  margin-top: 8px;
+  display: block;
 `;
