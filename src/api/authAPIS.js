@@ -12,6 +12,14 @@ export const postSignUp = async (nickname, jobId) => {
 };
 
 /**
+ * GET: 회원가입 카카오 세션 체크
+ */
+export const fetchKakaoSignupCheck = async () => {
+  const { data } = await axiosInstance.get('/auth/signup/ready');
+  return data;
+};
+
+/**
  * POST: 토큰 리프레쉬
  */
 export const postTokenRefresh = async () => {
