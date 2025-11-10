@@ -125,7 +125,7 @@ export default function MyQAListPage() {
             ))}
           </SkeletonGrid>
         ) : (
-          <QASetList qaList={filteredList} />
+          <QASetList qaList={filteredList} showPublicBadge={true} />
         )}
       </MainContentWrapper>
       <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>

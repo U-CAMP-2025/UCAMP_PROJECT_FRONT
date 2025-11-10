@@ -1,6 +1,6 @@
 import { countPost, scrollQaSet } from '@api/postAPIS';
 import { fetchUserMypage } from '@api/userAPIS';
-import { Overlay, Description, Title, Content } from '@components/common/Dialog';
+import { Overlay, Title, Content } from '@components/common/Dialog';
 import { JobSelector } from '@components/common/JobSelector';
 import { SortSelector } from '@components/common/SortSelector';
 import Typography from '@components/common/Typography';
