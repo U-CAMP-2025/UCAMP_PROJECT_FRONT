@@ -44,7 +44,7 @@ export default function QAUpdatePage() {
       qaSets: [{ question: '', answer: '' }],
       status: 'Y',
     },
-    mode: 'onChange', // 필드가 변경될 때 유효성 검사 수행
+    mode: 'onSubmit', // 필드가 변경될 때 유효성 검사 수행
   });
   const openAlert = (message, onClose) => {
     setAlertMessage(message);
@@ -66,11 +66,11 @@ export default function QAUpdatePage() {
     formState: { errors, isSubmitting },
   } = methods;
 
-  useEffect(() => {
-    register('jobIds', {
-      validate: (value) => value.length > 0 || '직무를 최소 1개 이상 선택해야 합니다.',
-    });
-  }, [register]);
+  // useEffect(() => {
+  //   register('jobIds', {
+  //     validate: (value) => value.length > 0 || '직무를 최소 1개 이상 선택해야 합니다.',
+  //   });
+  // }, [register]);
 
   useEffect(() => {
     getPost(qaId)
@@ -89,7 +89,7 @@ export default function QAUpdatePage() {
         });
       })
       .catch();
-  }, [qaId]);
+  }, [qaId, reset]);
 
   const { fields, append, remove, move } = useFieldArray({
     control,
@@ -97,6 +97,8 @@ export default function QAUpdatePage() {
   });
 
   const onInvalid = (errors) => {
+    console.log('Form validation failed:', errors);
+
     // 1. 직무 선택 에러 처리
     if (errors.jobIds && jobSectionRef.current) {
       jobSectionRef.current.scrollIntoView({
@@ -154,10 +156,8 @@ export default function QAUpdatePage() {
   const watchedQaSets = watch('qaSets');
 
   const onSubmit = (data) => {
-    // // 직무가 1개 이상 선택되어 있을 때만 저장 가능
-    // if (data.jobIds.length === 0) {
-    //   return; // 직무가 선택되지 않았다면 아무 작업도 하지 않음
-    // }
+    console.log('onSubmit called with:', data);
+    console.log('jobIds length:', data.jobIds?.length);
 
     editPost(qaId, data)
       .then((response) => {
@@ -215,6 +215,12 @@ export default function QAUpdatePage() {
         <SettingsBox>
           <FormProvider {...methods}>
             <FormWrapper>
+              <input
+                type='hidden'
+                {...register('jobIds', {
+                  validate: (value) => value.length > 0 || '직무를 최소 1개 이상 선택해야 합니다.',
+                })}
+              />
               <form onSubmit={handleSubmit(onSubmit, onInvalid)}>
                 {/* 직무 선택 (최소 1개 선택 필수) */}
                 <Section ref={jobSectionRef}>
