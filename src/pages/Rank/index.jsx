@@ -46,7 +46,7 @@ const DateSelector = styled.select`
 const TabContainer = styled.div`
   display: flex;
   gap: ${({ theme }) => theme.space[5]};
-  margin-bottom: ${({ theme }) => theme.space[12]};
+  margin-bottom: ${({ theme }) => theme.space[2]};
   border-bottom: 1px solid ${({ theme }) => theme.colors.gray[5]};
 `;
 const TabButton = styled.button`
@@ -81,7 +81,12 @@ const SkeletonGrid = styled.div`
   width: 95%;
   margin: 0 auto;
 `;
-
+// 탭 아래 회색 안내문 추가
+const NoticeText = styled.p`
+  font-size: ${({ theme }) => theme.font.size[2]};
+  color: ${({ theme }) => theme.colors.gray[9]};
+  text-align: right;
+`;
 const TABS = {
   WEEKPRACTICE: '주간 연습 횟수',
   MONTHPRACTICE: '월간 연습 횟수',
@@ -160,6 +165,7 @@ const RankPage = () => {
               {tabName}
             </TabButton>
           ))}
+          <NoticeText>※ 동일 순위의 경우 먼저 등록된 유저가 상위에 표시됩니다.</NoticeText>
         </TabContainer>
 
         {/* 탭별 테이블 표시 */}

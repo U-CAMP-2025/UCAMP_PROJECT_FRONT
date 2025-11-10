@@ -250,8 +250,8 @@ export default function PaymentPage() {
                   <th>주문번호</th>
                   <th>결제 금액</th>
                   <th>구독 상태</th>
-                  <th>구독 시작일</th>
                   <th>결제일</th>
+                  <th>구독 시작일</th>
                   <th>만료일</th>
                 </tr>
               </thead>
@@ -265,10 +265,10 @@ export default function PaymentPage() {
                         {p.paymentStatus === 'ACTIVE' ? '이용가능' : '만료'}
                       </HistoryStatus>
                     </td>
-                    <td>{p.startedAt ? new Date(p.startedAt).toLocaleDateString('ko-KR') : '-'}</td>
                     <td>
                       {p.approvedAt ? new Date(p.approvedAt).toLocaleDateString('ko-KR') : '-'}
                     </td>
+                    <td>{p.startedAt ? new Date(p.startedAt).toLocaleDateString('ko-KR') : '-'}</td>
                     <td>{p.expiredAt ? new Date(p.expiredAt).toLocaleDateString('ko-KR') : '-'}</td>
                   </tr>
                 ))}
@@ -310,7 +310,7 @@ const PlansRow = styled.div`
 `;
 
 const ContentWrapper = styled.div`
-  width: 70%;
+  width: 100%;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
