@@ -38,9 +38,19 @@ const Drop = styled.label`
 export default function PhotoSubmitDialog({ open, onOpenChange, onSubmit, onFilePick }) {
   const inputRef = useRef(null);
   const [file, setFile] = useState(null);
+  const [error, setError] = useState('');
 
   const handleFile = (f) => {
     if (!f) return;
+    const maxSize = 1 * 1024 * 1024; // 1MB 제한
+
+    if (f.size > maxSize) {
+      setError('1MB 이하 이미지를 업로드해주세요.');
+      setFile(null);
+      return;
+    }
+
+    setError('');
     setFile(f);
     onFilePick?.(f);
   };
@@ -83,7 +93,11 @@ export default function PhotoSubmitDialog({ open, onOpenChange, onSubmit, onFile
               </Typography>
             )}
           </Drop>
-
+          {error && (
+            <Typography size={2} color='red' style={{ marginTop: 4 }}>
+              {error}
+            </Typography>
+          )}
           <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 8 }}>
             <Dialog.Close asChild>
               <Button variant='outline'>취소</Button>

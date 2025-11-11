@@ -1,11 +1,16 @@
 import { axiosInstance } from '@api/axios';
+import { fetchSimulationRecords } from '@api/simulationAPIS';
 import ConfirmDialog from '@components/common/ConfirmDialog';
 import Typography from '@components/common/Typography';
 import QuestionAudioRecorder from '@components/simulation/QuestionAudioRecorder';
 import SessionVideoRecorder from '@components/simulation/SessionVideoRecorder';
 import VoiceModel from '@components/simulation/VoiceModel';
 import { PlayIcon, StopIcon, DiscIcon, CheckIcon } from '@radix-ui/react-icons';
+import { useAuthStore } from '@store/auth/useAuthStore';
+import { useTutorialStore } from '@store/tutorial/useTutorialStore';
+import theme from '@styles/theme';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import Joyride from 'react-joyride';
 import { useParams, useNavigate, UNSAFE_NavigationContext } from 'react-router-dom';
 
 import * as S from './SimulationGoStyle';
@@ -85,6 +90,8 @@ function useBlocker(when) {
 }
 
 export default function SimulationGO() {
+  const { isLogin } = useAuthStore();
+  const { seenSimGoTour, setSimGoTour } = useTutorialStore();
   const { simulationId } = useParams();
   const navigate = useNavigate();
   const [endConfirmOpen, setEndConfirmOpen] = useState(false);
@@ -108,6 +115,94 @@ export default function SimulationGO() {
   const [simPost, setPost] = useState(null);
   const [scriptMode, setScriptMode] = useState(false);
   const [ttsSpeaking, setTtsSpeaking] = useState(false);
+
+  // ======================== 시뮬레이션 진행 가이드투어 ===============================
+  const [runSimGoTour, setRunSimGoTour] = useState(false);
+
+  const simGoTourSteps = [
+    {
+      target: '#tour-timer',
+      content: (
+        <>
+          <b style={{ fontSize: '20px' }}>타이머</b>
+          <br />
+          <br />
+          2분 동안 답변을 진행할 수 있습니다.
+          <br />
+          시간 종료 시 자동으로 질문이 넘어갑니다.
+        </>
+      ),
+      placement: 'right',
+      disableBeacon: true,
+    },
+    {
+      target: '#tour-question-counter',
+      content: (
+        <>
+          <b style={{ fontSize: '20px' }}>진행도</b>
+          <br />
+          <br />
+          현재 면접 진행 상황을 보여줍니다.
+        </>
+      ),
+      placement: 'right',
+    },
+    {
+      target: '#tour-sidebar-button',
+      content: (
+        <>
+          <b style={{ fontSize: '20px' }}>시작하기</b>
+          <br />
+          <br />
+          버튼을 누르면 면접 연습이 시작됩니다.
+          <br />
+          모든 면접 질문에 답하지 않고 종료를 누르면
+          <br />
+          면접 연습 기록에 저장되지 않습니다.
+        </>
+      ),
+      placement: 'right',
+    },
+    {
+      target: '#tour-sidebar-button-2',
+      content: (
+        <>
+          <b style={{ fontSize: '20px' }}>녹음하기</b>
+          <br />
+          <br />
+          매 질문마다 버튼을 누른 후 답변을 시작해주세요!
+          <br />
+          버튼을 누르지 않으면 답변 텍스트 변환이 불가하며,
+          <br />
+          다음 질문으로 넘어갈 수 없습니다.
+        </>
+      ),
+      placement: 'right',
+    },
+  ];
+
+  useEffect(() => {
+    if (!isLogin) return;
+
+    fetchSimulationRecords().then((response) => {
+      if (response?.data?.length === 0 && !seenSimGoTour) {
+        setTimeout(() => {
+          setRunSimGoTour(true);
+        }, 500);
+      }
+    });
+  }, [isLogin, seenSimGoTour]);
+
+  const handleJoyrideCallback = (data) => {
+    const { status, action } = data;
+    const finishedStatuses = ['finished', 'skipped'];
+
+    if (finishedStatuses.includes(status) || action === 'close') {
+      setRunSimGoTour(false);
+      setSimGoTour(true);
+    }
+  };
+  // ======================== 가이드투어 종료 ============================
 
   const shouldBlockLeave = (isSessionStarted || isQuestionRecording) && !allowLeaveOnce; // 떠나기 차단 여부
 
@@ -407,12 +502,13 @@ export default function SimulationGO() {
           {/* 사이드바 */}
           <S.Sidebar>
             <S.TopInfoBar>
-              <S.TimerPill>{formatTime(timeLeft)}</S.TimerPill>
-              <S.QuestionCounter>
+              <S.TimerPill id='tour-timer'>{formatTime(timeLeft)}</S.TimerPill>
+              <S.QuestionCounter id='tour-question-counter'>
                 {Math.min(currentIdx + 1, totalQuestions)} / {totalQuestions || 0}
               </S.QuestionCounter>
             </S.TopInfoBar>
             <S.SidebarButton
+              id='tour-sidebar-button'
               onClick={() => {
                 if (isSessionStarted) {
                   // 세션 중이면 확인 모달 열기
@@ -428,6 +524,7 @@ export default function SimulationGO() {
             </S.SidebarButton>
 
             <S.SidebarButton
+              id='tour-sidebar-button-2'
               onClick={startAnswer}
               disabled={ttsSpeaking || !isSessionStarted || isQuestionRecording}
             >
@@ -535,6 +632,29 @@ export default function SimulationGO() {
           if (blocker && blocker.state === 'blocked') {
             blocker.proceed();
           }
+        }}
+      />
+      <Joyride
+        steps={simGoTourSteps}
+        run={runSimGoTour}
+        callback={handleJoyrideCallback}
+        continuous={true}
+        showProgress={false}
+        showSkipButton={true}
+        locale={{
+          next: '다음',
+          back: '이전',
+          skip: '건너뛰기',
+          last: '확인',
+        }}
+        scrollOffset={200}
+        styles={{
+          options: {
+            primaryColor: theme.colors.primary[9],
+            textColor: theme.colors.gray[12],
+            backgroundColor: theme.colors.gray[1],
+            arrowColor: theme.colors.gray[1],
+          },
         }}
       />
     </>
