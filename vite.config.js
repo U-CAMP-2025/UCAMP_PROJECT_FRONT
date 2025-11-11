@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [
     react(),
     tsconfigPaths(),
-    ...removeConsole({
+    removeConsole({
       includes: ['log', 'warn', 'error', 'info', 'debug'],
     }),
   ],
