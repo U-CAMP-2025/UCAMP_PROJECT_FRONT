@@ -21,6 +21,11 @@ export const useTutorialStore = create(
           ...state,
           seenSimTour: updated,
         })),
+      setSimGoTour: (updated) =>
+        set((state) => ({
+          ...state,
+          seenSimGoTour: updated,
+        })),
       setQAListTour: (updated) =>
         set((state) => ({
           ...state,
