@@ -1,5 +1,6 @@
 import { axiosInstance } from '@api/axios';
 import ConfirmDialog from '@components/common/ConfirmDialog';
+import ErrorDialog from '@components/common/ErrorDialog';
 import Typography from '@components/common/Typography';
 import QuestionAudioRecorder from '@components/simulation/QuestionAudioRecorder';
 import SessionVideoRecorder from '@components/simulation/SessionVideoRecorder';
@@ -112,7 +113,7 @@ export default function SimulationGO() {
   const shouldBlockLeave = (isSessionStarted || isQuestionRecording) && !allowLeaveOnce; // 떠나기 차단 여부
 
   const blocker = useBlocker(shouldBlockLeave);
-
+  const [errOpen, setErrOpen] = useState(false);
   useEffect(() => {
     if (blocker.state === 'blocked') {
       setLeaveConfirmOpen(true);
@@ -239,6 +240,7 @@ export default function SimulationGO() {
         }
       } catch (err) {
         console.error('에러:', err);
+        setErrOpen(true);
       }
     })();
     return () => {
@@ -536,6 +538,14 @@ export default function SimulationGO() {
             blocker.proceed();
           }
         }}
+      />
+      <ErrorDialog
+        open={errOpen}
+        onOpenChange={(open) => {
+          setErrOpen(open);
+          if (!open) navigate(-1); // 닫으면 뒤로가기
+        }}
+        message='접근이 불가능합니다.'
       />
     </>
   );

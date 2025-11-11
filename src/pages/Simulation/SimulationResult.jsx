@@ -72,6 +72,7 @@ export default function SimulationResultPage() {
       })
       .catch(() => {
         setError('결과를 불러오지 못했습니다.');
+        setAlertOpen(true);
       })
       .finally(() => {
         setLoading(false);
@@ -330,10 +331,11 @@ export default function SimulationResultPage() {
       />
       <ErrorDialog
         open={alertOpen}
-        onOpenChange={setAlertOpen}
-        title='알림'
-        message={alertMessage}
-        confirmText='확인'
+        onOpenChange={(open) => {
+          setAlertOpen(open);
+          if (!open) navigate(-1); // 닫으면 뒤로가기
+        }}
+        message='접근이 불가능합니다.'
       />
     </PageContainer>
   );
