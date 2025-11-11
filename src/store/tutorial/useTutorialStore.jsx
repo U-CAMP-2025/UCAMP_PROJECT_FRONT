@@ -5,6 +5,7 @@ const initialState = {
   seenHeaderTour: false,
   seenSimTour: false,
   seenQAListTour: false,
+  seenSimGoTour: false,
 };
 export const useTutorialStore = create(
   persist(
