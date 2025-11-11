@@ -113,6 +113,7 @@ export default function QACreatePage() {
   const selectedJobIds = watch('jobIds');
   const watchedQaSets = watch('qaSets');
   const title = watch('title');
+  const summary = watch('summary');
   const onSubmit = (data) => {
     createPost(data)
       .then((response) => {
@@ -266,8 +267,10 @@ export default function QACreatePage() {
                   </C.SectionTitle>
                   <C.FormTextAreaSummary
                     placeholder='노트에 대한 간단한 설명을 입력하세요.'
+                    maxLength={100}
                     {...register('summary')}
                   />
+                  <CharCount>{(summary || '').length} / 100</CharCount>
                 </C.Section>
 
                 <C.Divider />
