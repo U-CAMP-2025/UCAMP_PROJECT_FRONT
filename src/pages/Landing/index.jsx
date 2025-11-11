@@ -168,13 +168,15 @@ export default function LandingPage() {
           <L.SectionTitle id='video-section'>면접톡과 함께 준비해보세요!</L.SectionTitle>
           <L.VideoWrapper>
             <iframe
-              src='https://www.youtube.com/embed/2MJbpywFSX0'
+              src='https://www.youtube.com/embed/CL-3nWljhfg'
               title='YouTube video player'
               frameBorder='0'
               allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
               allowFullScreen
             />
           </L.VideoWrapper>
+          {/* 회색 안내 문구 추가 */}
+          <VideoCaption>유튜브 자막(CC)이 제공됩니다.</VideoCaption>
           {/* Social Proof & Ranking Section */}
           <L.SectionContainer $bgColor='#f8f9fd' id='ranking-section'>
             <L.SectionTitle>이미 많은 분들이 함께하고 있어요! 🔥</L.SectionTitle>
@@ -448,4 +450,10 @@ const PlanButton = styled.button`
   &:hover {
     background-color: ${({ theme }) => theme.colors.primary[10]};
   }
+`;
+const VideoCaption = styled.p`
+  font-size: ${({ theme }) => theme.font.size[4]};
+  color: ${({ theme }) => theme.colors.gray[9]};
+  text-align: center;
+  margin-top: ${({ theme }) => theme.space[2]};
 `;
