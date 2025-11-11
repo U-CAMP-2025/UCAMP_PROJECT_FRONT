@@ -5,7 +5,13 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tsconfigPaths(), removeConsole()],
+  plugins: [
+    react(),
+    tsconfigPaths(),
+    removeConsole({
+      includes: ['log', 'warn', 'error', 'info', 'debug'],
+    }),
+  ],
   server: {
     port: 3000,
   },
