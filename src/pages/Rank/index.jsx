@@ -132,22 +132,6 @@ const RankPage = () => {
     <>
       <Header />
       <Container>
-        {/* <Header1>
-          <SubHeader>
-            {activeTab === TABS.PRACTICE && (
-              <>
-                <Typography size={3} style={{ fontWeight: 500 }}>
-                  정렬 방법
-                </Typography>
-                <DateSelector value={dateRange} onChange={(e) => setDateRange(e.target.value)}>
-                  <option value='thisweek'>이번주</option>
-                  <option value='lastweek'>저번주</option>
-                </DateSelector>
-              </>
-            )}
-          </SubHeader>
-        </Header1> */}
-
         {/* 탭 */}
         <TabContainer>
           {Object.values(TABS).map((tabName) => (
@@ -165,7 +149,6 @@ const RankPage = () => {
               {tabName}
             </TabButton>
           ))}
-          <NoticeText>※ 동일 순위의 경우 먼저 등록된 유저가 상위에 표시됩니다.</NoticeText>
         </TabContainer>
 
         {/* 탭별 테이블 표시 */}
@@ -185,7 +168,9 @@ const RankPage = () => {
             {activeTab === TABS.BOOKMARKS && <RankingTable data={RankList} type='bookmark' />}
           </>
         )}
+        <NoticeText>※ 동일 순위의 경우 먼저 등록된 유저가 상위에 표시됩니다.</NoticeText>
       </Container>
+
       <Footer />
     </>
   );

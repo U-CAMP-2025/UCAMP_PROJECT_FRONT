@@ -5,6 +5,7 @@ const initialState = {
   seenHeaderTour: false,
   seenSimTour: false,
   seenQAListTour: false,
+  seenSimGoTour: false,
 };
 export const useTutorialStore = create(
   persist(
@@ -19,6 +20,11 @@ export const useTutorialStore = create(
         set((state) => ({
           ...state,
           seenSimTour: updated,
+        })),
+      setSimGoTour: (updated) =>
+        set((state) => ({
+          ...state,
+          seenSimGoTour: updated,
         })),
       setQAListTour: (updated) =>
         set((state) => ({

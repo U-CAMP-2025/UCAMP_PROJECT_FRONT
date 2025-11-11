@@ -229,10 +229,10 @@ export default function LandingPage() {
                 <L.RankingSubTitle>이번 주 명예의 전당</L.RankingSubTitle>
                 <L.Tabs>
                   <L.Tab active={activeTab === 'friends'} onClick={() => setActiveTab('friends')}>
-                    🔥 활동순
+                    🔥 연습 횟수순
                   </L.Tab>
                   <L.Tab active={activeTab === 'world'} onClick={() => setActiveTab('world')}>
-                    📚 북마크순
+                    📚 스크랩순
                   </L.Tab>
                 </L.Tabs>
               </L.RankingHeader>
@@ -252,7 +252,7 @@ export default function LandingPage() {
                         <L.RankBadge rank={actualRank}>{actualRank}</L.RankBadge>
                       </L.AvatarWrapper>
                       <L.Username>{user.username}</L.Username>
-                      <L.Score>{user.score.toLocaleString()} P</L.Score>
+                      <L.Score>{user.score.toLocaleString()}회</L.Score>
                       <L.Pedestal height={pedestalHeights[index]} rank={actualRank} />
                     </L.PodiumItem>
                   );
