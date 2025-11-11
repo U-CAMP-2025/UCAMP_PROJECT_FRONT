@@ -71,7 +71,12 @@ export default function SimulationEndPage() {
         <Spinner />
         <FooterMessage>
           면접 연습에서 말한 답변을 텍스트로 변환하고 있습니다. <br />
-          완료되면 <b>면접 연습 기록</b>에서 확인할 수 있습니다.
+          변환이 완료되면 <b>면접 연습 기록</b>에서 확인할 수 있습니다.
+          <br />
+          <br /> *** 현재 페이지에서 나갈 경우 녹화 영상을 저장할 수 없으며,
+          <br />
+          녹화 영상은 최초 1회만 저장 가능합니다. ***
+          <br />
         </FooterMessage>
       </MainContentWrapper>
     </PageContainer>
